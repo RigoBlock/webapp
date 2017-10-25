@@ -190,7 +190,7 @@ export default class ActionDragoWithdraw extends Component {
 
   onFindExchange = () => {
     const { dragoAddress } = this.context;
-
+    const { api } = this.context;
     api.parity
       .registryAddress()
       .then((registryAddress) => {

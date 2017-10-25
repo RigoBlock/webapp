@@ -207,7 +207,7 @@ export default class ActionDragoCancelOrder extends Component {
 
   onFindExchange = () => {
     const { dragoAddress } = this.context;
-
+    const { api } = this.context;
     api.parity
       .registryAddress()
       .then((registryAddress) => {
@@ -261,7 +261,7 @@ export default class ActionDragoCancelOrder extends Component {
   //an alternative is to create a list of assets traded on the exchange, and map throug a promise in onFindExchange
   onFindAsset = () => {
     const { dragoAddress } = this.context;
-
+    const { api } = this.context;
     api.parity
       .registryAddress()
       .then((registryAddress) => {

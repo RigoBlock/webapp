@@ -196,7 +196,7 @@ This has to be set when we have a list of items, otherwise it crashes the applic
 
   onFindExchange = () => {
     const { dragoAddress } = this.context;
-
+    const { api } = this.context;
     api.parity
       .registryAddress()
       .then((registryAddress) => {
@@ -262,6 +262,7 @@ This has to be set when we have a list of items, otherwise it crashes the applic
   }
 
   onSend = () => {
+    const { api } = this.context;
     const { instance } = this.context;
     //const deposit0 = new BigNumber(0);
     //const deposit0 = api.util.toWei(this.state.amount);
