@@ -1,6 +1,6 @@
 // Copyright 2016-2017 Gabriele Rigo
 
-import { api } from '../parity';
+// import { api } from '../parity';
 
 import EventDeposit from './EventDeposit';
 import EventWithdraw from './EventWithdraw';
@@ -56,6 +56,7 @@ export default class EventsMatched extends Component {
 
   renderEvents () {
     const { allEvents } = this.state;
+    
 
     if (!allEvents.length) {
       return null;
@@ -89,6 +90,7 @@ export default class EventsMatched extends Component {
 
   setupFilters () {
     const { contract } = this.context;
+    const { api } = this.context;
 
     const sortEvents = (a, b) => b.blockNumber.cmp(a.blockNumber) || b.logIndex.cmp(a.logIndex);
     const logToEvent = (log) => {

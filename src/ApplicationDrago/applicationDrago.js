@@ -1,6 +1,6 @@
 // Copyright 2016-2017 Gabriele Rigo
 
-import { api } from '../parity';
+// import { api } from '../parity';
 
 import * as abis from '../contracts';
 
@@ -20,10 +20,10 @@ import React, { Component } from 'react';
 // React.PropTypes is deprecated since React 15.5.0, use the npm module prop-types instead
 import PropTypes from 'prop-types';
 
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import lightBaseTheme from 'material-ui/styles/baseThemes/lightBaseTheme';
+// import getMuiTheme from 'material-ui/styles/getMuiTheme';
+// import lightBaseTheme from 'material-ui/styles/baseThemes/lightBaseTheme';
 
-const muiTheme = getMuiTheme(lightBaseTheme);
+// const muiTheme = getMuiTheme(lightBaseTheme);
 
 const bgstyle = {
   backgroundImage: `url(${bgimage})`
@@ -33,14 +33,27 @@ const DIVISOR = 10 ** 6;  //tokens are divisible by one million
 
 export default class ApplicationDrago extends Component {
 
-  //these should probably not static, as the address is updated dynamically
-  //we have a problem that the dapp sends transactions to martinuz!!
+  // Defining the properties of the context variables passed down to the children
   static childContextTypes = {
-    api: PropTypes.object,
-    //contract: PropTypes.object, //these have been blocked to allow for dynamic content serve
-    //instance: PropTypes.object,
-    muiTheme: PropTypes.object
+    contract: PropTypes.object,
+    // instance: PropTypes.object,
+
   };
+
+  // Checking the type of the context variable that we receive by the parent
+  static contextTypes = {
+    api: PropTypes.object.isRequired,
+    muiTheme: PropTypes.object.isRequired
+  };
+  
+  // Passing down the context variables to the children
+  getChildContext () {
+
+    
+    return {
+      
+    };
+  }
 
   state = {
     action: null,
@@ -52,6 +65,7 @@ export default class ApplicationDrago extends Component {
     gabBalance: new BigNumber(0),
     //instance: null,
     loading: true,
+    subscriptionIDDrago: null,
     //dragoName: 'martinuz',
     //price: null,
     //eventful: null
@@ -63,6 +77,11 @@ export default class ApplicationDrago extends Component {
 
   componentDidMount () {
     this.attachInterface();
+  }
+
+  componentWillUnmount() {
+    // Unsubscribing to the event when the the user moves away from this page
+    this.detachInterface();
   }
 
   render () {
@@ -77,7 +96,7 @@ export default class ApplicationDrago extends Component {
     return (
       <div className={ styles.body } style={ bgstyle }>
         { this.renderModals() }
-        <Status
+        {/* <Status
           address={ address }
           blockNumber={ blockNumber }
           gabBalance={ gabBalance }
@@ -88,7 +107,7 @@ export default class ApplicationDrago extends Component {
           gabBalance={ gabBalance }>
           <Accounts
             accounts={ accounts } />
-        </Status>
+        </Status> */}
         <ActionsDrago
           gabBalance={ gabBalance }
           onAction={ this.onAction } />
@@ -130,16 +149,6 @@ export default class ApplicationDrago extends Component {
     }
   }
 
-  getChildContext () {
-    //const { contract, instance } = this.state;
-
-    return {
-      api,
-      //contract, //in drago app, drago instance is not passed by parent, users interact with different dragos
-      //instance,
-      muiTheme
-    };
-  }
 
   onAction = (action) => {
     this.setState({
@@ -158,6 +167,7 @@ export default class ApplicationDrago extends Component {
 
   onNewBlockNumber = (_error, blockNumber) => {
     const { /*instance,*/ accounts } = this.state;
+    const { api } = this.context;
 
     if (_error) {
       console.error('onNewBlockNumber', _error);
@@ -173,7 +183,7 @@ export default class ApplicationDrago extends Component {
       ])
       .then(([eventful]) => {
         this.setState({
-          blockNumber//,
+          blockNumber
           //eventful
           //version,
           //base
@@ -183,7 +193,10 @@ export default class ApplicationDrago extends Component {
 
         //const gabQueries = accounts.map((account) => instance.balanceOf.call({}, [account.address]));
         const ethQueries = accounts.map((account) => api.eth.getBalance(account.address));
-
+        accounts.map((account) => {
+          console.log('API call getBalance -> applicationDrago: Getting balance of account', account.name);
+          }
+        )
         return Promise.all([
           //Promise.all(gabQueries),
           Promise.all(ethQueries)
@@ -211,6 +224,7 @@ export default class ApplicationDrago extends Component {
   }
 
   getAccounts () {
+    const { api } = this.context;
     return api.parity
       .accountsInfo()
       .catch((error) => {
@@ -238,6 +252,7 @@ export default class ApplicationDrago extends Component {
   }
 
   attachInterface = () => {
+    const { api } = this.context;
     api.parity
       .registryAddress()
       .then((registryAddress) => {
@@ -278,11 +293,23 @@ export default class ApplicationDrago extends Component {
               };
             })
         });
-
-        api.subscribe('eth_blockNumber', this.onNewBlockNumber);
+        api.subscribe('eth_blockNumber', this.onNewBlockNumber)
+        .then((subscriptionID) => {
+          console.log(`applicationDrago: Subscribed to eth_blockNumber -> Subscription ID: ${subscriptionID}`);
+          this.setState({subscriptionIDDrago: subscriptionID});
+        })
       })
       .catch((error) => {
         console.warn('attachInterface', error);
       });
   }
+
+  detachInterface = () => {
+    const { subscriptionIDDrago } = this.state;
+    const { api } = this.context;
+    console.log(`applicationDrago: Unsubscribed to eth_blockNumber -> Subscription ID: ${subscriptionIDDrago}`);
+    api.unsubscribe(subscriptionIDDrago).catch((error) => {
+      console.warn('Unsubscribe error', error);
+    });
+  } 
 }

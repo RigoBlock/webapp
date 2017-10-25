@@ -1,6 +1,6 @@
 // Copyright 2016-2017 Gabriele Rigo
 
-import { api } from '../parity';
+// import { api } from '../parity';
 
 import * as abis from '../contracts';
 
@@ -44,10 +44,11 @@ export default class ApplicationGabcoinAdmin extends Component {
     //instance: PropTypes.object.isRequired
     //gabcoin: PropTypes.object,
     //instance: PropTypes.object,
+    api: PropTypes.object
   }
 
   static childContextTypes = {
-    api: PropTypes.object,
+    // api: PropTypes.object,
     //gabcoinAddress: PropTypes.object,
     gabcoin: PropTypes.object,
     gabcoinAddress: PropTypes.string, //gabcoinAddress: PropTypes.object,
@@ -81,7 +82,8 @@ export default class ApplicationGabcoinAdmin extends Component {
     gabcoinName: ' ',
     gabcoinNameError: null,
     gabcoinSymbol: ' ',
-    gabcoinSymbolError: null
+    gabcoinSymbolError: null,
+    subscriptionIDGabcoinAdmin: null
     //next_id: null, //added
     //min_stake: null, //added
     //remaining: null,
@@ -93,11 +95,16 @@ export default class ApplicationGabcoinAdmin extends Component {
   }
 */
 
+  // componentWillUnmount() {
+  //   // Unsubscribing to the event when the the user moves away from this page
+  //   this.detachInterface();
+  // }
+
   render () {
     const { /*allEvents, */accounts, accountsInfo, address, blockNumber, gabBalance, loading, gabcoinName, gabcoinSymbol } = this.state;
 
-    const gabcoinNameLabel ='your target vault';
-    const gabcoinSymbolLabel ='and input the symbol!';
+    const gabcoinNameLabel ='Your target vault';
+    const gabcoinSymbolLabel ='And input the symbol!';
 /*
     if (loading) {
       return (
@@ -152,6 +159,7 @@ export default class ApplicationGabcoinAdmin extends Component {
   }
 
   onFindGabcoinAddress = () => {
+    const { api } = this.context;
     api.parity
       .registryAddress()
       .then((registryAddress) => {
@@ -203,10 +211,13 @@ export default class ApplicationGabcoinAdmin extends Component {
 
           console.log(`your target gabcoin was found at ${gabcoinAddress}`)
 
-          api.subscribe('eth_blockNumber', this.onNewBlockNumber);
-        })
-        .catch((error) => {
-        console.warn('findGabcoinAddress', error);
+        //   api.subscribe('eth_blockNumber', this.onNewBlockNumber);
+        // }).then((subscriptionID) => {
+        //   console.log(`applicationGabcoin: Subscribed to eth_blockNumber -> Subscription ID: ${subscriptionID}`);
+        //   this.setState({subscriptionIDGabcoin: subscriptionID});
+        // })
+        // .catch((error) => {
+        // console.warn('findGabcoinAddress', error);
 
         //this.attachInterface(); //this is new
         });
@@ -266,7 +277,7 @@ look for in events how fo JSON.stringify JSON.parse
     //const { allEvents } = this.props;
 
     return {
-      api,
+      // api,
       gabcoinAddress,
       instance,
       //gabcoin,
@@ -289,6 +300,7 @@ look for in events how fo JSON.stringify JSON.parse
 
   onNewBlockNumber = (_error, blockNumber) => {
     const { instance, accounts } = this.state;
+    const { api } = this.context;
 
     if (_error) {
       console.error('onNewBlockNumber', _error);
@@ -340,6 +352,7 @@ look for in events how fo JSON.stringify JSON.parse
   }
 
   getAccounts () {
+    const { api } = this.context;
     return api.parity
       .accountsInfo()
       .catch((error) => {

@@ -1,6 +1,6 @@
 // Copyright 2016-2017 Gabriele Rigo
 
-import { api } from '../parity';
+// import { api } from '../parity';
 
 import BigNumber from 'bignumber.js';
 
@@ -27,7 +27,7 @@ export function validatePositiveNumber (value) {
   return null;
 }
 
-export function validateAccount (account) {
+export function validateAccount (account, api) {
   if (!account || !account.address) {
     return ERRORS.invalidAccount;
   }

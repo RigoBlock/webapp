@@ -1,6 +1,6 @@
 // Copyright 2016-2017 Gabriele Rigo
 
-import { api } from '../../parity';
+// import { api } from '../../parity';
 import AccountSelector from '../../AccountSelector';
 import { ERRORS, validateAccount, validatePositiveNumber } from '../validation';
 
@@ -18,6 +18,7 @@ const NAME_ID = ' ';
 
 export default class ActionDeploy extends Component {
   static contextTypes = {
+    api: PropTypes.object.isRequired,
     instance: PropTypes.object.isRequired
   }
 
@@ -174,6 +175,7 @@ export default class ActionDeploy extends Component {
       from: this.state.account.address
     //,  value: api.util.toWei(this.state.amount).toString()
     };
+    const { api } = this.context;
 
     this.setState({
       sending: true

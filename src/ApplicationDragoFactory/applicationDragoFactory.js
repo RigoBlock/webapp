@@ -1,6 +1,6 @@
 // Copyright 2016-2017 Gabriele Rigo
 
-import { api } from '../parity';
+// import { api } from '../parity';
 
 import * as abis from '../contracts';
 
@@ -18,28 +18,47 @@ import React, { Component } from 'react';
 // React.PropTypes is deprecated since React 15.5.0, use the npm module prop-types instead
 import PropTypes from 'prop-types';
 
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import lightBaseTheme from 'material-ui/styles/baseThemes/lightBaseTheme';
+// import getMuiTheme from 'material-ui/styles/getMuiTheme';
+// import lightBaseTheme from 'material-ui/styles/baseThemes/lightBaseTheme';
 
-const muiTheme = getMuiTheme(lightBaseTheme);
+// const muiTheme = getMuiTheme(lightBaseTheme);
 
 //import bgimage from '../assets/images/blockchainLight.jpg';
 
 /*
 const bgstyle = {
-  backgroundImage: `url(${bgimage})`
+  backgroundImage: `url(${bgimage})` 
 };
 */
 
 const DIVISOR = 10 ** 6;  //tokens are divisible by one million
 
 export default class ApplicationDragoFactory extends Component {
+  
+
+  // We define the properties of the context variables passed down to the children
   static childContextTypes = {
-    api: PropTypes.object,
+    // api: PropTypes.object,
     contract: PropTypes.object,
-    instance: PropTypes.object,
-    muiTheme: PropTypes.object
+    instance: PropTypes.object//,
+    // muiTheme: PropTypes.object
   };
+
+  // We check the type of the context variable that we receive by the parent
+  static contextTypes = {
+    api: PropTypes.object.isRequired,
+    muiTheme: PropTypes.object.isRequired
+  };
+
+  // We pass down the context variables passed down to the children
+  getChildContext () {
+    const { contract, instance } = this.state;
+
+    return {
+      contract,
+      instance
+    };
+  }
 
   state = {
     action: null,
@@ -128,16 +147,7 @@ export default class ApplicationDragoFactory extends Component {
   }
   */
 
-  getChildContext () {
-    const { contract, instance } = this.state;
 
-    return {
-      api,
-      contract,
-      instance,
-      muiTheme
-    };
-  }
 
   onAction = (action) => {
     this.setState({
@@ -153,6 +163,7 @@ export default class ApplicationDragoFactory extends Component {
 
   onNewBlockNumber = (_error, blockNumber) => {
     const { instance, accounts } = this.state;
+    const { api } = this.context;
 
     if (_error) {
       console.error('onNewBlockNumber', _error);
@@ -177,8 +188,12 @@ export default class ApplicationDragoFactory extends Component {
 
         //const gabQueries = accounts.map((account) => instance.dragoOf.call({}, [account.address])); //calling instead of balanceOf()
         const gabQueries = accounts.map((account) => api.eth.getBalance(account.address));
-        const ethQueries = accounts.map((account) => api.eth.getBalance(account.address));
-
+        // const ethQueries = accounts.map((account) => api.eth.getBalance(account.address));
+        const ethQueries = gabQueries;
+        accounts.map((account) => {
+          console.log('API call getBalance -> applicationDragoFactory: Getting balance of account', account.name);
+          }
+        )
         return Promise.all([
           Promise.all(gabQueries),
           Promise.all(ethQueries)
@@ -206,6 +221,7 @@ export default class ApplicationDragoFactory extends Component {
   }
 
   getAccounts () {
+    const { api } = this.context;
     return api.parity
       .accountsInfo()
       .catch((error) => {
@@ -233,6 +249,7 @@ export default class ApplicationDragoFactory extends Component {
   }
 
   attachInterface = () => {
+    const { api } = this.context;
     api.parity
       .registryAddress()
       .then((registryAddress) => {
@@ -269,7 +286,35 @@ export default class ApplicationDragoFactory extends Component {
             })
         });
 
-        api.subscribe('eth_blockNumber', this.onNewBlockNumber);
+        // Getting the accounts balances. The AccountSelector will need this information.
+        // I have moved this code here from the onNewBlockNumber function.
+        const { accounts } = this.state;
+        const gabQueries = accounts.map((account) => api.eth.getBalance(account.address));
+        const ethQueries = accounts.map((account) => api.eth.getBalance(account.address));
+
+        Promise.all([
+          Promise.all(gabQueries),
+          Promise.all(ethQueries)
+        ]).then(([gabBalances, ethBalances]) => {
+          this.setState({
+            ethBalance: ethBalances.reduce((total, balance) => total.add(balance), new BigNumber(0)),
+            gabBalance: gabBalances.reduce((total, balance) => total.add(balance), new BigNumber(0)),
+            accounts: accounts.map((account, index) => {
+              const ethBalance = ethBalances[index];
+              const gabBalance = gabBalances[index];
+  
+              account.ethBalance = api.util.fromWei(ethBalance).toFormat(3);
+              account.gabBalance = gabBalance.div(DIVISOR).toFormat(6);
+              account.hasGab = gabBalance.gt(0);
+  
+              return account;
+            })
+          });
+        });
+        console.log(`Accounts: ${accounts}`);
+        
+        // Removed unnecessary connections to the RPC server.
+        // api.subscribe('eth_blockNumber', this.onNewBlockNumber);
       })
       .catch((error) => {
         console.warn('attachInterface', error);

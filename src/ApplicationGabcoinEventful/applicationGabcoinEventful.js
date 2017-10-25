@@ -1,6 +1,6 @@
 // Copyright 2016-2017 Gabriele Rigo
 
-import { api } from '../parity';
+// import { api } from '../parity';
 import * as abis from '../contracts';
 import styles from './application.module.css';
 import bgimage from '../assets/images/blockchainLight.jpg';
@@ -8,7 +8,8 @@ import bgimage from '../assets/images/blockchainLight.jpg';
 import Accounts from '../Accounts';
 //import Actions, { ActionBuyIn, ActionRefund, ActionTransfer, ActionDeploy } from '../ActionsGabcoin';
 //this is eventful contract only
-import { EventsGabcoin, EventsGabcoinCreated } from '../EventsGabcoin';
+// import { EventsGabcoin, EventsGabcoinCreated } from '../EventsGabcoin';
+import { EventsGabcoin } from '../EventsGabcoin';
 import Loading from '../Loading';
 import Status from '../Status';
 
@@ -18,10 +19,10 @@ import React, { Component } from 'react';
 // React.PropTypes is deprecated since React 15.5.0, use the npm module prop-types instead
 import PropTypes from 'prop-types';
 
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import lightBaseTheme from 'material-ui/styles/baseThemes/lightBaseTheme';
+// import getMuiTheme from 'material-ui/styles/getMuiTheme';
+// import lightBaseTheme from 'material-ui/styles/baseThemes/lightBaseTheme';
 
-const muiTheme = getMuiTheme(lightBaseTheme);
+// const muiTheme = getMuiTheme(lightBaseTheme);
 
 const bgstyle = {
   backgroundImage: `url(${bgimage})`
@@ -30,12 +31,36 @@ const bgstyle = {
 const DIVISOR = 10 ** 6;  //tokens are divisible by one million
 
 export default class ApplicationGabcoinEventful extends Component {
+
+  // constructor(props) {
+  //   super(props)
+  //   this.state = {
+  //     api: this.context.api
+  //   }
+  // }
+  
+  // Defining the properties of the context variables passed down to the children
   static childContextTypes = {
-    api: PropTypes.object,
     contract: PropTypes.object,
     instance: PropTypes.object,
-    muiTheme: PropTypes.object
+
   };
+
+  // Cheking type of the context variable that we receive by the parent
+  static contextTypes = {
+    api: PropTypes.object.isRequired,
+    muiTheme: PropTypes.object.isRequired
+  };
+  
+  // Passing down the context variables to the children
+  getChildContext () {
+    const { contract, instance } = this.state;
+    
+    return {
+      contract,
+      instance
+    };
+  }
 
   state = {
     action: null,
@@ -50,6 +75,8 @@ export default class ApplicationGabcoinEventful extends Component {
     loading: true,
     authority: null,
     version: null,
+    subscriptionIDGabcoinEventful: null
+    // api: this.context.api
     //price: null,
     //nextGabcoinID: null, //added
     //fee: null, //added
@@ -61,8 +88,13 @@ export default class ApplicationGabcoinEventful extends Component {
     this.attachInterface();
   }
 
+  componentWillUnmount() {
+    // We are goint to close the websocket connection when the the user moves away from this app
+    this.detachInterface();
+  }
+
   render () {
-    const { accounts, accountsInfo, address, blockNumber, gabBalance, loading, authority, version/*price, nextGabcoinID, fee */} = this.state;
+    const { accountsInfo, loading } = this.state;
 
     if (loading) {
       return (
@@ -72,7 +104,7 @@ export default class ApplicationGabcoinEventful extends Component {
 //{ this.renderModals() } before Status
     return (
       <div className={ styles.body } style={ bgstyle }>
-        <Status
+        {/* <Status
           address={ address }
           blockNumber={ blockNumber }
           gabBalance={ gabBalance }
@@ -84,9 +116,9 @@ export default class ApplicationGabcoinEventful extends Component {
           authority={ authority }>
           <Accounts
             accounts={ accounts } />
-        </Status>
-        <EventsGabcoinCreated
-          accountsInfo={ accountsInfo } />
+        </Status> */}
+        {/* <EventsGabcoinCreated
+          accountsInfo={ accountsInfo } /> */}
         <EventsGabcoin
           accountsInfo={ accountsInfo } />
       </div>
@@ -140,16 +172,7 @@ export default class ApplicationGabcoinEventful extends Component {
     }
   }
 */
-  getChildContext () {
-    const { contract, instance } = this.state;
 
-    return {
-      api,
-      contract,
-      instance,
-      muiTheme
-    };
-  }
 
   onAction = (action) => {
     this.setState({
@@ -165,7 +188,8 @@ export default class ApplicationGabcoinEventful extends Component {
 
   onNewBlockNumber = (_error, blockNumber) => {
     const { instance, accounts } = this.state;
-
+    const { api } = this.context;
+    
     if (_error) {
       console.error('onNewBlockNumber', _error);
       return;
@@ -189,15 +213,29 @@ export default class ApplicationGabcoinEventful extends Component {
         });
 
         //const gabQueries = accounts.map((account) => instance.gabcoinOf.call({}, [account.address])); //calling instead of balanceOf()
-        const gabQueries = accounts.map((account) => api.eth.getBalance(account.address));
-        const ethQueries = accounts.map((account) => api.eth.getBalance(account.address));
+        // const gabQueries = accounts.map((account) => api.eth.getBalance(account.address));
+        // const ethQueries = accounts.map((account) => api.eth.getBalance(account.address));
+        const gabQueries = accounts.map((account) => {
+          api.eth.getBalance(account.address)
+          }
+        )
+        accounts.map((account) => {
+          console.log('API call -> applicationGabcoinEventful: Getting balance of account', account.name);
+          }
+        );
+        
+        const ethQueries = gabQueries;
 
+        
         return Promise.all([
           Promise.all(gabQueries),
           Promise.all(ethQueries)
         ]);
       })
       .then(([gabBalances, ethBalances]) => {
+        // const { subscriptionIDGabcoinEvent } = this.state;
+        // console.log(`applicationGabcoinEventful: Unsubscribed to eth_blockNumber Subscription ID: ${subscriptionIDGabcoinEvent}`);
+        // api.unsubscribe(subscriptionIDGabcoinEvent);
         this.setState({
           ethBalance: ethBalances.reduce((total, balance) => total.add(balance), new BigNumber(0)),
           gabBalance: gabBalances.reduce((total, balance) => total.add(balance), new BigNumber(0)),
@@ -212,13 +250,17 @@ export default class ApplicationGabcoinEventful extends Component {
             return account;
           })
         });
+
       })
       .catch((error) => {
         console.warn('onNewBlockNumber', error);
       });
+
   }
 
   getAccounts () {
+    const { api } = this.context;
+    
     return api.parity
       .accountsInfo()
       .catch((error) => {
@@ -246,6 +288,8 @@ export default class ApplicationGabcoinEventful extends Component {
   }
 
   attachInterface = () => {
+    const { api } = this.context;
+    
     api.parity
       .registryAddress()
       .then((registryAddress) => {
@@ -282,10 +326,24 @@ export default class ApplicationGabcoinEventful extends Component {
             })
         });
 
-        api.subscribe('eth_blockNumber', this.onNewBlockNumber);
+        api.subscribe('eth_blockNumber', this.onNewBlockNumber)
+        .then((subscriptionID) => {
+          console.log(`applicationGabcoinEventful: Subscribed to eth_blockNumber -> Subscription ID: ${subscriptionID}`);
+          this.setState({subscriptionIDGabcoinEventful: subscriptionID});
+        })
+
       })
       .catch((error) => {
         console.warn('attachInterface', error);
       });
   }
+
+  detachInterface = () => {
+    const { api } = this.context;
+    const { subscriptionIDGabcoinEventful } = this.state;
+    console.log(`applicationGabcoinEventful: Unsubscribed to eth_blockNumber -> Subscription ID: ${subscriptionIDGabcoinEventful}`);
+    api.unsubscribe(subscriptionIDGabcoinEventful).catch((error) => {
+      console.warn('Unsubscribe error', error); 
+    });
+  } 
 }

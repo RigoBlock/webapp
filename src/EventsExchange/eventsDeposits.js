@@ -1,6 +1,6 @@
 // Copyright 2016-2017 Gabriele Rigo
 
-import { api } from '../parity';
+// import { api } from '../parity';
 
 import EventDeposit from './EventDeposit';
 import EventWithdraw from './EventWithdraw';
@@ -34,24 +34,30 @@ export default class EventsDeposits extends Component {
   state = {
     allEvents: [],
     minedEvents: [],
-    pendingEvents: []
+    pendingEvents: [],
+    subscriptionIDDeposit: null
   }
 
   componentDidMount () {
     this.setupFilters();
   }
 
+  componentWillUnmount() {
+    // Unsubscribing to the event when the the user moves away from this page
+    this.detachInterface();
+  }
+
   render () {
     return (
-      <div className={ styles.events }>
-        <div className={ styles.container }>
-          <table className={ styles.list }>
-            <tbody>
-              { this.renderEvents() }
-            </tbody>
+      // <div className={ styles.events }>
+      //   <div className={ styles.container }>
+      //     <table className={ styles.list }>
+      //       <tbody>
+              this.renderEvents()
+            {/* </tbody>
           </table>
         </div>
-      </div>
+      </div> */}
     );
   }
 
@@ -92,6 +98,7 @@ export default class EventsDeposits extends Component {
 
   setupFilters () {
     //const { contractExchange } = this.context;
+    const { api } = this.context;
     const { contract } = this.context;
 
     const sortEvents = (a, b) => b.blockNumber.cmp(a.blockNumber) || b.logIndex.cmp(a.logIndex);
@@ -129,7 +136,12 @@ export default class EventsDeposits extends Component {
       if (!_logs.length) {
         return;
       }
+      console.log(logs);
 
+
+
+
+      
       const logs = _logs.map(logToEvent);
 
       const minedEvents = logs
@@ -156,6 +168,18 @@ export default class EventsDeposits extends Component {
         minedEvents,
         pendingEvents
       });
+    }).then((subscriptionID) => {
+      console.log(`eventsDeposits: Subscribed to eth_blockNumber -> Subscription ID: ${subscriptionID}`);
+      this.setState({subscriptionIDDeposit: subscriptionID});
     });
   }
+
+  detachInterface = () => {
+    const { subscriptionIDDeposit } = this.state;
+    const { api } = this.context;
+    console.log(`eventsDeposits: Unsubscribed to eth_blockNumber -> Subscription ID: ${subscriptionIDDeposit}`);
+    api.unsubscribe(subscriptionIDDeposit).catch((error) => {
+      console.warn('Unsubscribe error', error);
+    });
+  } 
 }

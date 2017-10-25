@@ -1,6 +1,6 @@
 // Copyright 2016-2017 Gabriele Rigo
 
-import { api } from '../parity';
+// import { api } from '../parity';
 
 import EventBuyGabcoin from './EventBuyGabcoin';
 //import EventNewTranch from './EventNewTranch';
@@ -17,14 +17,29 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 export default class EventsGabcoin extends Component {
+
+  // Defining the properties of the context variables passed down to the children
   static childContextTypes = {
     accountsInfo: PropTypes.object
-  }
 
+  };
+
+  // Checking the type of the context variable that we receive by the parent
   static contextTypes = {
+    api: PropTypes.object.isRequired,
+    muiTheme: PropTypes.object.isRequired,
     contract: PropTypes.object.isRequired,
     instance: PropTypes.object.isRequired
+  };
+  
+  // Passing down the context variables to the children
+  getChildContext () {
+    const { accountsInfo } = this.props;
+
+    return { accountsInfo };
   }
+
+
 
   static propTypes = {
     accountsInfo: PropTypes.object.isRequired
@@ -33,20 +48,35 @@ export default class EventsGabcoin extends Component {
   state = {
     allEvents: [],
     minedEvents: [],
-    pendingEvents: []
+    pendingEvents: [],
+    subscriptionIDContractGabcoin: null
   }
 
   componentDidMount () {
     this.setupFilters();
+    console.log('eventsGabcoin mounted');
+  }
+
+  componentWillUnmount() {
+    // We are goint to close the websocket connection when the the user moves away from this app
+    this.detachInterface();
   }
 
   render () {
     return (
       <div className={ styles.events }>
         <div className={ styles.container }>
+        <h1>New Vault</h1>
           <table className={ styles.list }>
             <tbody>
-              { this.renderEvents() }
+              { this.renderEvents(['GabcoinCreated']) }
+            </tbody>
+          </table>
+          <br />
+          <h1>Vault Transactions</h1>
+          <table className={ styles.list }>
+            <tbody>
+              { this.renderEvents(['BuyGabcoin', 'SellGabcoin']) }
             </tbody>
           </table>
         </div>
@@ -54,15 +84,14 @@ export default class EventsGabcoin extends Component {
     );
   }
 
-  renderEvents () {
+  renderEvents (eventType) {
     const { allEvents } = this.state;
-
     if (!allEvents.length) {
       return null;
     }
-
+    console.log();
     return allEvents
-      .filter((event) => event.type === 'BuyGabcoin' || event.type === 'SellGabcoin' )
+      .filter((event) => eventType.includes(event.type) )
       .map((event) => {
         switch (event.type) {
           case 'BuyGabcoin':
@@ -84,14 +113,12 @@ case 'Transfer':
   return <EventTransfer key={ event.key } event={ event } />;
 */
 
-  getChildContext () {
-    const { accountsInfo } = this.props;
 
-    return { accountsInfo };
-  }
 
   setupFilters () {
     const { contract } = this.context;
+    const { api } = this.context;
+    console.log(contract);
 
     const sortEvents = (a, b) => b.blockNumber.cmp(a.blockNumber) || b.logIndex.cmp(a.logIndex);
     const logToEvent = (log) => {
@@ -155,6 +182,20 @@ case 'Transfer':
         minedEvents,
         pendingEvents
       });
+    }).then((subscriptionID) => {
+      console.log(`eventsGabcoin: Subscribed to contract ${contract._address} -> Subscription ID: ${subscriptionID}`);
+      this.setState({subscriptionIDContractGabcoin: subscriptionID});
     });
   }
+
+  detachInterface = () => {
+    const { contract } = this.context;
+    const { api } = this.context;
+    const { subscriptionIDContractGabcoin } = this.state;
+    console.log(`eventsGabcoin: Unsubscribed from contract ${contract._address} -> Subscription ID: ${subscriptionIDContractGabcoin}`);
+    contract.unsubscribe(subscriptionIDContractGabcoin).catch((error) => {
+      console.warn('Unsubscribe error', error);
+    });
+    console.log(this.context);
+  }  
 }

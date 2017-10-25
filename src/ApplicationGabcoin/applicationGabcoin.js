@@ -1,6 +1,6 @@
 // Copyright 2016-2017 Gabriele Rigo
 
-import { api } from '../parity';
+// import { api } from '../parity';
 import * as abis from '../contracts';
 
 import styles from './applicationGabcoin.module.css';
@@ -34,12 +34,28 @@ const bgstyle = {
 const DIVISOR = 10 ** 6;  //amended from 10^6
 
 export default class ApplicationGabcoin extends Component {
+  // We define the properties of the context variables passed down to the children
   static childContextTypes = {
-    api: PropTypes.object,
-    //contract: PropTypes.object, //these have been blocked to allow for dynamic content serve
-    //instance: PropTypes.object,
-    muiTheme: PropTypes.object
+    contract: PropTypes.object,
+    instance: PropTypes.object,
+
   };
+
+  // We check the type of the context variable that we receive by the parent
+  static contextTypes = {
+    api: PropTypes.object.isRequired,
+    muiTheme: PropTypes.object.isRequired
+  };
+  
+  // We pass down the context variables passed down to the children
+  getChildContext () {
+    const { contract, instance } = this.state;
+    
+    return {
+      contract,
+      instance
+    };
+  }
 
   state = {
     action: null,
@@ -51,6 +67,7 @@ export default class ApplicationGabcoin extends Component {
     gabBalance: new BigNumber(0),
     instance: null,
     loading: true,
+    subscriptionIDGabcoin: null
     //price: null,
     //nextGabcoinID: null, //added
     //fee: null, //added
@@ -60,6 +77,11 @@ export default class ApplicationGabcoin extends Component {
 
   componentDidMount () {
     this.attachInterface();
+  }
+
+  componentWillUnmount() {
+    // Unsubscribing to the event when the the user moves away from this page
+    this.detachInterface();
   }
 
   render () {
@@ -74,7 +96,7 @@ export default class ApplicationGabcoin extends Component {
     return (
       <div className={ styles.body } style={ bgstyle }>
         { this.renderModals() }
-        <Status
+        {/* <Status
           address={ address }
           blockNumber={ blockNumber }
           gabBalance={ gabBalance }
@@ -85,7 +107,7 @@ export default class ApplicationGabcoin extends Component {
           >
           <Accounts
             accounts={ accounts } />
-        </Status>
+        </Status> */}
         <ActionsGabcoin
           gabBalance={ gabBalance }
           onAction={ this.onAction } />
@@ -134,16 +156,6 @@ export default class ApplicationGabcoin extends Component {
     }
   }
 
-  getChildContext () {
-    //const { contract, instance } = this.state;
-
-    return {
-      api,
-      //contract, //in gabcoin app, gabcoin instance is not passed by parent, users interact with different gabcoins
-      //instance,
-      muiTheme
-    };
-  }
 
   onAction = (action) => {
     this.setState({
@@ -159,6 +171,7 @@ export default class ApplicationGabcoin extends Component {
 
   onNewBlockNumber = (_error, blockNumber) => {
     const {/* instance,*/ accounts } = this.state;
+    const { api } = this.context;
 
     if (_error) {
       console.error('onNewBlockNumber', _error);
@@ -173,7 +186,7 @@ export default class ApplicationGabcoin extends Component {
       ])
       .then(([gabcoineventful]) => {
         this.setState({
-          blockNumber//,
+          // blockNumber
           //fee,
           //nextGabcoinID,
           //price
@@ -181,7 +194,10 @@ export default class ApplicationGabcoin extends Component {
 
         //const gabQueries = accounts.map((account) => instance.balanceOf.call({}, [account.address])); //calling instead of balanceOf()
         const ethQueries = accounts.map((account) => api.eth.getBalance(account.address));
-
+        accounts.map((account) => {
+          console.log('API call -> applicationGabcoin: Getting balance of account', account.name);
+          }
+        )
         return Promise.all([
           //Promise.all(gabQueries),
           Promise.all(ethQueries)
@@ -209,6 +225,7 @@ export default class ApplicationGabcoin extends Component {
   }
 
   getAccounts () {
+    const { api } = this.context;
     return api.parity
       .accountsInfo()
       .catch((error) => {
@@ -236,6 +253,7 @@ export default class ApplicationGabcoin extends Component {
   }
 
   attachInterface = () => {
+    const { api } = this.context;
     api.parity
       .registryAddress()
       .then((registryAddress) => {
@@ -271,11 +289,25 @@ export default class ApplicationGabcoin extends Component {
               };
             })
         });
-
-        api.subscribe('eth_blockNumber', this.onNewBlockNumber);
+        api.subscribe('eth_blockNumber', this.onNewBlockNumber)
+        .then((subscriptionID) => {
+          console.log(`applicationGabcoin: Subscribed to eth_blockNumber -> Subscription ID: ${subscriptionID}`);
+          this.setState({subscriptionIDGabcoin: subscriptionID});
+        })
+        // console.log(api);
       })
       .catch((error) => {
         console.warn('attachInterface', error);
       });
   }
+
+  detachInterface = () => {
+    const { api } = this.context;
+    const { subscriptionIDGabcoin } = this.state;
+    console.log(`applicationGabcoin: Unsubscribed to eth_blockNumber -> Subscription ID: ${subscriptionIDGabcoin}`);
+    api.unsubscribe(subscriptionIDGabcoin).catch((error) => {
+      console.warn('Unsubscribe error', error);
+    });
+  } 
 }
+

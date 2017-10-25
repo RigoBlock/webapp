@@ -50,7 +50,60 @@
 }
 
 .account img {
-  margin-bottom: -11px;
+  /* margin-bottom: -11px; */
+  float: left;
+  width: 20px;
+  height: 20px;
+}
+
+.accountaddress {
+  /* margin-left: 60px; */
+  font-size: 12px;
+  float: right;
+}
+
+.listiteminfotext {
+  /* margin-left: 60px; */
+  font-size: 14px !important;
+  padding: 10px 5px 10px 5px !important;
+}
+
+.listiteminfotexttype {
+  /* margin-left: 60px; */
+  font-size: 14px !important;
+  padding: 10px 5px 10px 5px !important;
+  text-align: right !important;
+}
+
+.listiteminfotextamount {
+  /* margin-left: 60px; */
+  font-size: 14px !important;
+  padding: 10px 5px 10px 5px !important;
+  text-align: right !important;
+}
+
+.listiteminfotextavatarrow {
+  padding: 0px 0px 0px 0px !important;
+}
+
+.listiteminfotextavatar {
+  margin-top: -20px !important;
+  padding: 0px 0px 0px 0px !important;
+}
+
+.listitemavatartext {
+  /* margin-left: 60px; */
+  font-size: 14px !important;
+  padding: 10px 5px 10px 72px !important;
+}
+
+.tableDiv {
+  /* margin-left: 60px; */
+  width: 600px;
+}
+
+.eventstable {
+  /* width: 100%; */
 }
 
 .address {
@@ -64,6 +117,16 @@
   display: inline;
   margin-right: 1em;
   vertical-align: top;
+}
+
+.event td {
+  text-align: left;
+}
+
+.event th {
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  border-bottom-color: lightgray;
 }
 
 .mined {

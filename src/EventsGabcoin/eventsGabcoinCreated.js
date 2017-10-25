@@ -1,6 +1,6 @@
 // Copyright 2016-2017 Gabriele Rigo
 
-import { api } from '../parity';
+// import { api } from '../parity';
 
 import EventBuyGabcoin from './EventBuyGabcoin';
 //import EventNewTranch from './EventNewTranch';
@@ -22,6 +22,7 @@ export default class EventsGabcoinCreated extends Component {
   }
 
   static contextTypes = {
+    api: PropTypes.object.isRequired,
     contract: PropTypes.object.isRequired,
     instance: PropTypes.object.isRequired
   }
@@ -30,14 +31,27 @@ export default class EventsGabcoinCreated extends Component {
     accountsInfo: PropTypes.object.isRequired
   }
 
+  getChildContext () {
+    const { accountsInfo } = this.props;
+
+    return { accountsInfo };
+  }
+
   state = {
     allEvents: [],
     minedEvents: [],
-    pendingEvents: []
+    pendingEvents: [],
+    subscriptionIDContractCreated: null
   }
 
   componentDidMount () {
     this.setupFilters();
+    console.log('eventsGabcoinCreated mounted');
+  }
+
+  componentWillUnmount() {
+    // We are goint to close the websocket connection when the the user moves away from this app
+    this.detachInterface();
   }
 
   render () {
@@ -82,15 +96,11 @@ export default class EventsGabcoinCreated extends Component {
   case 'Transfer':
     return <EventTransfer key={ event.key } event={ event } />;*/
 
-  getChildContext () {
-    const { accountsInfo } = this.props;
 
-    return { accountsInfo };
-  }
 
   setupFilters () {
     const { contract } = this.context;
-
+    const { api } = this.context;
     const sortEvents = (a, b) => b.blockNumber.cmp(a.blockNumber) || b.logIndex.cmp(a.logIndex);
     const logToEvent = (log) => {
       const key = api.util.sha3(JSON.stringify(log));
@@ -153,6 +163,20 @@ export default class EventsGabcoinCreated extends Component {
         minedEvents,
         pendingEvents
       });
+    }).then((subscriptionID) => {
+      console.log(`eventsGabcoinCreated: Subscribed to contract ${contract._address} -> Subscription ID: ${subscriptionID}`);
+      this.setState({subscriptionIDContractCreated: subscriptionID});
     });
   }
+
+  detachInterface = () => {
+    const { contract } = this.context;
+    const { api } = this.context;
+    const { subscriptionIDContractCreated } = this.state;
+    console.log(`eventsGabcoinCreated: Unsubscribed from contract ${contract._address} -> Subscription ID: ${subscriptionIDContractCreated}`);
+    contract.unsubscribe(subscriptionIDContractCreated).catch((error) => {
+      console.warn('Unsubscribe error', error);
+    });
+    console.log(this.context);
+  }  
 }

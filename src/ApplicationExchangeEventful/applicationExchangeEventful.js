@@ -1,6 +1,6 @@
 // Copyright 2016-2017 Gabriele Rigo
 
-import { api } from '../parity';
+// import { api } from '../parity';
 import * as abis from '../contracts';
 
 import Loading from '../Loading';
@@ -9,7 +9,10 @@ import Status from '../Status';
 import Accounts from '../Accounts';
 //import Actions, { ActionBuyIn, ActionRefund, ActionTransfer, ActionDeploy } from '../ActionsGabcoin';
 //this is eventful contract only
-import { EventsExchange, EventsOrdersPlaced, EventsOrdersCancelled, EventsMatched, EventsFinalized } from '../EventsExchange';
+// import { EventsExchange, EventsOrdersPlaced, EventsOrdersCancelled, EventsMatched, EventsFinalized } from '../EventsExchange';
+import { EventsExchange } from '../EventsExchange';
+
+import { Container, Row, Col } from 'react-grid-system';
 
 import styles from './application.module.css';
 import bgimage from '../assets/images/blockchainLight.jpg';
@@ -21,10 +24,10 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {GridList, GridTile} from 'material-ui/GridList';
 
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import lightBaseTheme from 'material-ui/styles/baseThemes/lightBaseTheme';
+// import getMuiTheme from 'material-ui/styles/getMuiTheme';
+// import lightBaseTheme from 'material-ui/styles/baseThemes/lightBaseTheme';
 
-const muiTheme = getMuiTheme(lightBaseTheme);
+// const muiTheme = getMuiTheme(lightBaseTheme);
 
 const bgstyle = {
   backgroundImage: `url(${bgimage})`
@@ -40,6 +43,23 @@ export default class ApplicationExchangeEventful extends Component {
     muiTheme: PropTypes.object
   };
 
+  // Cheking type of the context variable that we receive by the parent
+  static contextTypes = {
+    api: PropTypes.object.isRequired,
+    muiTheme: PropTypes.object.isRequired
+  };
+
+  getChildContext () {
+    const { contract, instance } = this.state;
+
+    return {
+      // api,
+      contract,
+      instance,
+      // muiTheme
+    };
+  }
+
   state = {
     action: null,
     address: null,
@@ -53,6 +73,7 @@ export default class ApplicationExchangeEventful extends Component {
     loading: true,
     authority: null,
     version: null,
+    subscriptionIDExchangeEventful: null
     //price: null,
     //nextGabcoinID: null, //added
     //fee: null, //added
@@ -62,6 +83,11 @@ export default class ApplicationExchangeEventful extends Component {
 
   componentDidMount () {
     this.attachInterface();
+  }
+
+  componentWillUnmount() {
+    // We are goint to close the websocket connection when the the user moves away from this app
+    this.detachInterface();
   }
 
   render () {
@@ -75,7 +101,7 @@ export default class ApplicationExchangeEventful extends Component {
 //{ this.renderModals() } before Status
     return (
       <div className={styles.root}>
-        <GridList className={styles.gridlist}>
+        {/* <GridList className={styles.gridlist}>
           <EventsExchange
             accountsInfo = { accountsInfo } />
         </GridList>
@@ -94,21 +120,16 @@ export default class ApplicationExchangeEventful extends Component {
         <GridList className={styles.gridlist}>
           <EventsFinalized
             accountsInfo = { accountsInfo } />
-        </GridList>
+        </GridList> */}
+        <Container>
+          <EventsExchange
+              accountsInfo = { accountsInfo } />
+        </Container>
       </div>
     );
   }
 
-  getChildContext () {
-    const { contract, instance } = this.state;
 
-    return {
-      api,
-      contract,
-      instance,
-      muiTheme
-    };
-  }
 
   onAction = (action) => {
     this.setState({
@@ -124,6 +145,7 @@ export default class ApplicationExchangeEventful extends Component {
 
   onNewBlockNumber = (_error, blockNumber) => {
     const { instance, accounts } = this.state;
+    const { api } = this.context;
 
     if (_error) {
       console.error('onNewBlockNumber', _error);
@@ -150,7 +172,10 @@ export default class ApplicationExchangeEventful extends Component {
         //const gabQueries = accounts.map((account) => instance.gabcoinOf.call({}, [account.address])); //calling instead of balanceOf()
         const gabQueries = accounts.map((account) => api.eth.getBalance(account.address));
         const ethQueries = accounts.map((account) => api.eth.getBalance(account.address));
-
+        accounts.map((account) => {
+          console.log('API call -> applicationExhangeEventful: Getting balance of account', account.name);
+          }
+        );
         return Promise.all([
           Promise.all(gabQueries),
           Promise.all(ethQueries)
@@ -178,6 +203,7 @@ export default class ApplicationExchangeEventful extends Component {
   }
 
   getAccounts () {
+    const { api } = this.context;
     return api.parity
       .accountsInfo()
       .catch((error) => {
@@ -205,6 +231,7 @@ export default class ApplicationExchangeEventful extends Component {
   }
 
   attachInterface = () => {
+    const { api } = this.context;
     api.parity
       .registryAddress()
       .then((registryAddress) => {
@@ -241,10 +268,23 @@ export default class ApplicationExchangeEventful extends Component {
             })
         });
 
-        api.subscribe('eth_blockNumber', this.onNewBlockNumber);
+        api.subscribe('eth_blockNumber', this.onNewBlockNumber)
+        .then((subscriptionID) => {
+          console.log(`applicationExchangeEventful: Subscribed to eth_blockNumber -> Subscription ID: ${subscriptionID}`);
+          this.setState({subscriptionIDExchangeEventful: subscriptionID});
+        })
       })
       .catch((error) => {
         console.warn('attachInterface', error);
       });
   }
+
+  detachInterface = () => {
+    const { api } = this.context;
+    const { subscriptionIDExchangeEventful } = this.state;
+    console.log(`applicationExchangeEventful: Unsubscribed to eth_blockNumber -> Subscription ID: ${subscriptionIDExchangeEventful}`);
+    api.unsubscribe(subscriptionIDExchangeEventful).catch((error) => {
+      console.warn('Unsubscribe error', error); 
+    });
+  } 
 }

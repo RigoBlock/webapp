@@ -2,7 +2,7 @@
 
 import * as abis from '../../contracts';
 
-import { api } from '../../parity';
+// import { api } from '../../parity';
 import AccountSelector from '../../AccountSelector';
 import { ERRORS, validateAccount, validatePositiveNumber } from '../validation';
 
@@ -23,7 +23,8 @@ const ADDRESS_0 = '0x0000000000000000000000000000000000000000';
 
 export default class ActionCancelOrder extends Component {
   static contextTypes = {
-    instance: PropTypes.object.isRequired
+    instance: PropTypes.object.isRequired,
+    api: PropTypes.object.isRequired
   }
 
   static propTypes = {
@@ -144,9 +145,11 @@ export default class ActionCancelOrder extends Component {
   }
 
   onChangeAddress = (account) => {
+    const { api } = this.context;
+    // I have added a second variable to the validateAccount to pass the api
     this.setState({
       account,
-      accountError: validateAccount(account)
+      accountError: validateAccount(account, api)
     }, this.validateTotal);
   }
 
@@ -180,6 +183,7 @@ export default class ActionCancelOrder extends Component {
 
   onFindAsset = () => {
     const { dragoAddress } = this.context;
+    const { api } = this.context;
 
     api.parity
       .registryAddress()

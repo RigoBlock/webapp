@@ -1,6 +1,6 @@
 // Copyright 2016-2017 Gabriele Rigo
 
-import { api } from '../../parity';
+// import { api } from '../../parity';
 import AccountSelector from '../../AccountSelector';
 import { ERRORS, validateAccount, validatePositiveNumber } from '../validation';
 
@@ -19,7 +19,8 @@ const ADDRESS_0 = '0x0000000000000000000000000000000000000000'; //ADDRESS_0 is f
 
 export default class ActionDeposit extends Component {
   static contextTypes = {
-    instance: PropTypes.object.isRequired
+    instance: PropTypes.object.isRequired,
+    api: PropTypes.object.isRequired
   }
 
   static propTypes = {
@@ -130,10 +131,31 @@ export default class ActionDeposit extends Component {
 
 // autoComplete='off'
 
+  // validateAccount (account) {
+  //   // console.log(api)
+  //   // // console.log(context);
+  //   // console.log(account);
+  //   const { api } = this.context;
+  //   console.log(api);
+  //   if (!account || !account.address) {
+  //     return ERRORS.invalidAccount;
+  //   }
+
+  //   if (!api.util.isAddressValid(account.address)) {
+  //     return ERRORS.invalidAddress;
+  //   }
+
+  //   account.address = api.util.toChecksumAddress(account.address);
+
+  //   return null;
+  // }
+
   onChangeAddress = (account) => {
+    const { api } = this.context;
+    // I have added a second variable to the validateAccount to pass the api
     this.setState({
       account,
-      accountError: validateAccount(account)
+      accountError: validateAccount(account, api)
     }, this.validateTotal);
   }
 
@@ -166,6 +188,7 @@ export default class ActionDeposit extends Component {
   }
 
   onSend = () => {
+    const { api } = this.context;
     const { instance } = this.context;
     //const deposit0 = new BigNumber(0);
     //const deposit0 = api.util.toWei(this.state.amount);

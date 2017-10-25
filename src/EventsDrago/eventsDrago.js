@@ -1,6 +1,6 @@
 // Copyright 2016-2017 Gabriele Rigo
 
-import { api } from '../parity';
+// import { api } from '../parity';
 
 import EventBuyDrago from './EventBuyDrago';
 import EventNewTranch from './EventNewTranch';
@@ -8,6 +8,7 @@ import EventRefund from './EventRefund';
 import EventTransfer from './EventTransfer';
 import EventDragoCreated from './EventDragoCreated';
 import EventSellDrago from './EventSellDrago';
+import { Row, Col } from 'react-grid-system';
 
 import styles from './events.module.css';
 
@@ -22,6 +23,8 @@ export default class EventsDrago extends Component {
   }
 
   static contextTypes = {
+    api: PropTypes.object.isRequired,
+    muiTheme: PropTypes.object.isRequired,
     contract: PropTypes.object.isRequired,
     instance: PropTypes.object.isRequired
   }
@@ -30,39 +33,59 @@ export default class EventsDrago extends Component {
     accountsInfo: PropTypes.object.isRequired
   }
 
+  // Passing down the context variables to the children
+  getChildContext () {
+    const { accountsInfo } = this.props;
+
+    return { accountsInfo };
+  }
+
   state = {
     allEvents: [],
     minedEvents: [],
-    pendingEvents: []
+    pendingEvents: [],
+    subscriptionIDContractDrago: null
   }
 
   componentDidMount () {
     this.setupFilters();
   }
 
+  componentWillUnmount() {
+    // We are goint to close the websocket connection when the the user moves away from this app
+    this.detachInterface();
+  }
+
   render () {
     return (
       <div className={ styles.events }>
-        <div className={ styles.container }>
-          <table className={ styles.list }>
-            <tbody>
-              { this.renderEvents() }
-            </tbody>
-          </table>
-        </div>
+      <div className={ styles.container }>
+      <h1>New Drago</h1>
+        <table className={ styles.list }>
+          <tbody>
+            { this.renderEvents(['DragoCreated']) }
+          </tbody>
+        </table>
+        <br />
+        <h1>Drago Transactions</h1>
+        <table className={ styles.list }>
+          <tbody>
+            { this.renderEvents(['BuyDrago', 'SellDrago']) }
+          </tbody>
+        </table>
       </div>
+    </div>
     );
   }
 
-  renderEvents () {
+  renderEvents (eventType) {
     const { allEvents } = this.state;
 
     if (!allEvents.length) {
       return null;
     }
-
     return allEvents
-      .filter((event) => event.type === 'BuyDrago' || event.type === 'SellDrago' )
+      .filter((event) => eventType.includes(event.type) )
       .map((event) => {
         switch (event.type) {
           case 'BuyDrago':
@@ -81,14 +104,9 @@ export default class EventsDrago extends Component {
       });
   }
 
-  getChildContext () {
-    const { accountsInfo } = this.props;
-
-    return { accountsInfo };
-  }
-
   setupFilters () {
     const { contract } = this.context;
+    const { api } = this.context;
 
     const sortEvents = (a, b) => b.blockNumber.cmp(a.blockNumber) || b.logIndex.cmp(a.logIndex);
     const logToEvent = (log) => {
@@ -152,6 +170,20 @@ export default class EventsDrago extends Component {
         minedEvents,
         pendingEvents
       });
+    }).then((subscriptionID) => {
+      console.log(`eventsDrago: Subscribed to contract ${contract._address} -> Subscription ID: ${subscriptionID}`);
+      this.setState({subscriptionIDContractDrago: subscriptionID});
     });
   }
+
+  detachInterface = () => {
+    const { contract } = this.context;
+    const { api } = this.context;
+    const { subscriptionIDContractDrago } = this.state;
+    console.log(`eventsDrago: Unsubscribed from contract ${contract._address} -> Subscription ID: ${subscriptionIDContractDrago}`);
+    contract.unsubscribe(subscriptionIDContractDrago).catch((error) => {
+      console.warn('Unsubscribe error', error);
+    });
+    console.log(this.context);
+  }  
 }

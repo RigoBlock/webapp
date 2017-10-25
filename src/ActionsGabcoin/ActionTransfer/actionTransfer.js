@@ -19,6 +19,7 @@ const NAME_ID = ' ';
 
 export default class ActionTransfer extends Component {
   static contextTypes = {
+    api: PropTypes.object.isRequired,
     instance: PropTypes.object.isRequired
   }
 
@@ -182,6 +183,7 @@ export default class ActionTransfer extends Component {
     const options = {
       from: this.state.fromAccount.address
     };
+    const { api } = this.context;
 
     this.setState({
       sending: true

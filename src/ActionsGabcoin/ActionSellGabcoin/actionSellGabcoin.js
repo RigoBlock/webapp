@@ -2,7 +2,7 @@
 
 import * as abis from '../../contracts';
 
-import { api } from '../../parity';
+// import { api } from '../../parity';
 import AccountSelector from '../../AccountSelector';
 import { ERRORS, validateAccount, validatePositiveNumber } from '../validation';
 
@@ -21,6 +21,7 @@ const NAME_ID = ' ';
 
 export default class ActionSellGabcoin extends Component {
   static contextTypes = {
+    api: PropTypes.object.isRequired
     //instance: PropTypes.object.isRequired
   }
 
@@ -182,6 +183,7 @@ export default class ActionSellGabcoin extends Component {
   }
 
   onFindGabcoinAddress = () => {
+    const { api } = this.context;
     api.parity
       .registryAddress()
       .then((registryAddress) => {
@@ -249,7 +251,8 @@ export default class ActionSellGabcoin extends Component {
     const options = {
       from: this.state.account.address
     };
-
+    const { api } = this.context;
+    
     this.setState({
       sending: true
     });

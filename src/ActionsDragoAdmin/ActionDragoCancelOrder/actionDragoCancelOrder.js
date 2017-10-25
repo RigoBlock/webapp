@@ -25,8 +25,8 @@ const ADDRESS_0 = '0x0000000000000000000000000000000000000000';
 
 export default class ActionDragoCancelOrder extends Component {
   static contextTypes = {
-    instance: PropTypes.object.isRequired,
-    dragoAddress: PropTypes.object.isRequired
+    // instance: PropTypes.object.isRequired,
+    // dragoAddress: PropTypes.object.isRequired
   }
 
   static propTypes = {

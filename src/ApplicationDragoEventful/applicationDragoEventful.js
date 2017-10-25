@@ -1,6 +1,6 @@
 // Copyright 2016-2017 Gabriele Rigo
 
-import { api } from '../parity';
+// import { api } from '../parity';
 
 import * as abis from '../contracts';
 
@@ -34,10 +34,14 @@ const DIVISOR = 10 ** 6;  //tokens are divisible by one million
 
 export default class ApplicationDragoEventful extends Component {
   static childContextTypes = {
-    api: PropTypes.object,
     contract: PropTypes.object,
     instance: PropTypes.object,
     muiTheme: PropTypes.object
+  };
+
+  static contextTypes = {
+    api: PropTypes.object.isRequired,
+    muiTheme: PropTypes.object.isRequired
   };
 
   state = {
@@ -52,6 +56,7 @@ export default class ApplicationDragoEventful extends Component {
     loading: true,
     authority: null,
     version: null,
+    subscriptionIDDragoEventful: null,
     //price: null,
     //nextDragoID: null, //added
     //fee: null, //added
@@ -61,6 +66,11 @@ export default class ApplicationDragoEventful extends Component {
 
   componentDidMount () {
     this.attachInterface();
+  }
+
+  componentWillUnmount() {
+    // We are goint to close the websocket connection when the the user moves away from this app
+    this.detachInterface();
   }
 
   render () {
@@ -74,7 +84,7 @@ export default class ApplicationDragoEventful extends Component {
 //{ this.renderModals() } before Status
     return (
       <div className={ styles.body } style={ bgstyle }>
-        <Status
+        {/* <Status
           address={ address }
           blockNumber={ blockNumber }
           gabBalance={ gabBalance }
@@ -86,9 +96,9 @@ export default class ApplicationDragoEventful extends Component {
           authority={ authority }>
           <Accounts
             accounts={ accounts } />
-        </Status>
-        <EventsDragoCreated
-          accountsInfo={ accountsInfo } />
+        </Status> */}
+        {/* <EventsDragoCreated
+          accountsInfo={ accountsInfo } /> */}
         <EventsDrago
           accountsInfo={ accountsInfo } />
       </div>
@@ -140,7 +150,6 @@ export default class ApplicationDragoEventful extends Component {
     const { contract, instance } = this.state;
 
     return {
-      api,
       contract,
       instance,
       muiTheme
@@ -161,6 +170,7 @@ export default class ApplicationDragoEventful extends Component {
 
   onNewBlockNumber = (_error, blockNumber) => {
     const { instance, accounts } = this.state;
+    const { api } = this.context;
 
     if (_error) {
       console.error('onNewBlockNumber', _error);
@@ -186,8 +196,12 @@ export default class ApplicationDragoEventful extends Component {
 
         //const gabQueries = accounts.map((account) => instance.dragoOf.call({}, [account.address])); //calling instead of balanceOf()
         const gabQueries = accounts.map((account) => api.eth.getBalance(account.address));
-        const ethQueries = accounts.map((account) => api.eth.getBalance(account.address));
-
+        // const ethQueries = accounts.map((account) => api.eth.getBalance(account.address));
+        const ethQueries = gabQueries;
+        accounts.map((account) => {
+          console.log('API call getBalance -> applicationDragoEventful: Getting balance of account', account.name);
+          }
+        )
         return Promise.all([
           Promise.all(gabQueries),
           Promise.all(ethQueries)
@@ -215,6 +229,7 @@ export default class ApplicationDragoEventful extends Component {
   }
 
   getAccounts () {
+    const { api } = this.context;
     return api.parity
       .accountsInfo()
       .catch((error) => {
@@ -242,6 +257,7 @@ export default class ApplicationDragoEventful extends Component {
   }
 
   attachInterface = () => {
+    const { api } = this.context;
     api.parity
       .registryAddress()
       .then((registryAddress) => {
@@ -278,10 +294,23 @@ export default class ApplicationDragoEventful extends Component {
             })
         });
 
-        api.subscribe('eth_blockNumber', this.onNewBlockNumber);
+        api.subscribe('eth_blockNumber', this.onNewBlockNumber)
+        .then((subscriptionID) => {
+          console.log(`applicationDragoEventful: Subscribed to eth_blockNumber -> Subscription ID: ${subscriptionID}`);
+          this.setState({applicationDragoEventful: subscriptionID});
+        })
       })
       .catch((error) => {
         console.warn('attachInterface', error);
       });
   }
+
+  detachInterface = () => {
+    const { api } = this.context;
+    const { applicationDragoEventful } = this.state;
+    console.log(`applicationDragoEventful: Unsubscribed to eth_blockNumber -> Subscription ID: ${applicationDragoEventful}`);
+    api.unsubscribe(applicationDragoEventful).catch((error) => {
+      console.warn('Unsubscribe error', error); 
+    });
+  } 
 }

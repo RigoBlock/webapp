@@ -1,6 +1,6 @@
 // Copyright 2016-2017 Gabriele Rigo
 
-import { api } from '../../parity';
+// import { api } from '../../parity';
 import * as abis from '../../contracts';
 
 import AccountSelector from '../../AccountSelector';
@@ -21,6 +21,7 @@ const NAME_ID = ' ';
 
 export default class ActionBuyGabcoin extends Component {
   static contextTypes = {
+    api: PropTypes.object.isRequired
     //instance: PropTypes.object.isRequired
   }
 
@@ -181,6 +182,7 @@ export default class ActionBuyGabcoin extends Component {
   }
 
   onFindGabcoinAddress = () => {
+    const { api } = this.context;
     api.parity
       .registryAddress()
       .then((registryAddress) => {
@@ -240,6 +242,7 @@ export default class ActionBuyGabcoin extends Component {
   onSend = () => {
     //const { instance } = this.context;
     const instance = this.state.instance;
+    const { api } = this.context;
 
     //const gabcoinAddress = this.state.gabcoinAddress.toString();
     // const maxPrice = api.util.toWei(this.state.maxPrice);

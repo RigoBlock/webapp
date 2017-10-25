@@ -1,6 +1,6 @@
 // Copyright 2016-2017 Gabriele Rigo
 
-import { api } from '../parity';
+// import { api } from '../parity';
 
 import EventBuyDrago from './EventBuyDrago';
 import EventNewTranch from './EventNewTranch';
@@ -22,6 +22,7 @@ export default class EventsDragoCreated extends Component {
   }
 
   static contextTypes = {
+    api: PropTypes.object.isRequired,
     contract: PropTypes.object.isRequired,
     instance: PropTypes.object.isRequired
   }
@@ -33,7 +34,8 @@ export default class EventsDragoCreated extends Component {
   state = {
     allEvents: [],
     minedEvents: [],
-    pendingEvents: []
+    pendingEvents: [],
+    subscriptionIDContractDragoCreated: null
   }
 
   componentDidMount () {
@@ -89,6 +91,7 @@ export default class EventsDragoCreated extends Component {
 
   setupFilters () {
     const { contract } = this.context;
+    const { api } = this.context;
 
     const sortEvents = (a, b) => b.blockNumber.cmp(a.blockNumber) || b.logIndex.cmp(a.logIndex);
     const logToEvent = (log) => {
@@ -152,6 +155,20 @@ export default class EventsDragoCreated extends Component {
         minedEvents,
         pendingEvents
       });
-    });
+    }).then((subscriptionID) => {
+      console.log(`eventsDrago: Subscribed to contract ${contract._address} -> Subscription ID: ${subscriptionID}`);
+      this.setState({subscriptionIDContractDragoCreated: subscriptionID});
+    });;
   }
+
+  detachInterface = () => {
+    const { contract } = this.context;
+    const { api } = this.context;
+    const { subscriptionIDContractDragoCreated } = this.state;
+    console.log(`eventsDrago: Unsubscribed from contract ${contract._address} -> Subscription ID: ${subscriptionIDContractDragoCreated}`);
+    contract.unsubscribe(subscriptionIDContractDragoCreated).catch((error) => {
+      console.warn('Unsubscribe error', error);
+    });
+    console.log(this.context);
+  } 
 }

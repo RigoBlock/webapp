@@ -4,9 +4,23 @@ import IdentityIcon from '../../IdentityIcon';
 import { formatCoins, formatEth, formatHash } from '../../format';
 
 import styles from '../events.module.css';
+import { Container, Row, Col } from 'react-grid-system';
 
 import moment from 'moment';
 import React, { Component } from 'react';
+import Avatar from 'material-ui/Avatar';
+import FileFolder from 'material-ui/svg-icons/file/folder';
+import FontIcon from 'material-ui/FontIcon';
+import List from 'material-ui/List/List';
+import ListItem from 'material-ui/List/ListItem';
+import {
+  Table,
+  TableBody,
+  TableHeader,
+  TableHeaderColumn,
+  TableRow,
+  TableRowColumn,
+} from 'material-ui/Table';
 
 // React.PropTypes is deprecated since React 15.5.0, use the npm module prop-types instead
 import PropTypes from 'prop-types';
@@ -46,16 +60,52 @@ export default class Event extends Component {
     const { state, type } = event;
     const cls = `${styles.event} ${styles[state]} ${styles[type.toLowerCase()]}`;
 
+    // console.log(type);
+
     return (
-      <tr className={ cls }>
-        { this.renderTimestamp(block) }
-        { this.renderType(type) }
-        { this.renderPrice(price) }
-        { this.renderValue(value) }
-        { this.renderEthValue(ethvalue) }
-        { this.renderAddress(fromAddress) }
-        { this.renderAddress(toAddress) }
-      </tr>
+        // <span>
+        // <TableRow>
+        //         <TableRowColumn>{ this.renderTimestamp(block) }</TableRowColumn>
+        //         <TableRowColumn>{ this.renderType(type) }</TableRowColumn>
+        //         <TableRowColumn>{ this.renderEthValue(ethvalue) } <small> ETH</small></TableRowColumn>
+        // </TableRow>
+        // <TableRow>
+        //         <TableRowColumn colSpan={3}>{ this.renderAddress(fromAddress) } { this.renderAddress(toAddress) }</TableRowColumn>
+        // </TableRow>
+        // </span>
+        <TableRow>
+        <TableRowColumn colSpan={3} className={styles.listiteminfotextavatarrow}>
+        <Container fluid>
+        <Row>
+            <Col className={styles.listiteminfotext}>{ this.renderTimestamp(block) }</Col>
+            <Col className={styles.listiteminfotexttype}>{ this.renderType(type) }</Col>
+            <Col className={styles.listiteminfotextamount}>{ this.renderEthValue(ethvalue) } ETH</Col>
+          </Row>
+          <Row>
+            <Col className={styles.listiteminfotextavatar}>{ this.renderAddress(fromAddress) } { this.renderAddress(toAddress) }</Col>
+          </Row>
+        </Container>
+        </TableRowColumn>
+        </TableRow>
+
+
+
+
+      // <table className={ styles.eventstable }>
+      // <tr className={ cls }>
+      //   { this.renderTimestamp(block) }
+      //   { this.renderType(type) }
+      //   { this.renderPrice(price) }
+      //   { this.renderValue(value) }
+      //   { this.renderEthValue(ethvalue) }
+      // </tr>
+      // <tr>
+      //   { this.renderAddress(fromAddress) }
+      // </tr>
+      // <tr>
+      //   { this.renderAddress(toAddress) }
+      // </tr>
+      // </table>
     );
   }
 
@@ -69,78 +119,88 @@ export default class Event extends Component {
 
   renderTimestamp (block) {
     return (
-      <td className={ styles.blocknumber }>
-        { !block ? ' ' : moment(block.timestamp).fromNow() }
-      </td>
+        !block ? ' ' : moment(block.timestamp).fromNow()
     );
   }
 
   renderAddress (address) {
-    if (!address) {
-      return EMPTY_COLUMN;
-    }
+    const { api } = this.context;
 
+    if (!address) {
+      // return EMPTY_COLUMN;
+      return ''
+    }
+    // console.log(styles.account);
     return (
-      <td className={ styles.account }>
-        <IdentityIcon address={ address } />
-        { this.renderAddressName(address) }
-      </td>
+        <List>
+          <ListItem
+            disabled={true}
+            leftAvatar={
+              <Avatar size={30} src={ api.util.createIdentityImg(address, 4) } />
+            }
+          className={styles.listitemavatartext}
+          >
+          { this.renderAddressName(address) }
+          </ListItem>
+        </List>
     );
   }
 
   renderAddressName (address) {
     const { accountsInfo } = this.context;
     const account = accountsInfo[address];
-
+    // console.log(account.name);
     if (account && account.name) {
       return (
-        <div className={ styles.name }>
-          { account.name }
-        </div>
+        account.name
+        // <span className={ styles.name }>
+        //   { account.name }
+        // </span>
       );
     }
-
+    // console.log(address);
     return (
-      <div className={ styles.address }>
-        { /*formatHash(*/address/*)*/ }
-      </div>
+      address
+      // <span className={ styles.address }>
+      //   { /*formatHash(*/address/*)*/ }
+      // </span>
     );
   }
 
   renderPrice (price) {
     if (!price) {
-      return EMPTY_COLUMN;
+      return '';
     }
 
     return (
-      <td className={ styles.ethvalue }>
-        { formatEth(price) }<small> ETH</small>
-      </td>
+
+        formatEth(price)
+
     );
   }
 
   renderValue (value) {
     if (!value) {
-      return EMPTY_COLUMN;
+      return '';
     }
 
     return (
-      <td className={ styles.gabvalue }>
-        { formatCoins(value) }<small> dETH</small>
-      </td>
+
+        formatCoins(value)
+
     );
 
   }
 
   renderEthValue (ethvalue) {
     if (!ethvalue) {
-      return EMPTY_COLUMN;
+      return '';
     }
 
     return (
-      <td className={ styles.ethvalue }>
-        { formatEth(ethvalue) }<small> ETH</small>
-      </td>
+
+        formatEth(ethvalue)
+
     );
   }
 
@@ -160,9 +220,9 @@ renderName (dragoname) {
 
   renderType (type) {
     return (
-      <td className={ styles.type }>
-        { type }
-      </td>
+
+        type
+
     );
   }
 

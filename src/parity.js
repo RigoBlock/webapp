@@ -5,39 +5,60 @@
 // API reference: https://gitlab.parity.io/parity/parity/blob/d2394d3ac30b589f92676eec401c50d6b388f911/js/npm/parity/README.md
 // Converted rpc calls to use provider
 
-import { Api } from '@parity/parity.js';
+// import { Api } from '@parity/parity.js';
 
 
-// Debugging
-var keys = Object.keys(Api);
-console.log(keys);
-console.log("windows parity " + window.parity);
+// For refenences:
+// https://github.com/paritytech/js-api
+
+
+import Api from '@parity/api';
+
+var HttpsUrl = true;
+var WsSecureUrl = true;
+const OverHttps = true;
+const timeout = 1000; // to set the delay between each ping to the Http server. Default = 1000 (1 sec)
+
+
 if (typeof window.parity !== 'undefined') {
-  console.log("Connecting to window.parity");
-  
-
-  // If I do var { api } = window.parity; later on I get this error on the attachInterface functionss:
-  //
-  // Error: only absolute urls are supported
-  //
-  // so I am setting the absolute url to http://127.0.0.1:8545
-  var transport = new Api.Transport.Http('http://127.0.0.1:8545');
-  // var { api } = window.parity;
-  var api = new Api(transport);
-  
-
+  // Change to 'http://localhost:8545' and 'ws://localhost:8546' before building
+  // For RPC over Https
+  // HttpsUrl = 'https://srv03.endpoint.network:8545';
+  HttpsUrl = 'http://localhost:8545';
+  // For RPC over Websocket
+  // WsSecureUrl = 'wss://srv03.endpoint.network:8546';
+  WsSecureUrl = 'ws://localhost:8546';
+  console.log(HttpsUrl);
 } else {
-  console.log("Connecting to https://srv03.endpoint.network:8545");
-  var transport = new Api.Transport.Http('https://srv03.endpoint.network:8545');
-  var api = new Api(transport);
-
-  // Debugging
-  var keys = Object.keys(transport);
-  console.log(keys);
+  // For RPC over Https
+  HttpsUrl = 'https://srv03.endpoint.network:8545';
+  // For RPC over Websocket
+  WsSecureUrl = 'wss://srv03.endpoint.network:8546';
 }
 
-// Debugging
+const CheckTransport = () => {
+  if (OverHttps) {
+    try {
+      const transport = new Api.Provider.Http(HttpsUrl, timeout);
+      console.log("Connecting to ", HttpsUrl);
+      return new Api(transport);
+    } catch (err) {
+      console.warn('Connection error: ', err);
+    }
+  } else {
+    try {
+      console.log("Connecting to ", WsSecureUrl);
+      const transport = new Api.Provider.WsSecure(WsSecureUrl);
+      return new Api(transport);
+  } catch (err) {
+      console.warn('Connection error: ', err);
+  }
+  }
+}
+
+var api = CheckTransport();
 console.log(api);
+console.log(api.isConnected);
 
 export {
   api

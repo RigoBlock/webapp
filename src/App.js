@@ -20,4 +20,12 @@
 
 // export default App;
 
-export { default } from './Application';
+export {
+    ApplicationHomePage, 
+    ApplicationGabcoinPage, 
+    ApplicationDragoPage, 
+    ApplicationExchangePage, 
+    Whoops404} from './Application';
+// export { default } from './Application';
+
+// export { default } from './Application';

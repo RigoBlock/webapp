@@ -21,10 +21,10 @@ import AccountBalance from 'material-ui/svg-icons/action/account-balance';
 import ApplicationDragoFactory from '../ApplicationDragoFactory';
 import ApplicationDragoAdmin from '../ApplicationDragoAdmin';
 
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import lightBaseTheme from 'material-ui/styles/baseThemes/lightBaseTheme';
+// import getMuiTheme from 'material-ui/styles/getMuiTheme';
+// import lightBaseTheme from 'material-ui/styles/baseThemes/lightBaseTheme';
 
-const muiTheme = getMuiTheme(lightBaseTheme);
+// const muiTheme = getMuiTheme(lightBaseTheme);
 
 export default class ActionsDrago extends Component {
 
@@ -91,7 +91,7 @@ export default class ActionsDrago extends Component {
 
   getChildContext () {
     return {
-      muiTheme
+      // muiTheme
     };
   }
 

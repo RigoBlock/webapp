@@ -1,6 +1,6 @@
 // Copyright 2016-2017 Gabriele Rigo
 
-import { api } from '../parity';
+// import { api } from '../parity';
 import styles from './identityIcon.module.css';
 
 import React, { Component} from 'react';
@@ -13,8 +13,13 @@ export default class IdentityIcon extends Component {
     address: PropTypes.string.isRequired
   }
 
+  static contextTypes = {
+    api: PropTypes.object.isRequired
+  }
+
   render () {
     const { address } = this.props;
+    const { api } = this.context;
 
     return (
       <img

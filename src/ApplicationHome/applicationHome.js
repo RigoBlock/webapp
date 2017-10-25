@@ -1,5 +1,8 @@
 // Copyright 2016-2017 Gabriele Rigo
 
+// import { api } from '../parity';
+
+
 import styles from './applicationHome.module.css';
 import bgimage from '../assets/images/blockchainLight.jpg';
 
@@ -11,16 +14,19 @@ import Slider from 'material-ui/Slider';
 import Drawer from 'material-ui/Drawer';
 import AppBar from 'material-ui/AppBar';
 import RaisedButton from 'material-ui/RaisedButton';
+import { Row, Col, GridSystem, Visible, Hidden, ScreenClassRender} from 'react-grid-system';
 
 import ApplicationDragoFactory from '../ApplicationDragoFactory';
 import ApplicationGabcoinFactory from '../ApplicationGabcoinFactory';
 
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import lightBaseTheme from 'material-ui/styles/baseThemes/lightBaseTheme';
+import Loading from '../Loading';
+
+// import getMuiTheme from 'material-ui/styles/getMuiTheme';
+// import lightBaseTheme from 'material-ui/styles/baseThemes/lightBaseTheme';
 import injectTapEventPlugin from 'react-tap-event-plugin';
 injectTapEventPlugin();
 
-const muiTheme = getMuiTheme(lightBaseTheme);
+// const muiTheme = getMuiTheme(lightBaseTheme);
 
 const bgstyle = {
   backgroundImage: `url(${bgimage})`
@@ -32,16 +38,44 @@ export default class ApplicationHome extends Component {
 
   state = {
         open: false,
+        connected: true
   }
 
-// style={ bgstyle }
-
+  // We define the properties of the context variables passed down to the children
   static childContextTypes = {
-    muiTheme: PropTypes.object
+    // api: PropTypes.object,
+    // muiTheme: PropTypes.object
   };
 
+  // We check the type of the context variable that we receive by the parent
+  static contextTypes = {
+    api: PropTypes.object.isRequired,
+    muiTheme: PropTypes.object.isRequired
+  };
+  
+  // We pass down the context variables passed down to the children
+  getChildContext () {
+    return {
+      // api,
+      // muiTheme
+    };
+  }
+
+  componentDidMount () {
+    // this.setState()
+    // this.checkConnectionToNode();
+    console.log(this.context);
+  }
+
   render() {
-    console.log(styles);
+    const { connected } = this.state;
+
+    if (!connected) {
+      return (
+        <Loading />
+      );
+    }
+
     return (
       <div className={ styles.body } style={ bgstyle }>
         <h1 className={styles.headline}>RigoBlock: Decentralized Pools of Digital Tokens </h1>
@@ -100,11 +134,22 @@ export default class ApplicationHome extends Component {
     });
   }
 
-  getChildContext () {
-    return {
-      muiTheme
-    };
-  }
+  // isUp = () => {
+  //   console.log(`applicationHome: checking node`);
+  //   this.setState({connected: true})
+  // }
+
+  // checkConnectionToNode = () => {
+  //   const { api } = this.context;
+  //     api.subscribe('net_listening', this.isUp)
+  //     .catch((error) => {
+  //       console.warn('net_listening', error);
+  //       this.setState({connected: false});
+  //       console.log(`applicationHome: Parity node is DOWN`);
+  //     })
+  // }
+
+
 }
 
 //<Slider name='slider0' defaultValue={0.5} />

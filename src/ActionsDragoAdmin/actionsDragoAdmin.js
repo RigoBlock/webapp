@@ -16,7 +16,7 @@ import AccountBalance from 'material-ui/svg-icons/action/account-balance';
 
 export default class ActionsDragoAdmin extends Component {
   static contextTypes = {
-    //instance: PropTypes.object
+    instance: PropTypes.object
   }
 
   static propTypes = {
@@ -26,7 +26,7 @@ export default class ActionsDragoAdmin extends Component {
 
   render () {
     //const { instance } = this.context;
-
+    // console.log(this.context);
     const { gabBalance } = this.props;
 
     return (

@@ -1,6 +1,6 @@
 // Copyright 2016-2017 Gabriele Rigo
 
-import { api } from '../parity';
+// import { api } from '../parity';
 import * as abis from '../contracts';
 
 import styles from './applicationExchange.module.css';
@@ -24,10 +24,10 @@ import IconButton from 'material-ui/IconButton';
 import Subheader from 'material-ui/Subheader';
 import StarBorder from 'material-ui/svg-icons/toggle/star-border';
 
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import lightBaseTheme from 'material-ui/styles/baseThemes/lightBaseTheme';
+// import getMuiTheme from 'material-ui/styles/getMuiTheme';
+// import lightBaseTheme from 'material-ui/styles/baseThemes/lightBaseTheme';
 
-const muiTheme = getMuiTheme(lightBaseTheme);
+// const muiTheme = getMuiTheme(lightBaseTheme);
 
 const bgstyle = {
   backgroundImage: `url(${bgimage})`
@@ -36,14 +36,36 @@ const bgstyle = {
 const DIVISOR = 10 ** 18;  // calculations in ETH
 
 export default class ApplicationExchange extends Component {
+
+
+  // Checking the type of the context variable that we receive by the parent
+  static contextTypes = {
+    api: PropTypes.object.isRequired,
+    muiTheme: PropTypes.object.isRequired
+  };
+
   static childContextTypes = {
-    api: PropTypes.object,
+    // api: PropTypes.object,
     contractOracle: PropTypes.object,
     contractExchange: PropTypes.object,
     instance: PropTypes.object,
     //allEvents: PropTypes.object,
     muiTheme: PropTypes.object
   };
+
+  getChildContext () {
+    const { /*allEvents, */contractExchange, contractOracle, instance } = this.state;
+    //const { allEvents } = this.props;
+
+    return {
+      // api,
+      contractExchange,
+      contractOracle,
+      instance,
+      //allEvents,
+      // muiTheme
+    };
+  }
 
 /*
   static propTypes = {
@@ -62,7 +84,8 @@ export default class ApplicationExchange extends Component {
     instance: null,
     loading: true,
     //price: null,
-    authority: null
+    authority: null,
+    subscriptionIDExchange: null
     //next_id: null, //added
     //min_stake: null, //added
     //remaining: null,
@@ -71,6 +94,11 @@ export default class ApplicationExchange extends Component {
 
   componentDidMount () {
     this.attachInterface();
+  }
+
+  componentWillUnmount() {
+    // Unsubscribing to the event when the the user moves away from this page
+    this.detachInterface();
   }
 
   render () {
@@ -170,19 +198,7 @@ export default class ApplicationExchange extends Component {
     }
   }
 
-  getChildContext () {
-    const { /*allEvents, */contractExchange, contractOracle, instance } = this.state;
-    //const { allEvents } = this.props;
 
-    return {
-      api,
-      contractExchange,
-      contractOracle,
-      instance,
-      //allEvents,
-      muiTheme
-    };
-  }
 
   onAction = (action) => {
     this.setState({
@@ -198,6 +214,7 @@ export default class ApplicationExchange extends Component {
 
   onNewBlockNumber = (_error, blockNumber) => {
     const { instance, accounts } = this.state;
+    const { api } = this.context;
 
     if (_error) {
       console.error('onNewBlockNumber', _error);
@@ -224,7 +241,10 @@ export default class ApplicationExchange extends Component {
         //fix: tokens[0][_who]  //amend deposit functions
         const gabQueries = accounts.map((account) => instance.marginOf.call({}, [account.address]));
         const ethQueries = accounts.map((account) => api.eth.getBalance(account.address));
-
+        accounts.map((account) => {
+          console.log('API call -> applicationExchange: Getting balance of account', account.name);
+          }
+        )
         return Promise.all([
           Promise.all(gabQueries),
           Promise.all(ethQueries)
@@ -252,6 +272,7 @@ export default class ApplicationExchange extends Component {
   }
 
   getAccounts () {
+    const { api } = this.context;
     return api.parity
       .accountsInfo()
       .catch((error) => {
@@ -279,6 +300,7 @@ export default class ApplicationExchange extends Component {
   }
 
   attachInterface = () => {
+    const { api } = this.context;
     api.parity
       .registryAddress()
       .then((registryAddress) => {
@@ -318,10 +340,23 @@ export default class ApplicationExchange extends Component {
             })
         });
 
-        api.subscribe('eth_blockNumber', this.onNewBlockNumber);
+        api.subscribe('eth_blockNumber', this.onNewBlockNumber)
+        .then((subscriptionID) => {
+          console.log(`applicationExchange: Subscribed to eth_blockNumber -> Subscription ID: ${subscriptionID}`);
+          this.setState({subscriptionIDExchange: subscriptionID});
+        });
       })
       .catch((error) => {
         console.warn('attachInterface', error);
       });
   }
+
+  detachInterface = () => {
+    const { api } = this.context;
+    const { subscriptionIDExchange } = this.state;
+    console.log(`applicationExchange: Unsubscribed to eth_blockNumber -> Subscription ID: ${subscriptionIDExchange}`);
+    api.unsubscribe(subscriptionIDExchange).catch((error) => {
+      console.warn('Unsubscribe error', error);
+    });
+  } 
 }

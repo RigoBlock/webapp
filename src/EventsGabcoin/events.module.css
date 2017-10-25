@@ -50,7 +50,12 @@
 }
 
 .account img {
-  margin-bottom: -11px;
+  /* margin-bottom: -11px; */
+  float: left;
+}
+
+.accountaddress {
+  margin-left: 60px;
 }
 
 .address {
@@ -94,4 +99,8 @@
 
 .newtranch {
   background: rgba(255, 175, 0, 0.125); /*rgba(68, 51, 0, 0.15);*/
+}
+
+.eventTable {
+  width: 100%;
 }

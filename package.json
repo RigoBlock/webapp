@@ -2,30 +2,39 @@
   "name": "rigoblock-david",
   "version": "0.1.0",
   "private": true,
-  "homepage": "/rigoblock-david/",
+  "homepage": "",
   "dependencies": {
+    "@parity/api": "^2.0.13",
     "@parity/parity.js": "^1.8.11",
     "bignumber.js": "^4.1.0",
     "copy-webpack-plugin": "^4.1.1",
     "css-loader": "^0.28.7",
+    "custom-react-scripts": "^0.2.0",
+    "jss": "^9.0.0",
+    "lodash": "^4.17.0",
     "material-ui": "^0.19.4",
+    "material-ui-next": "npm:material-ui@next",
     "moment": "^2.19.1",
     "node-fetch": "^1.7.3",
     "node-noop": "^1.0.0",
+    "node-sass": "^4.0.0",
     "node-sass-chokidar": "^0.0.3",
     "prop-types": "^15.6.0",
     "react": "^16.0.0",
     "react-dom": "^16.0.0",
-    "custom-react-scripts": "^0.2.0",
+    "react-grid-system": "^3.0.7",
+    "react-router": "^4.2.0",
+    "react-router-dom": "^4.2.2",
     "react-tap-event-plugin": "^3.0.2",
     "rucksack-css": "^1.0.2",
     "style-loader": "^0.19.0"
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "PUBLIC_URL=./rigoblock-david react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
-    "watch": "node scripts/watch.js"
+    "watch": "node scripts/watch.js",
+    "build-ui": "node scripts/build-ui.js"
   }
 }

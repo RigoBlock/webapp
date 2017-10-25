@@ -1,6 +1,6 @@
 // Copyright 2016-2017 Gabriele Rigo
 
-import { api } from '../../parity';
+// import { api } from '../../parity';
 import AccountSelector from '../../AccountSelector';
 import { ERRORS, validateAccount, validatePositiveNumber } from '../validation';
 
@@ -20,7 +20,8 @@ const ADDRESS_0 = '0x0000000000000000000000000000000000000000';
 
 export default class ActionWithdraw extends Component {
   static contextTypes = {
-    instance: PropTypes.object.isRequired
+    instance: PropTypes.object.isRequired,
+    api: PropTypes.object.isRequired
   }
 
   static propTypes = {
@@ -132,9 +133,10 @@ export default class ActionWithdraw extends Component {
 */
 
   onChangeAddress = (account) => {
+    const { api } = this.context;
     this.setState({
       account,
-      accountError: validateAccount(account)
+      accountError: validateAccount(account, api)
     }, this.validateTotal);
   }
 
@@ -174,7 +176,8 @@ export default class ActionWithdraw extends Component {
     // const maxPrice = api.util.toWei(this.state.maxPrice);
     //const values = [this.state.account.address, toAddress];
     const amount = new BigNumber(this.state.amount).mul(DIVISOR);
-
+    const { api } = this.context;
+    
     const toAddress = api.util.toChecksumAddress(this.state.toAddress);
 
     const values = [ADDRESS_0, amount.toFixed(0)]; // [this.state.toAddress]; //amount.toFixed(0)

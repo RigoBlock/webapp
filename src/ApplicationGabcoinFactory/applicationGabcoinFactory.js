@@ -1,6 +1,6 @@
 // Copyright 2016-2017 Gabriele Rigo
 
-import { api } from '../parity';
+// import { api } from '../parity';
 
 import * as abis from '../contracts';
 
@@ -34,12 +34,32 @@ const bgstyle = {
 const DIVISOR = 10 ** 6;  //tokens are divisible by one million
 
 export default class ApplicationGabcoinFactory extends Component {
+  
+  // We define the properties of the context variables passed down to the children
   static childContextTypes = {
-    api: PropTypes.object,
+    // api: PropTypes.object,
     contract: PropTypes.object,
     instance: PropTypes.object//,
-    //muiTheme: PropTypes.object
+    // muiTheme: PropTypes.object
   };
+
+  // We check the type of the context variable that we receive by the parent 
+  static contextTypes = {
+    api: PropTypes.object.isRequired,
+    muiTheme: PropTypes.object.isRequired
+  };
+
+  // We pass down the context variables passed down to the children
+  getChildContext () {
+    const { contract, instance } = this.state;
+
+    return {
+      contract,
+      instance
+    };
+  }
+  
+
 
   state = {
     action: null,
@@ -59,11 +79,14 @@ export default class ApplicationGabcoinFactory extends Component {
     //totalSupply: null
   }
 
+  
+
   componentDidMount () {
     this.attachInterface();
   }
 
   render () {
+
     const { accounts, accountsInfo, address, blockNumber, gabBalance, loading, /*price, nextGabcoinID,*/ version } = this.state;
 
     if (loading) {
@@ -132,17 +155,6 @@ export default class ApplicationGabcoinFactory extends Component {
   }
   */
 
-  getChildContext () {
-    const { contract, instance } = this.state;
-
-    return {
-      api,
-      contract,
-      instance//,
-      //muiTheme
-    };
-  }
-
   onAction = (action) => {
     this.setState({
       action
@@ -157,6 +169,7 @@ export default class ApplicationGabcoinFactory extends Component {
 
   onNewBlockNumber = (_error, blockNumber) => {
     const { instance, accounts } = this.state;
+    const { api } = this.context;
 
     if (_error) {
       console.error('onNewBlockNumber', _error);
@@ -182,7 +195,10 @@ export default class ApplicationGabcoinFactory extends Component {
         //const gabQueries = accounts.map((account) => instance.gabcoinOf.call({}, [account.address])); //calling instead of balanceOf()
         const gabQueries = accounts.map((account) => api.eth.getBalance(account.address));
         const ethQueries = accounts.map((account) => api.eth.getBalance(account.address));
-
+        accounts.map((account) => {
+          console.log('API call -> applicationGabcoinFactory: Getting balance of account', account.name);
+          }
+        )
         return Promise.all([
           Promise.all(gabQueries),
           Promise.all(ethQueries)
@@ -210,6 +226,7 @@ export default class ApplicationGabcoinFactory extends Component {
   }
 
   getAccounts () {
+    const { api } = this.context;
     return api.parity
       .accountsInfo()
       .catch((error) => {
@@ -231,12 +248,12 @@ export default class ApplicationGabcoinFactory extends Component {
       })
       .then((accountsInfo) => {
         console.log('getAccounts', accountsInfo);
-
         return accountsInfo;
       });
   }
 
   attachInterface = () => {
+    const { api } = this.context;
     api.parity
       .registryAddress()
       .then((registryAddress) => {
@@ -273,7 +290,35 @@ export default class ApplicationGabcoinFactory extends Component {
             })
         });
 
-        api.subscribe('eth_blockNumber', this.onNewBlockNumber);
+        // Getting the accounts balances. The AccountSelector will need this information.
+        // I have moved this code here from the onNewBlockNumber function.
+        const { accounts } = this.state;
+        const gabQueries = accounts.map((account) => api.eth.getBalance(account.address));
+        const ethQueries = accounts.map((account) => api.eth.getBalance(account.address));
+
+        Promise.all([
+          Promise.all(gabQueries),
+          Promise.all(ethQueries)
+        ]).then(([gabBalances, ethBalances]) => {
+          this.setState({
+            ethBalance: ethBalances.reduce((total, balance) => total.add(balance), new BigNumber(0)),
+            gabBalance: gabBalances.reduce((total, balance) => total.add(balance), new BigNumber(0)),
+            accounts: accounts.map((account, index) => {
+              const ethBalance = ethBalances[index];
+              const gabBalance = gabBalances[index];
+  
+              account.ethBalance = api.util.fromWei(ethBalance).toFormat(3);
+              account.gabBalance = gabBalance.div(DIVISOR).toFormat(6);
+              account.hasGab = gabBalance.gt(0);
+  
+              return account;
+            })
+          });
+        });
+        console.log(`Accounts: ${accounts}`);
+        
+        // Removed unnecessary connections to the RPC server.
+        // api.subscribe('eth_blockNumber', this.onNewBlockNumber);
       })
       .catch((error) => {
         console.warn('attachInterface', error);
