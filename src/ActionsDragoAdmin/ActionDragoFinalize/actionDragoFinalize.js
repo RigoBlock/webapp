@@ -2,7 +2,7 @@
 
 import * as abis from '../../contracts';
 
-import { api } from '../../parity';
+// import { api } from '../../parity';
 import AccountSelector from '../../AccountSelector';
 import { ERRORS, validateAccount, validatePositiveNumber } from '../validation';
 
@@ -26,13 +26,15 @@ const ADDRESS_0 = '0x0000000000000000000000000000000000000000';
 export default class ActionDragoFinalize extends Component {
   static contextTypes = {
     instance: PropTypes.object.isRequired,
-    dragoAddress: PropTypes.object.isRequired
+    dragoAddress: PropTypes.object.isRequired,
+    api: PropTypes.object
   }
 
   static propTypes = {
     accounts: PropTypes.array,
     onClose: PropTypes.func,
-    cfd: PropTypes.object
+    cfd: PropTypes.object,
+    
   }
 
   state = {

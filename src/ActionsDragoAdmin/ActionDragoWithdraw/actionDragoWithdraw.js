@@ -29,7 +29,8 @@ const APPROVED_EXCHANGES = ['exchange2', 'exchangenot']; //we have to add a comp
 export default class ActionDragoWithdraw extends Component {
   static contextTypes = {
     instance: PropTypes.object.isRequired,
-    dragoAddress: PropTypes.object.isRequired
+    dragoAddress: PropTypes.object.isRequired,
+    api: PropTypes.object
   }
 
   static propTypes = {

@@ -2,7 +2,7 @@
 
 import * as abis from '../../contracts';
 
-import { api } from '../../parity';
+// import { api } from '../../parity';
 import AccountSelector from '../../AccountSelector';
 import { ERRORS, validateAccount, validatePositiveNumber } from '../validation';
 
@@ -27,6 +27,7 @@ export default class ActionDragoCancelOrder extends Component {
   static contextTypes = {
     // instance: PropTypes.object.isRequired,
     // dragoAddress: PropTypes.object.isRequired
+    api: PropTypes.object
   }
 
   static propTypes = {

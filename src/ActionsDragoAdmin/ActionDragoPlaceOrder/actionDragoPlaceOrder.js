@@ -2,7 +2,7 @@
 
 import * as abis from '../../contracts';
 
-import { api } from '../../parity';
+// import { api } from '../../parity';
 import AccountSelector from '../../AccountSelector';
 import { ERRORS, validateAccount, validatePositiveNumber } from '../validation';
 
@@ -28,7 +28,8 @@ const ADDRESS_0 = '0x0000000000000000000000000000000000000000';
 export default class ActionDragoPlaceOrder extends Component {
   static contextTypes = {
     instance: PropTypes.object.isRequired,
-    dragoAddress: PropTypes.object.isRequired
+    dragoAddress: PropTypes.object.isRequired,
+    api: PropTypes.object
     //is_stable: PropTypes.bool.isRequired
   }
 

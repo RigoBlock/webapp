@@ -4,7 +4,7 @@
 
 import * as abis from '../../contracts';
 
-import { api } from '../../parity';
+// import { api } from '../../parity';
 import AccountSelector from '../../AccountSelector';
 import { ERRORS, validateAccount, validatePositiveNumber } from '../validation';
 
@@ -32,7 +32,8 @@ export default class ActionDragoDeposit extends Component {
   static contextTypes = {
     instance: PropTypes.object.isRequired, //instance arrives from application, here we have to find exchanges and assets
     //approvedExchanges: PropTypes.array.isRequired
-    dragoAddress: PropTypes.object.isRequired
+    dragoAddress: PropTypes.object.isRequired,
+    api: PropTypes.object
   }
 
   static propTypes = {
