@@ -1,33 +1,37 @@
-// Copyright 2016-2017 Gabriele Rigo
-
-import React, { Component } from 'react';
-import * as abis from '../contracts';
-import ReactDOM from 'react-dom'
-import { Link, Route, withRouter, HashRouter, Switch, Redirect } from 'react-router-dom'
-
-
-import Accounts from '../Accounts';
-import Loading from '../Loading';
-import Status from '../Status';
-
-import styles from './applicationConfig.module.css';
-import BigNumber from 'bignumber.js';
+// Copyright 2016-2017 Rigo Investment Sarl.
 
 import { Grid, Row, Col } from 'react-flexbox-grid';
-import LeftSideDrawerConfig from '../Elements/leftSideDrawerConfig';
-import PropTypes from 'prop-types';
-import utils from '../utils/utils'
-import NotificationSystem from 'react-notification-system'
+import { Link, Route, withRouter, HashRouter, Switch, Redirect } from 'react-router-dom'
 import {List, ListItem} from 'material-ui/List';
-import Subheader from 'material-ui/Subheader';
-import Paper from 'material-ui/Paper';
 import Avatar from 'material-ui/Avatar';
-import ElementNotification from '../Elements/elementNotification'
-import ElementNotificationsDrawer from '../Elements/elementNotificationsDrawer'
-import PageNetworkConfig from './pageNetworkConfig'
+import BigNumber from 'bignumber.js';
+import NotificationSystem from 'react-notification-system'
+import Paper from 'material-ui/Paper';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
+import ReactDOM from 'react-dom'
+
+import {
+  DEFAULT_NETWORK_ID,
+  MSG_NO_KOVAN,
+  MSG_NETWORK_STATUS_OK,
+  MSG_NETWORK_STATUS_ERROR,
+  NETWORK_OK,
+  NETWORK_WARNING
+} from '../utils/const'
+import * as abis from '../contracts';
 import CheckAuthPage from '../Elements/checkAuthPage'
 import ElementBottomStatusBar from '../Elements/elementBottomStatusBar'
+import ElementNotification from '../Elements/elementNotification'
+import ElementNotificationsDrawer from '../Elements/elementNotificationsDrawer'
+import LeftSideDrawerConfig from '../Elements/leftSideDrawerConfig';
+import Loading from '../Loading';
+import PageNetworkConfig from './pageNetworkConfig'
+import Status from '../Status';
+import utils from '../utils/utils'
+import { ALLOWED_ENDPOINTS, DEFAULT_ENDPOINT } from '../utils/const';
 
+import styles from './applicationConfig.module.css';
 
 const DIVISOR = 10 ** 6;  //tokens are divisible by one million
 
@@ -68,25 +72,42 @@ export class ApplicationConfig extends Component {
     pendingEvents: [],
     infura: false,
     prevBlockNumber: 0,
-    networkStatus: 'Service is operating normally.',
-    networkError: 'networkOk'
+    networkStatus: MSG_NETWORK_STATUS_OK,
+    networkError: NETWORK_OK,
+    networkCorrect: false,
+    warnMsg: null
   }
 
   scrollPosition = 0
 
+  shouldComponentUpdate(nextProps, nextState){
+    const propsUpdate = (!utils.shallowEqual(this.props, nextProps))
+    const stateUpdate = (!utils.shallowEqual(this.state, nextState))
+    return stateUpdate || propsUpdate 
+  }
+
   componentWillMount () {
-    const endpoint = localStorage.getItem('endpoint')
-    switch (endpoint) {
-      case "infura":
-        this.attachInterfaceInfura()
-        .then(() =>{
-        })
-      break;
-      case "rigoblock":
-        this.attachInterfaceRigoBlock()
-        .then(() =>{
-        })
-      break; 
+    // Allowed endpoints are defined in const.js
+    var selectedEndpoint = localStorage.getItem('endpoint')
+    var allowedEndpoints = new Map(ALLOWED_ENDPOINTS)
+    if (allowedEndpoints.has(selectedEndpoint)) {
+      switch (selectedEndpoint) {
+        case "infura":
+          this.attachInterfaceInfura()
+          .then(() =>{
+          })
+        break;
+        case "rigoblock":
+          this.attachInterfaceRigoBlock()
+          .then(() =>{
+          })
+        break; 
+      }
+    } else {
+      localStorage.setItem('endpoint', DEFAULT_ENDPOINT)
+      this.attachInterfaceInfura()
+      .then(() =>{
+      })
     }
   } 
 
@@ -103,20 +124,23 @@ export class ApplicationConfig extends Component {
   }
 
   render () {
-    const { ethBalance, loading, blockNumber, accounts, allEvents, accountsInfo } = this.state;
+    const { ethBalance, loading, blockNumber, accounts, allEvents, accountsInfo, networkError, networkStatus, networkCorrect, warnMsg } = this.state;
     const {isManager, location, handleToggleNotifications, notificationsOpen, match }  = this.props
     if (loading) {
       return <Loading></Loading>
     }
-    if (accounts.length === 0) {
-      return (
-        <span>
-          <CheckAuthPage />
-          <ElementBottomStatusBar blockNumber={this.state.prevBlockNumber}
-            networkName='Kovan' />
-        </span>
-    )
-    }
+    // if ((accounts.length === 0 || !networkCorrect)) {
+    //   return (
+    //     <span>
+    //       <CheckAuthPage warnMsg={warnMsg}/>
+    //       <ElementBottomStatusBar
+    //         blockNumber={this.state.prevBlockNumber}
+    //         networkName='Kovan'
+    //         networkError={networkError}
+    //         networkStatus={networkStatus} />
+    //     </span>
+    // )
+    // }
 
     var notificationStyle = {
       NotificationItem: { // Override the notification item
@@ -147,24 +171,6 @@ export class ApplicationConfig extends Component {
                   accountsInfo={accountsInfo} />
                 } 
             />
-            {/* <Route exact path={match.path+"/pools"}
-              render={(props) => <PageFundsDragoTrader {...props}               
-              // blockNumber={blockNumber}
-              // accounts={accounts}
-              // ethBalance={ethBalance} 
-              // allEvents={allEvents}
-              // accountsInfo={accountsInfo}
-              />
-            } 
-            /> */}
-            {/* <Route path={match.path+"/pools/:dragoid/:dragocode"}
-              render={(props) => <PageFundDetailsDragoTrader {...props}               
-              blockNumber={blockNumber}
-              accounts={accounts}
-              ethBalance={ethBalance} 
-              allEvents={allEvents}
-              accountsInfo={accountsInfo}
-              /> */}
             } 
             />
             <Redirect from={match.path} to={match.path+"/network"}  />
@@ -173,16 +179,23 @@ export class ApplicationConfig extends Component {
         </Row>
           <Row>
           <Col xs>
-            <ElementNotificationsDrawer 
-              handleToggleNotifications={handleToggleNotifications} 
-              notificationsOpen={notificationsOpen}
-              accounts={accounts}
-              events={allEvents}
-              />
+          {notificationsOpen ? (
+                  <ElementNotificationsDrawer
+                    handleToggleNotifications={handleToggleNotifications}
+                    notificationsOpen={notificationsOpen}
+                    accounts={accounts}
+                    events={allEvents}
+                  />
+                ) : (
+                    null
+                  )}
           </Col>
         </Row>
-        <ElementBottomStatusBar blockNumber={this.state.prevBlockNumber}
-          networkName='Kovan' />
+        <ElementBottomStatusBar 
+          blockNumber={this.state.prevBlockNumber}
+          networkName='Kovan'
+          networkError={networkError}
+          networkStatus={networkStatus} />
       </span>
     )
   }
@@ -259,8 +272,8 @@ export class ApplicationConfig extends Component {
       })
       .then((ethBalances) => {
         this.setState({
-          networkError: 'networkOk',
-          networkStatus: 'Service is operating normally.',
+          networkError: NETWORK_OK,
+          networkStatus: MSG_NETWORK_STATUS_OK,
           accountsBalanceError: false,
           ethBalance: ethBalances.reduce((total, balance) => total.add(balance), new BigNumber(0)),
           accounts: [].concat(accounts.map((account, index) => {
@@ -275,8 +288,8 @@ export class ApplicationConfig extends Component {
         console.warn(`${sourceLogClass} -> ${error}`)
         // Setting the balances to 0 if receiving an error from the endpoint. It happens with Infura.
         this.setState({
-          networkError: 'networkWarning',
-          networkStatus: 'Service disruption. Cannot update accounts balances. Account balances could be out of date.',
+          networkError: NETWORK_WARNING,
+          networkStatus: MSG_NETWORK_STATUS_ERROR,
           accountsBalanceError: true,
           ethBalance: new BigNumber(0),
           accounts: [].concat(accounts.map((account, index) => {
@@ -321,12 +334,26 @@ export class ApplicationConfig extends Component {
   }
 
   getAccountsMetamask () {
+
     const web3 = window.web3
     if (typeof web3 === 'undefined') {
       return
     }
-    // const balance = web3.fromWei(web3.eth.getBalance(web3.eth.accounts[0]))
-    return web3.eth.getAccounts()
+    return web3.eth.net.getId()
+    .then((networkId) => {
+      if (networkId != DEFAULT_NETWORK_ID) {
+        this.setState({
+          networkCorrect: false,
+          warnMsg: MSG_NO_KOVAN
+        })
+      } else {
+        this.setState({
+          networkCorrect: true
+        }) 
+      }
+    })
+    .then (() =>{
+      return web3.eth.getAccounts()
       .then(accounts => {
         const balance = web3.eth.getBalance(accounts[0])
         .then(balance => {
@@ -343,6 +370,7 @@ export class ApplicationConfig extends Component {
       .catch(() =>{
         return
       })
+    })
   }
 
   attachInterfaceInfura = () => {
@@ -355,7 +383,7 @@ export class ApplicationConfig extends Component {
     ])
     .then(([accountsMetaMask]) => {
       const allAccounts = {...accountsMetaMask}
-      console.log('account loaded')
+      console.log('Accounts loaded')
       this.setState({
         accountsInfo: accountsMetaMask,
         loading: false,

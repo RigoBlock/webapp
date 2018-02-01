@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
 import RaisedButton from 'material-ui/RaisedButton';
 import React from 'react';
 
-import AccountSelector from './elementAccountSelector'
+import AccountSelector from '../../Elements/elementAccountSelector'
 import IdentityIcon from '../../IdentityIcon';
 
 import styles from './elementFundActionsHeader.module.css';

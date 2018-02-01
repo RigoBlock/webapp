@@ -1,4 +1,4 @@
-// Copyright 2016-2017 Gabriele Rigo
+// Copyright 2016-2017 Rigo Investment Sarl.
 
 import React, { Component } from 'react';
 import Menu from 'material-ui/Menu';
@@ -17,6 +17,7 @@ import ElementFundActionWithdraw from '../Elements/elementFundActionWithdraw'
 import ElementFundActionPlaceOrder from '../Elements/elementFundActionPlaceOrder'
 import ElementFundActionCancelOrder from '../Elements/elementFundActionCancelOrder'
 import ElementFundActionFinalizeOrder from '../Elements/elementFundActionFinalizeOrder'
+import ElementFundActionSetPrice from '../Elements/elementFundActionSetPrice'
 
 export default class ElementFundActionsList extends Component {
   static propTypes = {
@@ -33,6 +34,7 @@ export default class ElementFundActionsList extends Component {
       placeOrder: false,
       cancelOrder: false,
       finalizeOrder: false,
+      setPrice: false,
     }
   }
 
@@ -49,50 +51,57 @@ export default class ElementFundActionsList extends Component {
     });
   };
 
-  openActionForm = (event, value) =>{
+  openActionForm = (event, value) => {
     this.setState({
       openMenuActions: false,
     });
     console.log(value)
-    switch(value) {
+    switch (value) {
       case 'deposit':
-          this.setState({
-            showActionMenuItem:{
-              deposit: !this.state.showActionMenuItem.deposit
-            }
-          })
-          break;
+        this.setState({
+          showActionMenuItem: {
+            deposit: !this.state.showActionMenuItem.deposit
+          }
+        })
+        break;
       case 'withdraw':
-      this.setState({
-        showActionMenuItem:{
-          withdraw: !this.state.showActionMenuItem.withdraw
-        }
-      })
-          break;
+        this.setState({
+          showActionMenuItem: {
+            withdraw: !this.state.showActionMenuItem.withdraw
+          }
+        })
+        break;
       case 'placeOrder':
-      this.setState({
-        showActionMenuItem:{
-          placeOrder: !this.state.showActionMenuItem.placeOrder
-        }
-      })
-      break;
+        this.setState({
+          showActionMenuItem: {
+            placeOrder: !this.state.showActionMenuItem.placeOrder
+          }
+        })
+        break;
       case 'cancelOrder':
-      this.setState({
-        showActionMenuItem:{
-          cancelOrder: !this.state.showActionMenuItem.cancelOrder
-        }
-      })
-          break;
+        this.setState({
+          showActionMenuItem: {
+            cancelOrder: !this.state.showActionMenuItem.cancelOrder
+          }
+        })
+        break;
       case 'finalizeOrder':
-      this.setState({
-        showActionMenuItem:{
-          finalizeOrder: !this.state.showActionMenuItem.finalizeOrder
-        }
-      })
-          break;
+        this.setState({
+          showActionMenuItem: {
+            finalizeOrder: !this.state.showActionMenuItem.finalizeOrder
+          }
+        })
+        break;
+        case 'setPrice':
+        this.setState({
+          showActionMenuItem: {
+            setPrice: !this.state.showActionMenuItem.setPrice
+          }
+        })
+        break;
       default:
-          return null
-    } 
+        return null
+    }
     return null
   }
 
@@ -124,6 +133,7 @@ export default class ElementFundActionsList extends Component {
           desktop={true}
           onChange={this.openActionForm}>
             <Subheader inset={false}>Drago</Subheader>
+            <MenuItem value="setPrice" primaryText="Set Prices"/>
             <MenuItem value="1" primaryText="Set Fee" disabled={true}/>
             <MenuItem value="2" primaryText="Fee Account" disabled={true}/>
             <MenuItem value="3" primaryText="Estimante NAV" disabled={true}/>
@@ -170,6 +180,13 @@ export default class ElementFundActionsList extends Component {
                 snackBar={this.props.snackBar}/> :
               null
             }
+        {this.state.showActionMenuItem.setPrice ?
+          <ElementFundActionSetPrice accounts={accounts}
+            dragoDetails={dragoDetails}
+            openActionForm={this.openActionForm}
+            snackBar={this.props.snackBar} /> :
+          null
+        }
       </div>
     );
   }

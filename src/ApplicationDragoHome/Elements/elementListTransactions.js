@@ -12,6 +12,8 @@ import utils from '../../utils/utils'
 
 import styles from './elementListTransactions.module.css';
 import 'react-virtualized/styles.css'
+import  * as Colors from 'material-ui/styles/colors'
+import BigNumber from 'bignumber.js';
 
 // const list = Immutable.List(generateRandomList());
 
@@ -132,7 +134,7 @@ class ElementListTransactions extends PureComponent {
                   <Column
                     width={200}
                     disableSort
-                    label="Date"
+                    label="DATE"
                     cellDataGetter={({rowData}) => rowData.timestamp}
                     dataKey="date"
                     className={styles.exampleColumn}
@@ -142,14 +144,14 @@ class ElementListTransactions extends PureComponent {
                   <Column
                     width={100}
                     disableSort
-                    label="Action"
+                    label="TRADE"
                     cellDataGetter={({rowData}) => rowData.type}
                     dataKey="action"
                     className={styles.exampleColumn}
                     cellRenderer={({cellData}) => this.renderAction(cellData)}
                     flexShrink={1}
                   />
-                  <Column
+                  {/* <Column
                     width={100}
                     disableSort
                     label="Symbol"
@@ -158,22 +160,22 @@ class ElementListTransactions extends PureComponent {
                     cellRenderer={({cellData}) => this.renderSymbol(cellData)}
                     className={styles.exampleColumn}
                     flexShrink={1}
-                  />
+                  /> */}
                   {/* formatEth(price) }<small> ETH</small> */}
                   <Column
                     width={100}
                     disableSort
-                    label="DRG"
+                    label="UNITS"
                     cellDataGetter={({rowData}) => rowData.drgvalue}
                     dataKey="drg"
                     className={styles.exampleColumn}
-                    cellRenderer={({rowData}) => this.renderDrgValue(rowData.drgvalue)}
+                    cellRenderer={({rowData}) => this.renderDrgValue(rowData)}
                     flexShrink={1}
                   />
                   <Column
                     width={100}
                     disableSort
-                    label="ETH"
+                    label="VALUE"
                     cellDataGetter={({rowData}) => rowData.ethvalue}
                     dataKey="eth"
                     className={styles.exampleColumn}
@@ -183,7 +185,7 @@ class ElementListTransactions extends PureComponent {
                   <Column
                     width={210}
                     disableSort
-                    label="Tx"
+                    label="TX"
                     cellDataGetter={({rowData}) => rowData.transactionHash}
                     dataKey="tx"
                     className={styles.exampleColumn}
@@ -224,7 +226,7 @@ class ElementListTransactions extends PureComponent {
 
   renderEthValue(ethValue) {
     return (
-      <div>{ethValue} <small>ETH</small></div>
+      <div>{new BigNumber(ethValue).toFixed(4)} <small>ETH</small></div>
     )
   }
 
@@ -237,10 +239,10 @@ class ElementListTransactions extends PureComponent {
   renderAction(action) {
     switch(action) {
       case "BuyDrago":
-        return <span>Buy</span>
+        return <span style={{color: Colors.green300, fontWeight: 600}}>BUY</span>
         break
       case "SellDrago":
-        return <span>Sell</span>
+        return <span style={{color: Colors.red300, fontWeight: 600}}>SELL</span>
         break
       case "DragoCreated":
         return <span>Created</span>
@@ -249,17 +251,14 @@ class ElementListTransactions extends PureComponent {
   }
 
   renderTime(timestamp) {
-    const day = ("0" + timestamp.getDate()).slice(-2)
-    const month = ("0" + (timestamp.getMonth() + 1)).slice(-2)
-    const date = timestamp.getFullYear()+'-'+month+'-'+day+' '+timestamp.getHours()+':'+timestamp.getMinutes()+':'+timestamp.getSeconds()
     return (
-      <span>{date}</span>
+      <span>{utils.dateFromTimeStamp(timestamp)}</span>
     )
   }
 
-  renderDrgValue(drgvalue) {
+  renderDrgValue(rowData) {
     return (
-      <div>{drgvalue} <small>DRG</small></div>
+      <div>{new BigNumber(rowData.drgvalue).toFixed(4)} <small>{rowData.symbol}</small></div>
     )
   }
 

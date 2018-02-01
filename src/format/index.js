@@ -1,4 +1,4 @@
-// Copyright 2016-2017 Gabriele Rigo
+// Copyright 2016-2017 Rigo Investment Sarl.
 
 // import { api } from '../parity';
 
@@ -13,7 +13,7 @@ export function formatBlockNumber (blockNumber) {
     : `#${blockNumber.toFormat()}`;
 }
 
-export function formatCoins (amount, decimals = 1, api) {  //prev. decimals = 6
+export function formatCoins (amount, decimals = 4, api) {  //prev. decimals = 6
   // console.log(amount.toNumber())
   const adjusted = amount.div(DIVISOR);
   if (decimals === -1) {
@@ -33,7 +33,7 @@ export function formatCoins (amount, decimals = 1, api) {  //prev. decimals = 6
   return adjusted.toFormat(decimals);
 }
 
-export function formatEth (eth, decimals = 2, api) {
+export function formatEth (eth, decimals = 4, api) {
   return api.util.fromWei(eth).toFormat(decimals);
 }
 

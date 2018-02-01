@@ -10,11 +10,14 @@ import IdentityIcon from '../IdentityIcon';
 import Loading from '../Loading'
 import utils from '../utils/utils'
 
+
 import styles from './pageNetworkConfig.module.css'
 import Toggle from 'material-ui/Toggle';
 import ElementBoxHeadTitle from '../Elements/elementBoxHeadTitle'
 import RaisedButton from 'material-ui/RaisedButton';
-import FlatButton from 'material-ui/FlatButton';
+import FlatButton from 'material-ui/FlatButton'
+import TextField from 'material-ui/TextField'
+import { ALLOWED_ENDPOINTS, DEFAULT_ENDPOINT } from '../utils/const';
 
 
 
@@ -22,19 +25,21 @@ class PageNetworkConfig extends Component {
 
   constructor(props) {
     super(props);
-    const endpoint = localStorage.getItem('endpoint')
+    // Allowed endpoints are defined in const.js
+    var selectedEndpoint = localStorage.getItem('endpoint')
+    var allowedEndpoints = new Map(ALLOWED_ENDPOINTS)
+    if (allowedEndpoints.has(selectedEndpoint)) {
+      allowedEndpoints.set(selectedEndpoint, true) 
+    } else {
+      allowedEndpoints.set(DEFAULT_ENDPOINT, true)
+      selectedEndpoint = DEFAULT_ENDPOINT
+    }
     this.state = {
-      network: {
-        infura: (endpoint === 'infura') ? true : false,
-        rigoblock: (endpoint === 'rigoblock' || endpoint === null) ? true : false,
-        local: false,
-      },
+      selectedEndpoint: selectedEndpoint,
+      allowedEndpoints: allowedEndpoints,
       save: true,
-      snackBar: false,
-      snackBarMsg: '',
     }
   }
-
 
   // Checking the type of the context variable that we receive by the parent
   static contextTypes = {
@@ -45,7 +50,7 @@ class PageNetworkConfig extends Component {
       location: PropTypes.object.isRequired,
       ethBalance: PropTypes.object.isRequired,
       accounts: PropTypes.array.isRequired,
-      accountsInfo: PropTypes.object.isRequired, 
+      // accountsInfo: PropTypes.object.isRequired, 
       ethBalance: PropTypes.object.isRequired,
     };
 
@@ -69,45 +74,18 @@ class PageNetworkConfig extends Component {
       })
     }
 
-    handleSetActive = (to) => {
-    }
-
-
-    componentDidUpdate(nextProps) {
-    }
-
     onToggle = (event) =>{
-      console.log(event)
-      console.log(event.target.getAttribute('data-network'))
-      const network = event.target.getAttribute('data-network')
-      switch(network) {
-        case "infura":
-          localStorage.setItem('endpoint', 'infura')
-          this.setState ({
-            network: {
-              infura: true,
-              rigoblock: false,
-              local: false
-            },
-            save: false
-          }   
-          )
-          break;
-        case "rigoblock":
-          localStorage.setItem('endpoint', 'rigoblock')
-          this.setState ({
-            network: {
-              infura: false,
-              rigoblock: true,
-              local: false
-            },
-            save: false
-          }   
-          )
-          break;
-        default:
-            null
-      } 
+      // console.log(event.target.getAttribute('data-endpoint'))
+      const selectedEndpoint = event.target.getAttribute('data-endpoint')
+      console.log(ALLOWED_ENDPOINTS)
+      var allowedEndpoints = new Map(ALLOWED_ENDPOINTS)
+      localStorage.setItem('endpoint', selectedEndpoint)
+      allowedEndpoints.set(selectedEndpoint, true)
+      this.setState ({
+        selectedEndpoint: selectedEndpoint,
+        allowedEndpoints: allowedEndpoints,
+        save: false,
+      })
     }
 
     handleRefresh = () =>{
@@ -115,8 +93,7 @@ class PageNetworkConfig extends Component {
     }
 
     render() {
-      const { location, accounts, accountsInfo, allEvents } = this.props
-      const { loading, network } = this.state 
+      const { allowedEndpoints, selectedEndpoint } = this.state 
 
       const stylesToggle = {
         block: {
@@ -143,62 +120,66 @@ class PageNetworkConfig extends Component {
       };
 
       return (
-      <div className={styles.boxContainer}>
-        <Row>
-          <Col xs={12}>
-            <ElementBoxHeadTitle primaryText="Endpoint" />
-          </Col>
-          <Col xs={12}>
-            <Paper className={styles.paperContainer} zDepth={1}>
-              <p>Please select your preferred access point to the blockchain.</p>
-              <p>RigoBlock and Infura provide secure, reliable, and scalable access to Ethereum.</p>
-              <p>RigoBlock protocol is currently deployed on <b>Kovan</b> network only.</p>
-              <p>&nbsp;</p>
-              <div style={stylesToggle.block}>
-                <Toggle
-                  label="Infura"
-                  style={stylesToggle.toggle}
-                  onToggle={this.onToggle}
-                  data-network="infura"
-                  toggled={network.infura}
-                />
-                <Toggle
-                  label="RigoBlock"
-                  onToggle={this.onToggle}
-                  data-network="rigoblock"
-                  style={stylesToggle.toggle}
-                  toggled={network.rigoblock}
-                />
-                <Toggle
-                  label="Local"
-                  style={stylesToggle.toggle}
-                  toggled={network.local}
-                  disabled={true}
-                />
-                {/* <Toggle
-                  label="Styling"
-                  thumbStyle={stylesToggle.thumbOff}
-                  trackStyle={stylesToggle.trackOff}
-                  thumbSwitchedStyle={stylesToggle.thumbSwitched}
-                  trackSwitchedStyle={stylesToggle.trackSwitched}
-                  labelStyle={stylesToggle.labelStyle}
-                /> */}
-              </div>
-              <Row>
-                <Col xs={12}>
-                <p>You need to refresh you browser to save and make this setting active. Please proceed:</p>
-                </Col>
-                <Col xs={12}>
-                  <RaisedButton label="Refresh" 
-                  primary={true} 
-                  disabled={this.state.save} 
-                  onClick={this.handleRefresh}/>
-                </Col>
-              </Row>
-            </Paper>
-          </Col>
-        </Row>  
-      </div> 
+        <div className={styles.boxContainer}>
+          <Row>
+            <Col xs={12}>
+              <ElementBoxHeadTitle primaryText="Endpoint" />
+            </Col>
+            <Col xs={12}>
+              <Paper className={styles.paperContainer} zDepth={1}>
+                <p>Please select your preferred access point to the blockchain.</p>
+                <p>RigoBlock and Infura provide secure, reliable, and scalable access to Ethereum.</p>
+                <p>RigoBlock protocol is currently deployed on <b>Kovan</b> network only.</p>
+                <p>&nbsp;</p>
+                <div style={stylesToggle.block}>
+                  <Toggle
+                    label="Infura"
+                    style={stylesToggle.toggle}
+                    onToggle={this.onToggle}
+                    data-endpoint="infura"
+                    toggled={allowedEndpoints.get('infura')}
+                  />
+                  <Toggle
+                    label="RigoBlock"
+                    style={stylesToggle.toggle}
+                    onToggle={this.onToggle}
+                    data-endpoint="rigoblock"
+                    toggled={allowedEndpoints.get('rigoblock')}
+                  />
+                  <Toggle
+                    label="Local"
+                    style={stylesToggle.toggle}
+                    toggled={allowedEndpoints.get('local')}
+                    disabled={true}
+                  />
+                  {/* <Toggle
+                    label="Custom"
+                    style={stylesToggle.toggle}
+                    toggled={allowedEndpoints.get('custom')}
+                  />
+                  <TextField
+                    hintText="https://"
+                    floatingLabelText="Custom RPC endpoint"
+                    floatingLabelFixed={true}
+                    disabled={true}
+                    errorText="Must be a valid URL"
+                  /> */}
+                </div>
+                <Row>
+                  <Col xs={12}>
+                    <p>You need to refresh you browser to save and make this setting active. Please proceed:</p>
+                  </Col>
+                  <Col xs={12}>
+                    <RaisedButton label="Refresh"
+                      primary={true}
+                      disabled={this.state.save}
+                      onClick={this.handleRefresh} />
+                  </Col>
+                </Row>
+              </Paper>
+            </Col>
+          </Row>
+        </div> 
       )
     }
   }

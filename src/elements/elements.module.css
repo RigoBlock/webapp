@@ -42,6 +42,15 @@ a.selected {
 
 }
 
+.menuItemPrimaryText {
+  font-weight: 600 !important;
+  margin-bottom: -15px;
+}
+
+.menuAccountType{
+  padding: 5px 0px !important;
+}
+
 
 @media screen and (max-width: 480px) {
   .responsiveLinks {

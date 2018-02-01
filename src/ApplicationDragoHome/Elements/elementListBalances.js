@@ -104,6 +104,7 @@ class ElementListBalances extends PureComponent {
               {({ width }) => (
                 <Table
                   ref="Table"
+                  id={"fundBalances-table"}
                   disableHeader={disableHeader}
                   headerClassName={styles.headerColumn}
                   headerHeight={headerHeight}
@@ -116,13 +117,13 @@ class ElementListBalances extends PureComponent {
                   rowCount={rowCount}
                   scrollToIndex={scrollToIndex}
                   sort={this._sort}
-                  sortBy={sortBy}
+                  // sortBy={sortBy}
                   sortDirection={sortDirection}
                   width={width}>
                   <Column
                     width={150}
                     disableSort
-                    label="Symbol"
+                    label="SYMBOL"
                     cellDataGetter={({rowData}) => rowData.symbol}
                     dataKey="symbol"
                     cellRenderer={({cellData}) => cellData.symbol}
@@ -133,28 +134,27 @@ class ElementListBalances extends PureComponent {
                   <Column
                     width={width}
                     disableSort
-                    label="Name"
+                    label="NAME"
                     cellDataGetter={({rowData}) => rowData.name}
                     dataKey="name"
-                    cellRenderer={({cellData}) => cellData.name}
                     className={styles.exampleColumn}
-                    cellRenderer={({cellData}) => cellData}
+                    cellRenderer={({rowData}) => this.renderName(rowData.name)}
                     flexShrink={1}
                   />
                   <Column
                     width={250}
                     disableSort
-                    label="Balance"
+                    label="UNITS"
                     cellDataGetter={({rowData}) => rowData.balance}
                     dataKey="drg"
                     className={styles.exampleColumn}
-                    cellRenderer={({rowData}) => this.renderDrgValue(rowData.balance)}
+                    cellRenderer={({rowData}) => this.renderDrgValue(rowData)}
                     flexShrink={1}
                   />
                   <Column
                     width={210}
                     disableSort
-                    label="Actions"
+                    label="ACTIONS"
                     cellDataGetter={({rowData}) => rowData.symbol}
                     dataKey="actions"
                     className={styles.exampleColumn}
@@ -181,9 +181,18 @@ class ElementListBalances extends PureComponent {
       <div>{ethValue} <small>ETH</small></div>
     )
   }
-  renderDrgValue(drgvalue) {
+  
+  renderDrgValue(rowData) {
+    console.log(rowData)
     return (
-      <div>{drgvalue} <small>DRG</small></div>
+      <div>{rowData.balance} <small>{rowData.symbol}</small></div>
+    )
+  }
+
+  renderName(drgname) {
+    const name = drgname.trim()
+    return (
+      <div>{name.charAt(0).toUpperCase() + name.slice(1)}</div>
     )
   }
 

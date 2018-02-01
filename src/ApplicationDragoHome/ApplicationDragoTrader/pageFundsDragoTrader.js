@@ -27,7 +27,6 @@ import DragoApi from '../../DragoApi/src'
 import ElementListFunds from '../Elements/elementListFunds'
 import FilterFunds from '../Elements/elementFilterFunds'
 import Loading from '../../Loading';
-import SearchFunds from '../Elements/elementSearchFunds'
 import utils from '../../utils/utils'
 import ElementListWrapper from '../../Elements/elementListWrapper'
 
@@ -80,7 +79,7 @@ class PageFundsDragoTrader extends Component {
       const {accounts } = this.props
       const sourceLogClass = this.constructor.name
       if (!this.props.ethBalance.eq(nextProps.ethBalance)) {
-        this.getTransactions (null, accounts)
+        this.getDragos()
         console.log(`${sourceLogClass} -> componentWillReceiveProps -> Accounts have changed.`);
       } else {
         null
@@ -129,7 +128,7 @@ class PageFundsDragoTrader extends Component {
                       <h2><Avatar size={50} icon={<ActionShowChart />} /></h2>
                     </Col>
                     <Col xs={12} md={11} className={styles.dragoTitle}>
-                    <p>Dragos</p>
+                    <p>Funds</p>
                     <small></small>
                     </Col>
                   </Row>

@@ -1,4 +1,4 @@
-/* Copyright 2016 Gabriele Rigo */
+/* Copyright 2016 Rigo Investment Sarl. */
 
 /* .body {
   background-size: cover;
@@ -8,30 +8,7 @@
 
 
 
-/* pageFundDetailsTrader */
 
-.paperContainer {
-  margin-top: 10px;
-  display: 'inline-block';
-}
-
-.cardtitle {
-  background-color: #EEEEEE;
-  color: black !important;
-}
-
-.dragoTitle img {
-  width: 50px !important;
-  height: 50px !important;
-}
-
-.dragoTitle p {
-  font-size: 1.5em !important;
-  margin-bottom: 5px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
 
 
 

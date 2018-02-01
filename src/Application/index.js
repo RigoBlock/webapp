@@ -1,8 +1,9 @@
-// Copyright 2016-2017 Gabriele Rigo
+// Copyright 2016-2017 Rigo Investment Sarl.
 
 export {
     ApplicationHomePage, 
-    ApplicationGabcoinPage, 
+    ApplicationVaultPage, 
+    ApplicationGabcoinPage,
     ApplicationDragoPage, 
     ApplicationConfigPage, 
     // ApplicationExchangePage, 

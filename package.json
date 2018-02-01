@@ -27,11 +27,10 @@
     "object-assign": "^4.1.1",
     "prop-types": "^15.6.0",
     "react": "^16.0.0",
-    "react-autosuggest": "^9.3.2",
     "react-copy-to-clipboard": "^5.0.1",
     "react-dom": "^16.0.0",
     "react-flexbox-grid": "^2.0.0",
-    "react-grid-system": "^3.1.0",
+    "react-grid-system": "^3.1.2",
     "react-notification-system": "^0.2.16",
     "react-router": "^4.2.0",
     "react-router-dom": "^4.2.2",
@@ -42,17 +41,22 @@
     "rucksack-css": "^1.0.2",
     "source-map-explorer": "^1.5.0",
     "style-loader": "^0.19.0",
-    "web3": "^1.0.0-beta.27",
-    "web3-core": "^1.0.0-beta.27"
+    "swarm-js": "^0.1.37",
+    "web3": "^1.0.0-beta.26",
+    "web3-core": "^1.0.0-beta.27",
+    "web3-eth-abi": "^1.0.0-beta.28",
+    "web3-eth-contract": "^1.0.0-beta.28",
+    "web3-eth-personal": "^1.0.0-beta.28",
+    "web3-net": "^1.0.0-beta.28"
   },
   "scripts": {
     "start": "react-scripts start",
     "build-parity": "PUBLIC_URL=./ react-scripts build",
+    "build-beta": "GENERATE_SOURCEMAP=false react-scripts build",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
     "watch": "node scripts/watch.js",
-    "build-ui": "node scripts/build-ui.js",
     "analyze": "source-map-explorer build/static/js/main.*"
   },
   "devDependencies": {

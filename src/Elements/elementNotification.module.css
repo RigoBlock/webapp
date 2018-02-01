@@ -1,6 +1,14 @@
-.blur {
-  filter: blur(2px);
-}
+.progressBar {
+    padding-left: 2px;
+    padding-right: 2px;
+    padding-bottom: 2px;
+  }
+
+  .menu {
+    position: absolute;
+    right: 0;
+    z-index: 999;
+  }
 
 @keyframes pulse {
   0%{opacity:.5}100%{opacity:1}

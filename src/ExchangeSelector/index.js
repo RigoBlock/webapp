@@ -1,4 +1,4 @@
-// Copyright 2016-2017 Gabriele Rigo
+// Copyright 2016-2017 Rigo Investment Sarl.
 
 import { renderExchanges } from './exchangeSelector';
 import ExchangeSelect from './exchangeSelector';

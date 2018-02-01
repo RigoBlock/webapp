@@ -35,6 +35,7 @@ import Search from 'material-ui/svg-icons/action/search'
 import Snackbar from 'material-ui/Snackbar'
 import Sticky from 'react-stickynode'
 import ElementListWrapper from '../../Elements/elementListWrapper'
+import ElementAccountBox from '../../Elements/elementAccountBox'
 
 
 import { dragoFactoryEventsSignatures } from '../../utils/utils.js'
@@ -48,12 +49,6 @@ import Loading from '../../Loading'
 import utils from '../../utils/utils'
 
 import styles from './pageDashboardDragoTrader.module.css'
-
-// let ScrollLink       = Scroll.Link;
-// let Element    = Scroll.Element;
-// let Events     = Scroll.Events;
-// let scroll     = Scroll.animateScroll;
-// let scrollSpy  = Scroll.scrollSpy;
 
 class PageDashboardDragoTrader extends Component {
 
@@ -80,13 +75,11 @@ class PageDashboardDragoTrader extends Component {
       snackBarMsg: ''
     }
 
-
     componentDidMount() {
     }
 
     componentWillMount() {
-      const { api, contract } = this.context
-      const {accounts } = this.props
+      const { accounts } = this.props
       this.getTransactions (null, accounts)
     }
 
@@ -144,7 +137,7 @@ class PageDashboardDragoTrader extends Component {
       
       return (
         <CopyToClipboard text={text}
-            onCopy={() => this.snackBar('Copied to clilpboard')}>
+            onCopy={() => this.snackBar('Copied to clipboard')}>
             <Link to={'#'} ><CopyContent className={styles.copyAddress}/></Link>
         </CopyToClipboard>
       );
@@ -160,16 +153,10 @@ class PageDashboardDragoTrader extends Component {
       );
     }
 
-    subTitle = (account) => {
-      return (
-        account.address
-      )     
-    }
-
     render() {
       const { location, accounts, accountsInfo, allEvents } = this.props
       const { dragoTransactionsLogs, loading, dragoBalances } = this.state 
-      console.log(this.props.ethBalance)
+      // console.log(this.props.ethBalance)
       const tabButtons = {
         inkBarStyle: {
           margin: 'auto',
@@ -184,120 +171,96 @@ class PageDashboardDragoTrader extends Component {
       }
 
       const listAccounts = accounts.map((account) => {
-        const { api } = this.context;
         return (
           <Col xs={6} key={account.name}>
-            <Card>
-              <Row between="xs">
-                <Col xs >
-                  <CardHeader
-                    title={account.name}
-                    subtitle={this.subTitle(account)}
-                    subtitleStyle={{ fontSize: 12 }}
-                    avatar={<IdentityIcon address={account.address} />}
-                  />
-                  <CardText>
-                    <Row middle="xs" between="xs">
-                      <Col xs >
-                        <Chip className={styles.accountChip}>
-                          <Avatar size={32}>W</Avatar>
-                          {account.source}
-                        </Chip>
-                      </Col>
-                      <Col xs between="xs" className={styles.accountAmount}>
-                        ETH {account.ethBalance}
-                      </Col>
-                    </Row>
-                  </CardText>
-                </Col>
-              </Row>
-            </Card>
+            <ElementAccountBox account={account} key={account.name} snackBar={this.snackBar}/>
           </Col>
           )
         }
-      );
+      )
+      
       return (
-        
-      <Row>
-        <Col xs={12}>
-          <Paper className={styles.paperContainer} zDepth={1}>
-            <Toolbar className={styles.detailsToolbar}>
+        <Row>
+          <Col xs={12}>
+            <Paper className={styles.paperContainer} zDepth={1}>
+              <Toolbar className={styles.detailsToolbar}>
                 <ToolbarGroup className={styles.detailsToolbarGroup}>
                   <Row className={styles.detailsToolbarGroup}>
                     <Col xs={12} md={1} className={styles.dragoTitle}>
                       <h2><Avatar size={50} icon={<ActionHome />} /></h2>
                     </Col>
                     <Col xs={12} md={11} className={styles.dragoTitle}>
-                    <p>Dashboard</p>
-                    <small></small>
+                      <p>Holder</p>
                     </Col>
                   </Row>
-                </ToolbarGroup> 
-                <ToolbarGroup>
-                <p>&nbsp;</p>
                 </ToolbarGroup>
-            </Toolbar>
-            <Sticky enabled={true} innerZ={1}>
-              <Row className={styles.tabsRow}>
+                <ToolbarGroup>
+                  <p>&nbsp;</p>
+                </ToolbarGroup>
+              </Toolbar>
+              <Sticky enabled={true} innerZ={1}>
+                <Row className={styles.tabsRow}>
+                  <Col xs={12}>
+                    <Tabs tabItemContainerStyle={tabButtons.tabItemContainerStyle} inkBarStyle={tabButtons.inkBarStyle}>
+                      <Tab label="Accounts" className={styles.detailsTab}
+                        onActive={() => scrollToComponent(this.Accounts, { offset: -80, align: 'top', duration: 500 })}
+                        icon={<ActionList color={Colors.blue500} />}>
+                      </Tab>
+                      <Tab label="Holding" className={styles.detailsTab}
+                        onActive={() => scrollToComponent(this.Dragos, { offset: -80, align: 'top', duration: 500 })}
+                        icon={<ActionAssessment color={Colors.blue500} />}>
+                      </Tab>
+                      <Tab label="Transactions" className={styles.detailsTab}
+                        onActive={() => scrollToComponent(this.Transactions, { offset: -80, align: 'top', duration: 500 })}
+                        icon={<ActionShowChart color={Colors.blue500} />}>
+                      </Tab>
+                    </Tabs>
+                  </Col>
+                </Row>
+              </Sticky>
+              <Row className={styles.transactionsStyle}>
                 <Col xs={12}>
-                  <Tabs tabItemContainerStyle={tabButtons.tabItemContainerStyle} inkBarStyle={tabButtons.inkBarStyle}>
-                    <Tab label="Accounts" className={styles.detailsTab}
-                    onActive={() => scrollToComponent(this.Accounts, { offset: -80, align: 'top', duration: 500})}
-                      icon={<ActionList color={Colors.blue500} />}>
-                    </Tab>
-                    <Tab label="Holding" className={styles.detailsTab} 
-                      onActive={() => scrollToComponent(this.Dragos, { offset: -80, align: 'top', duration: 500})}
-                      icon={<ActionAssessment color={Colors.blue500} />}>
-                    </Tab>
-                    <Tab label="Transactions" className={styles.detailsTab}
-                    onActive={() => scrollToComponent(this.Transactions, { offset: -80, align: 'top', duration: 500})}
-                      icon={<ActionShowChart color={Colors.blue500} />}>
-                    </Tab>
-                  </Tabs>
-                </Col>
-              </Row>
-            </Sticky>
-            <Row className={styles.transactionsStyle}>
-              <Col xs>
-                <span ref={(section) => { this.Accounts = section; }}></span>
-                <AppBar
-                    title='My Accounts'
-                    showMenuIconButton={false}
+                  <span ref={(section) => { this.Accounts = section; }}></span>
+                  <AppBar
+                    title='ACCOUNTS'
                     className={styles.appBar}
+                    showMenuIconButton={false}
+                    titleStyle={{ fontSize: 20 }}
                   />
-                  <Row between="xs">
+                  <Row>
                     {listAccounts}
                   </Row>
-              </Col>
-            </Row>
-            <Row className={styles.transactionsStyle}>
-              <Col  xs >
+                </Col>
+              </Row>
+              <Row className={styles.transactionsStyle}>
+                <Col xs={12} >
                   <span ref={(section) => { this.Dragos = section; }}></span>
                   <AppBar className={styles.appBar}
-                      title='My Dragos'
-                      showMenuIconButton={false}
-                    />
-                    <Paper zDepth={1}>
-                      <Row>
-                        <Col className={styles.transactionsStyle} xs={12}>
+                    title='PORTFOLIO'
+                    showMenuIconButton={false}
+                    titleStyle={{ fontSize: 20 }}
+                  />
+                  <Paper zDepth={1}>
+                    <Row>
+                      <Col className={styles.transactionsStyle} xs={12}>
                         <ElementListWrapper list={dragoBalances}>
                           <ElementListBalances />
                         </ElementListWrapper>
-                        </Col>
-                      </Row>
-                    </Paper>
-
+                      </Col>
+                    </Row>
+                  </Paper>
                 </Col>
-            </Row>
-            <Row className={styles.transactionsStyle}>
-              <Col xs>
+              </Row>
+              <Row className={styles.transactionsStyle}>
+                <Col xs={12}>
                   <span ref={(section) => { this.Transactions = section; }}></span>
-                  <AppBar
-                  title='My Transactions'
-                  showMenuIconButton={false}
+                  <AppBar className={styles.appBar}
+                    title='TRANSACTIONS'
+                    showMenuIconButton={false}
+                    titleStyle={{ fontSize: 20 }}
                   />
                   <Paper zDepth={1}>
-                    <Row style={{outline: 'none'}}>
+                    <Row style={{ outline: 'none' }}>
                       <Col className={styles.transactionsStyle} xs={12}>
                         <ElementListWrapper list={dragoTransactionsLogs}
                           renderCopyButton={this.renderCopyButton}
@@ -308,18 +271,18 @@ class PageDashboardDragoTrader extends Component {
                       </Col>
                     </Row>
                   </Paper>
-              </Col>
-            </Row>
-          </Paper>
-        </Col>
-        <Snackbar
-          open={this.state.snackBar}
-          message={this.state.snackBarMsg}
-          action="close"
-          onActionTouchTap={this.handlesnackBarRequestClose}
-          onRequestClose={this.handlesnackBarRequestClose}
-        />
-      </Row>  
+                </Col>
+              </Row>
+            </Paper>
+          </Col>
+          <Snackbar
+            open={this.state.snackBar}
+            message={this.state.snackBarMsg}
+            action="close"
+            onActionTouchTap={this.handlesnackBarRequestClose}
+            onRequestClose={this.handlesnackBarRequestClose}
+          />
+        </Row>  
       )
     }
 

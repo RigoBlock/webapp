@@ -32,8 +32,14 @@
   margin-bottom: -2px !important;
 }
 
+.accessTimeIcon {
+  height: 15px !important;
+  width: 15px !important;
+  margin-bottom: -3px !important;
+}
+
 .networkDataContainer {
-  width: 150px !important;
+  /* width: 150px !important; */
   height: 17px !important;
   float: right;
 }

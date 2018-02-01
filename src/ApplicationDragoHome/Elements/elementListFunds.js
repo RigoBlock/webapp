@@ -121,7 +121,7 @@ class ElementListFunds extends PureComponent {
                 sortBy={sortBy}
                 sortDirection={sortDirection}
                 width={width}>
-                {!hideIndexRow && (
+                {/* {!hideIndexRow && (
                   <Column
                     label="Index"
                     cellDataGetter={({rowData}) => rowData.params.dragoID.value.c}
@@ -129,7 +129,7 @@ class ElementListFunds extends PureComponent {
                     // disableSort={!this._isSortEnabled()}
                     width={60}
                   />
-                )}
+                )} */}
                 {/* <Column
                   width={100}
                   disableSort
@@ -142,7 +142,7 @@ class ElementListFunds extends PureComponent {
                 <Column
                   width={100}
                   disableSort
-                  label="Drago Code"
+                  label="DRAGO CODE"
                   cellDataGetter={({rowData}) => rowData.params.symbol.value}
                   dataKey="dragocode"
                   className={styles.exampleColumn}
@@ -151,7 +151,7 @@ class ElementListFunds extends PureComponent {
                 />
                 <Column
                   width={100}
-                  label="Symbol"
+                  label="SYMBOL"
                   cellDataGetter={({rowData}) => rowData.params.symbol.value.toUpperCase()}
                   dataKey="symbol"
                   className={styles.exampleColumn}
@@ -160,17 +160,17 @@ class ElementListFunds extends PureComponent {
                 <Column
                   width={210}
                   disableSort
-                  label="Name"
+                  label="NAME"
                   cellDataGetter={({rowData}) => rowData.params.name.value}
                   dataKey="name"
                   className={styles.exampleColumn}
-                  cellRenderer={({cellData}) => cellData}
+                  cellRenderer={({rowData}) => this.renderName(rowData.params.name.value)}
                   flexGrow={1}
                 />
                 <Column
                   width={210}
                   disableSort
-                  label="Actions"
+                  label="ACTIONS"
                   cellDataGetter={({rowData}) => rowData.params.symbol.value}
                   dataKey="actions"
                   className={styles.exampleColumn}
@@ -190,6 +190,13 @@ class ElementListFunds extends PureComponent {
     const { match} = this.props;
     const url =  rowData.params.dragoID.value.c + "/" + utils.dragoISIN(cellData, rowData.params.dragoID.value.c)
     return <FlatButton label="View" primary={true} containerElement={<Link to={match.path+"/"+url} />} />
+  }
+
+  renderName(drgname) {
+    const name = drgname.trim()
+    return (
+      <div>{name.charAt(0).toUpperCase() + name.slice(1)}</div>
+    )
   }
 
   _getDatum(list, index) {

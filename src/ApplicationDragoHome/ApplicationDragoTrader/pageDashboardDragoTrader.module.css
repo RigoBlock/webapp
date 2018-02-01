@@ -24,14 +24,6 @@
   display: 'inline-block';
 }
 
-.accountChip {
-  /* margin: 5px !important; */
-}
-
-.accountAmount {
-  text-align: right;
-}
-
 .detailsToolbar {
   height: 100% !important;
 }

@@ -10,6 +10,12 @@ import EthusdParity from './Parity/ethusd';
 import EventfulParity from './Parity/eventful';
 import ExchangeParity from './Parity/exchange';
 import RegistryParity from './registry';
+import VaultEventfulParity from './Parity/vaultEventful';
+import VaultParity from './Parity/vault';
+import VaultWeb3 from './Web3/vault';
+import VaultFactoryParity from './Parity/vaultFactory';
+import VaultFactoryWeb3 from './Web3/vaultFactory';
+
 
 class Contract {
   constructor (api) {
@@ -20,14 +26,19 @@ class Contract {
     if (api._provider.isMetaMask) {
       this._drago = new DragoWeb3(api);
       this._dragofactory = new DragoFactoryWeb3(api);
+      this._vault = new VaultWeb3(api);
+      this._vaultfactory = new VaultFactoryWeb3(api);
     } else {
       this._dragoregistry = new DragoRegistryParity(api);
       this._drago = new DragoParity(api);
       this._dragofactory = new DragoFactoryParity(api);
+      this._ethusd = new EthusdParity(api);
       this._exchange = new ExchangeParity(api);
       this._eventful = new EventfulParity(api);
       this._registry = new RegistryParity(api);
-      this._ethusd = new EthusdParity(api);
+      this._vaulteventful = new VaultEventfulParity(api);
+      this._vault = new VaultParity(api);
+      this._vaultfactory = new VaultFactoryParity(api);
     }
   }
 
@@ -57,6 +68,18 @@ class Contract {
 
   get registry () {
     return this._registry;
+  }
+
+  get vaulteventful () {
+    return this._vaulteventful;
+  }
+
+  get vaultfactory () {
+    return this._vaultfactory;
+  }
+
+  get vault () {
+    return this._vault;
   }
 }
 

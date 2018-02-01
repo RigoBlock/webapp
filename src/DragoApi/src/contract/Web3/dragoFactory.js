@@ -59,11 +59,9 @@ class DragoFactoryWeb3 {
       throw new Error('accountAddress needs to be provided')
     }
     const instance = this._instance
-    const values = [dragoName, dragoSymbol]
     const options = {
       from: accountAddress
     }
-    console.log(values)
     console.log(options)
     instance.options.from = accountAddress
     // instance.methods.createDrago(dragoName, dragoSymbol).estimateGas(options)
@@ -79,8 +77,14 @@ class DragoFactoryWeb3 {
     instance.options.gas = "0x442168"
     return instance.methods.createDrago(dragoName, dragoSymbol)
       .send(options)
-      .then((receipt) =>{ return console.log(receipt)})
-      .catch((error) => {console.log(error)})
+      .then((receipt) =>{
+        console.log(receipt)
+        return receipt
+      })
+      .catch((error) => {
+        console.log(error)
+        return error
+      })
 
 
     // return instance.createDrago

@@ -21,11 +21,12 @@ class applicationDragoTrader extends Component {
       accountsInfo: PropTypes.object.isRequired,
       location: PropTypes.object.isRequired,
       match: PropTypes.object.isRequired,
+      isManager: PropTypes.bool.isRequired
     };
 
 
     render() {
-      const { ethBalance, location, blockNumber, accounts, match, allEvents, accountsInfo } = this.props;
+      const { ethBalance, location, blockNumber, accounts, match, allEvents, accountsInfo, isManager } = this.props;
       return (
         <Switch>
           <Route path={match.path+"/dashboard"} 
@@ -54,6 +55,7 @@ class applicationDragoTrader extends Component {
             ethBalance={ethBalance} 
             allEvents={allEvents}
             accountsInfo={accountsInfo}
+            isManager={isManager}
             />
           } 
           />

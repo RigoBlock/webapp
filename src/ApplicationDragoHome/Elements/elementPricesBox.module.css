@@ -1,3 +1,43 @@
 .price {
+  /* padding: 20px !important; */
+  font-size: 20px;
+  margin-top: 15px;
+  margin-bottom: 10px;
+  /* text-align: right; */
+  
+}
+
+.boxHeader {
+  
+}
+
+.actionButton {
+  
+}
+
+.row {
+  padding: 5px;
+  text-align: center;
+}
+
+.buyHeader {
   padding: 20px !important;
+  /* background-color:  #81C784; */
+  color: #4CAF50;
+  text-align: center;
+  font-weight: 600;
+  font-size: 20px;
+  border-left: 3px solid;
+  border-color: #81C784;
+}
+
+.sellHeader {
+  padding: 20px !important;
+  /* background-color: #E57373; */
+  color: #F44336;
+  text-align: center;
+  font-weight: 600;
+  font-size: 20px;
+  border-left: 3px solid;
+  border-color: #E57373;
 }

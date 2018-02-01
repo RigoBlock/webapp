@@ -1,4 +1,5 @@
 import  * as Colors from 'material-ui/styles/colors'
+import { Link, Route, withRouter } from 'react-router-dom'
 import { Row, Col, Grid } from 'react-flexbox-grid';
 import {Card, CardHeader, CardTitle, CardText} from 'material-ui/Card';
 import AlertWarning from 'material-ui/svg-icons/alert/warning'
@@ -8,6 +9,7 @@ import ListItem from 'material-ui/List/ListItem'
 import Paper from 'material-ui/Paper';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react'
+import {APP, DS} from '../utils/const.js'
 
 import styles from './checkAuthPage.module.css'
 
@@ -28,24 +30,50 @@ class CheckAuthPage extends Component {
       isConnected: PropTypes.bool,
     };
     
+    renderWarnMsg = () =>{
+      const { warnMsg } = this.props
+      if (warnMsg === null) return
+      return (
+        <Row>
+          <Col xs={12}>
+            <div className={styles.warnMsgBox}>
+              <p>{warnMsg}</p>
+            </div>
+
+          </Col>
+        </Row>
+      )
+    }
+
+    buildUrlPath = (location) => {
+      var path = location.pathname.split( '/' );
+      // path.splice(-1,1);
+      // var url = path.join('/');
+      return path[2]
+      }
+
     render() {
       // console.log(this.props)
+      var { location } = this.props
       return (
         <Row>
           <Col xs={12}>
             <Paper className={styles.paperContainer} zDepth={1}>
+              {this.renderWarnMsg()}
               <Row>
-                <Col xs={12}>
-                  
-                    <h1 className={styles.title} >Authenticate</h1>
-                    <p>You need to connect to an external wallet. Please <b>unlock</b> your MetaMask account and <b>refresh</b> your browser.</p>
-                    <p>If you do not have MetaMask installed, please read the instruction below.</p>
-                    <p>RigoBlock supports Metamask and Parity wallets.</p>
-                  
+                <Col xs={12}>  
+                    <h1 className={styles.Branding} >RigoBlock</h1>
                 </Col>
               </Row>
               <Row>
                 <Col xs={12} className={styles.walletBox}>
+                <h2>NETWORK</h2>
+                <p>The default configuration for the Ethereum network endpoint is INFURA.</p>
+                <p>You can change it at in the <Link to={DS+APP+DS+this.buildUrlPath(location)+DS+"config/network"}>network configuration</Link> page.</p>
+                <h2>ACCOUNTS</h2>
+                <p>You need to connect to an external wallet. Please <b>unlock</b> your MetaMask account and <b>refresh</b> your browser.</p>
+                    <p>If you do not have MetaMask installed, please read the instruction below.</p>
+                    <p>RigoBlock supports Metamask and Parity wallets.</p>
                   <ListItem className={styles.walletTitle}
                     disabled={true}
                     size={50}

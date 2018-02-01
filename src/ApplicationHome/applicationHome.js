@@ -1,4 +1,4 @@
-// Copyright 2016-2017 Gabriele Rigo
+// Copyright 2016-2017 Rigo Investment Sarl.
 
 // import { api } from '../parity';
 
@@ -19,7 +19,7 @@ import Paper from 'material-ui/Paper';
 import { Grid, Row, Col } from 'react-flexbox-grid';
 
 // import ApplicationDragoFactory from '../ApplicationDragoFactory';
-import ApplicationGabcoinFactory from '../ApplicationGabcoinFactory';
+// import ApplicationGabcoinFactory from '../ApplicationGabcoinFactory';
 
 import Loading from '../Loading';
 
@@ -83,14 +83,14 @@ export default class ApplicationHome extends Component {
         <div className={ styles.shadow }>
           <Row>
             <Col xs={12}>
-            <h1 className={styles.headline}>RigoBlock: Decentralized Pools of Digital Tokens </h1>
-            <h2>Ever dreamed of running your own hedge fund?</h2>
-            <p>&nbsp;</p>
-            <p>&nbsp;</p>
+              <h1 className={styles.headline}>RigoBlock: Decentralized Pools of Digital Tokens </h1>
+              <h2>Ever dreamed of running your own investment fund?</h2>
+              <p>&nbsp;</p>
+              <p>&nbsp;</p>
             </Col>
           </Row>
           <Row className={ styles.cards }>
-            <Col xs={4}>
+            <Col xs={6}>
               <Card className={ styles.column }>
                 <CardTitle title="RigoBlock Vault" className={ styles.cardtitle } titleColor="white"/>
                 <CardText>
@@ -98,13 +98,13 @@ export default class ApplicationHome extends Component {
                 </CardText>
                 <CardActions>
                     {/* <ApplicationGabcoinFactory /> */}
-                    <Link to="/vault">
+                    <Link to="/vaultv2">
                     <RaisedButton label="New Vault" className={ styles.exchangebutton } labelColor="white"/>
                   </Link>
                 </CardActions>
               </Card>
             </Col>
-            <Col xs={4}>
+            <Col xs={6}>
               <Card className={ styles.column }>
                 <CardTitle title="RigoBlock Drago" className={ styles.cardtitle } titleColor="white" />
                 <CardText>
@@ -118,7 +118,7 @@ export default class ApplicationHome extends Component {
                 </CardActions>
               </Card>
             </Col>
-            <Col xs={4} >
+            {/* <Col xs={4} >
               <Card className={ styles.column }>
                 <CardTitle title="RigoBlock Exchange" className={ styles.cardtitle } titleColor="white" />
                 <CardText>
@@ -130,7 +130,7 @@ export default class ApplicationHome extends Component {
                   </Link>
                 </CardActions>
               </Card>
-            </Col>
+            </Col> */}
           </Row>
           <Row>
             <Col xs={12}>

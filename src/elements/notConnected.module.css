@@ -1,0 +1,35 @@
+.warningText {
+  text-align: center;
+  background-color: #FFF176;
+  vertical-align: middle;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  color: #000000;
+  
+}
+
+.titleRBHeader img {
+  float: left;
+}
+
+.titleRBHeaderContainer {
+  margin-left: auto;
+  margin-right: auto;
+  width: 50%;
+}
+
+.titlePrimaryText {
+  font-family: gill sans,sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 40px;
+  margin-left: auto;
+}
+
+.titleSecondaryText {
+  font-family: gill sans,sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 12px;
+  margin-left: auto;
+}

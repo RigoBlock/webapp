@@ -25,9 +25,6 @@ import React, { Component } from 'react'
 import Search from 'material-ui/svg-icons/action/search'
 import Snackbar from 'material-ui/Snackbar'
 import Subheader from 'material-ui/Subheader'
-import ElementListWrapper from '../../Elements/elementListWrapper'
-
-
 
 import { dragoFactoryEventsSignatures } from '../../utils/utils.js'
 import { formatCoins, formatEth, formatHash, toHex } from '../../format'
@@ -35,9 +32,10 @@ import * as abis from '../../contracts';
 import DragoApi from '../../DragoApi/src'
 import ElementFundActionsList from '../Elements/elementFundActionsList'
 import ElementListTransactions from '../Elements/elementListTransactions'
+import ElementListWrapper from '../../Elements/elementListWrapper'
 import ElementPriceBox from '../Elements/elementPricesBox'
 import IdentityIcon from '../../IdentityIcon'
-import InfoTable from '../Elements/elementInfoTable'
+import InfoTable from '../../Elements/elementInfoTable'
 import Loading from '../../Loading'
 import utils from '../../utils/utils'
 
@@ -51,6 +49,7 @@ import {
 } from 'material-ui/Table';
 
 import styles from './pageFundDetailsDragoManager.module.css';
+import ElementFundNotFound from '../../Elements/elementFundNotFound'
 
 
 class PageFundDetailsDragoManager extends Component {
@@ -65,6 +64,7 @@ class PageFundDetailsDragoManager extends Component {
       ethBalance: PropTypes.object.isRequired,
       accounts: PropTypes.array.isRequired,
       accountsInfo: PropTypes.object.isRequired, 
+      isManager: PropTypes.bool.isRequired
     };
 
     state = {
@@ -102,6 +102,7 @@ class PageFundDetailsDragoManager extends Component {
       const dragoID = this.props.match.params.dragoid
       const {accounts } = this.props
       const sourceLogClass = this.constructor.name
+      // console.log(nextProps)
       if (!this.props.ethBalance.eq(nextProps.ethBalance)) {
         this.getDragoDetails(dragoID)
         console.log(`${sourceLogClass} -> componentWillReceiveProps -> Accounts have changed.`);
@@ -181,7 +182,7 @@ class PageFundDetailsDragoManager extends Component {
 
     
     render() {
-      const { location, accounts, accountsInfo, allEvents } = this.props
+      const { location, accounts, accountsInfo, allEvents, isManager } = this.props
       const { dragoDetails, dragoTransactionsLogs, loading } = this.state
       const paperContainer = {
         marginTop: 10,
@@ -203,11 +204,12 @@ class PageFundDetailsDragoManager extends Component {
       }
 
       const columnsStyle = [styles.detailsTableCell, styles.detailsTableCell2, styles.detailsTableCell3]
-      const tableButtons = [this.renderCopyButton(dragoDetails.address), this.renderEtherscanButton('address', dragoDetails.address)]
-      const tableRows = [['Symbol', dragoDetails.symbol, ''], 
+      const tableButtonsDragoAddress = [this.renderCopyButton(dragoDetails.address), this.renderEtherscanButton('address', dragoDetails.address)]
+      const tableButtonsDragoOwner = [this.renderCopyButton(dragoDetails.addresssOwner), this.renderEtherscanButton('address', dragoDetails.addresssOwner)]
+      const tableInfo = [['Symbol', dragoDetails.symbol, ''], 
         ['Name', dragoDetails.name, ''], 
-        ['Address', dragoDetails.address, tableButtons],
-        ['Owner', dragoDetails.addresssOwner, tableButtons]]
+        ['Address', dragoDetails.address, tableButtonsDragoAddress],
+        ['Manager', dragoDetails.addresssOwner, tableButtonsDragoOwner]]   
       const paperStyle = {
 
       };
@@ -221,6 +223,11 @@ class PageFundDetailsDragoManager extends Component {
       if (loading) {
         return (
           <Loading />
+        );
+      }
+      if (dragoDetails.address === '0x0000000000000000000000000000000000000000') {
+        return (
+          <ElementFundNotFound />
         );
       }
       return (
@@ -243,34 +250,41 @@ class PageFundDetailsDragoManager extends Component {
                     <Col xs={6}>
                       <Paper zDepth={1}>
                         <AppBar
-                          title="Details"
+                          title="DETAILS"
                           showMenuIconButton={false}
+                          titleStyle={{ fontSize: 20 }}
                         />
                         <div className={styles.detailsTabContent}>
-                        <InfoTable  rows={tableRows} columnsStyle={columnsStyle}/>
+                        <InfoTable  rows={tableInfo} columnsStyle={columnsStyle}/>
                         </div>
                       </Paper>
                     </Col>
                     <Col xs={6}>
-                      <ElementPriceBox dragoDetails={dragoDetails} />
+                      <Paper zDepth={1}>
+                        <ElementPriceBox 
+                        accounts={accounts} 
+                        isManager={isManager}
+                        dragoDetails={dragoDetails} />
+                      </Paper>
                     </Col>
                   </Row>
                   <Row>
                     <Col xs={12} className={styles.detailsTabContent}>
                     <Paper style={paperStyle} zDepth={1} >
                     <AppBar
-                          title="Last transactions"
+                          title="LAST TRANSACTIONS"
                           showMenuIconButton={false}
+                          titleStyle={{ fontSize: 20 }}
                         />
                       
                       <div className={styles.detailsTabContent}>
                           <p>Your last 20 transactions on this Drago.</p>
                         </div>
-                      
-                          <ElementListWrapper>
-                            <ElementListTransactions accountsInfo={accountsInfo} list={dragoTransactionList}
+                          
+                          <ElementListWrapper accountsInfo={accountsInfo} list={dragoTransactionList}
                               renderCopyButton={this.renderCopyButton}
-                              renderEtherscanButton={this.renderEtherscanButton} />
+                              renderEtherscanButton={this.renderEtherscanButton}>
+                            <ElementListTransactions  />
                           </ElementListWrapper>
                         {/* <ElementListTransactions accountsInfo={accountsInfo} list={dragoTransactionList} 
                         renderCopyButton={this.renderCopyButton}
@@ -460,6 +474,12 @@ class PageFundDetailsDragoManager extends Component {
           .getBlockByNumber(log.blockNumber.c[0])
           .then((block) => {
             log.timestamp = block.timestamp
+            return log
+          })
+          .catch((error) => {
+            // Sometimes Infura returns null for api.eth.getBlockByNumber, therefore we are assigning a fake timestamp to avoid
+            // other issues in the app.
+            log.timestamp = new Date()
             return log
           })
         })

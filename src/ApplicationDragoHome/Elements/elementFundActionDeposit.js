@@ -1,4 +1,4 @@
-// Copyright 2016-2017 Gabriele Rigo
+// Copyright 2016-2017 Rigo Investment Sarl.
 
 import { Dialog, FlatButton, TextField } from 'material-ui';
 import { Grid, Row, Col } from 'react-flexbox-grid';
@@ -12,9 +12,9 @@ import  * as Colors from 'material-ui/styles/colors';
 
 import { ERRORS, validateAccount, validatePositiveNumber } from './validation';
 import * as abis from '../../contracts';
-import AccountSelector from '../Elements/elementAccountSelector';
-import ElementDialogHeadTitle from '../Elements/elementDialogHeadTitle'
-import ElementDialogAddressTitle from '../Elements/elementDialogAddressTitle'
+import AccountSelector from '../../Elements/elementAccountSelector';
+import ElementDialogHeadTitle from '../../Elements/elementDialogHeadTitle'
+import ElementDialogAddressTitle from '../../Elements/elementDialogAddressTitle'
 
 import styles from './elementFundActionDeposit.module.css';
 import DragoApi from '../../DragoApi/src'
@@ -89,7 +89,7 @@ export default class ElementFundActionDeposit extends Component {
     return (
       <div>
           <ElementDialogHeadTitle primaryText='Deposit to the exchange' />
-          <ElementDialogAddressTitle dragoDetails={dragoDetails} />
+          <ElementDialogAddressTitle tokenDetails={dragoDetails} />
       </div>
 
     )

@@ -22,6 +22,14 @@ import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert'
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import NotificationWifi from 'material-ui/svg-icons/notification/wifi';
+import FaltButton from 'material-ui/FlatButton';
+import Popover from 'material-ui/Popover';
+import Menu from 'material-ui/Menu';
+import ArrowDropDown from 'material-ui/svg-icons/navigation/arrow-drop-down'
+
+import {List, ListItem} from 'material-ui/List';
+import Avatar from 'material-ui/Avatar';
+import {grey400, darkBlack, lightBlack} from 'material-ui/styles/colors';
 
 import {APP, DS} from '../utils/const.js'
 // import ElementNotificationsDrawer from '.Elements/elementNotificationsDrawer'
@@ -107,15 +115,45 @@ class NavLinks extends Component {
       return path[2]
       }
 
+      handleClick = (event) => {
+        // This prevents ghost click.
+        event.preventDefault();
+    
+        this.setState({
+          open: true,
+          anchorEl: event.currentTarget,
+        });
+      };
+    
+      handleRequestClose = () => {
+        this.setState({
+          open: false,
+        });
+      };
+
     render() {
       var { location, handleTopBarSelectAccountType, isManager, handleToggleNotifications } = this.props
       let userTypeDisabled = false;
+      var userTypeLabel = 'HOLDER'
       const links = [
         {label: 'home', to: 'home', icon: <ActionHome color="white"/>},
-        {label: 'vault', to: 'vault', icon: <ActionAccountBalance color="white"/>},
+        // {label: 'vault', to: 'vault', icon: <ActionAccountBalance color="white"/>},
+        {label: 'vault', to: 'vaultv2', icon: <ActionAccountBalance color="white"/>},
         {label: 'drago', to: 'drago', icon: <ActionShowChart color="white"/>},
         // {label: 'exchange', to: 'exchange', icon: <ActionPolymer color="white"/>}
          ]
+
+      const compactStyle = {
+        padding: "0px !important"
+      }
+
+
+      const buttonAccountType = {
+        border: "1px solid",
+        borderColor: '#FFFFFF',
+        // width: "140px"
+      }
+
 
       // Disabling user type if isManager not defined
       if (typeof isManager === 'undefined') {
@@ -123,38 +161,83 @@ class NavLinks extends Component {
         userTypeDisabled = true;
         menuStyles = {...menuStyles, ...disabledUserType};
       } else {
+        isManager ? userTypeLabel = 'WIZARD' : userTypeLabel = 'HOLDER'
         menuStyles = {...menuStyles, ...enabledUserType};
       }
 
       return (
+        <ToolbarGroup>
           <ToolbarGroup>
-              <ToolbarGroup>
-                {this.renderTopLinks(links)}
-              </ToolbarGroup>
-              <ToolbarSeparator style={menuStyles.separator}/>
-              <ToolbarGroup>
-                  <DropDownMenu value={isManager} onChange={handleTopBarSelectAccountType}
-                  labelStyle={menuStyles.dropDown} disabled={userTypeDisabled}>
-                      <MenuItem value={false} primaryText="Holder"  />
-                      <MenuItem value={true} primaryText="Wizard" />
-                  </DropDownMenu>
-                  <IconMenu
-                  iconButtonElement={<IconButton><AccountIcon /></IconButton>}
-                  onChange={this.handleSelectProfile}
-                  iconStyle={menuStyles.profileIcon}
-                  >
-                      {/* <MenuItem value="2" primaryText="Accounts" /> */}
-                      <MenuItem leftIcon={<Settings/>} value="config" primaryText="Config" 
-                      containerElement={<Link to={DS+APP+DS+this.buildUrlPath(location)+DS+"config"} />}/>
-                      {/* <MenuItem value="1" primaryText="Profile" /> */}
-                      <MenuItem leftIcon={<Help/>} value="help" primaryText="Help" />
-                  </IconMenu>
-                  <IconButton tooltip="Network" onClick={handleToggleNotifications} iconStyle={menuStyles.profileIcon}>
-                    <NotificationWifi />
-                  </IconButton>
-                    {/* <ElementNotificationsDrawer handleToggleNotifications={this.handleToggleNotifications} accounts={accounts}/> */}
-              </ToolbarGroup>
+            {this.renderTopLinks(links)}
           </ToolbarGroup>
+          <ToolbarSeparator style={menuStyles.separator} />
+          <ToolbarGroup>
+            <FlatButton
+              onClick={this.handleClick}
+              labelPosition="before"
+              label={userTypeLabel}
+              labelStyle={{ color: '#FFFFFF' }}
+              style={buttonAccountType}
+              icon={<ArrowDropDown color='#FFFFFF'/>}
+              hoverColor={Colors.blue300}
+            />
+            <Popover
+              open={this.state.open}
+              anchorEl={this.state.anchorEl}
+              anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+              targetOrigin={{ horizontal: 'right', vertical: 'top' }}
+              onRequestClose={this.handleRequestClose}
+              style={{marginTop: "5px"}}
+
+            >
+              <Menu value={isManager} 
+              onChange={handleTopBarSelectAccountType}
+              desktop={true}
+              className={styles.menuAccountType}
+              >
+                <MenuItem
+                value={false} 
+                primaryText={
+                  <div>
+                  <div className={styles.menuItemPrimaryText}>HOLDER</div>
+                  <div><small>Invest in funds</small></div>
+                  </div>
+                }
+                />
+                <MenuItem value={true} 
+                primaryText={
+                  <div>
+                  <div className={styles.menuItemPrimaryText}>WIZARD</div>
+                  <div><small>Manage your funds</small></div>
+                  </div>
+                }
+                />
+              </Menu>
+            </Popover>
+            {/* <DropDownMenu value={isManager} onChange={handleTopBarSelectAccountType}
+              labelStyle={menuStyles.dropDown} disabled={userTypeDisabled}
+              anchorOrigin={ {vertical: 'bottom', horizontal: 'left',}}
+              style={this.compactStyle}
+              >
+              <MenuItem value={false} primaryText="Holder" />
+              <MenuItem value={true} primaryText="Wizard" />
+            </DropDownMenu> */}
+            <IconMenu
+              iconButtonElement={<IconButton><AccountIcon /></IconButton>}
+              iconStyle={menuStyles.profileIcon}
+              anchorOrigin={ {vertical: 'bottom', horizontal: 'left',}}
+              desktop={true}
+            >
+              <MenuItem leftIcon={<Settings />} value="config" primaryText="Config"
+                containerElement={<Link to={DS + APP + DS + this.buildUrlPath(location) + DS + "config"} />} />
+              <MenuItem leftIcon={<Help />} value="help" primaryText="Help" />
+            </IconMenu>
+            <IconButton tooltip="Network" onClick={handleToggleNotifications} iconStyle={menuStyles.profileIcon}>
+              <NotificationWifi />
+            </IconButton>
+            {/* <ElementNotificationsDrawer handleToggleNotifications={this.handleToggleNotifications} accounts={accounts}/> */}
+          </ToolbarGroup>
+        </ToolbarGroup>
       )
     }
   }

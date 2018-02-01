@@ -1,9 +1,7 @@
-import Autosuggest from 'react-autosuggest'
 import Immutable from 'immutable'
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom'
-import TextField from 'material-ui/TextField';
 
 import Loading from '../Loading'
 
@@ -12,7 +10,8 @@ class ElementListWrapper extends Component {
   static propTypes = {
     list: PropTypes.array,
     location: PropTypes.object,
-    match: PropTypes.object
+    match: PropTypes.object,
+    poolType: PropTypes.string
   };
 
   render() {

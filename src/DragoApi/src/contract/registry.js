@@ -73,6 +73,10 @@ class Registry {
     const api = this._api
     const contract = this._getContractAddressFromRegister(contractName)
     .then((address) => {
+      // console.log(address)
+      if (address[0] == "0x0000000000000000000000000000000000000000") {
+        throw new Error('The contract address was not found in the Register.')
+      }
       if (api._provider.isMetaMask) {
         return new api.eth.Contract(abi, address)
       }

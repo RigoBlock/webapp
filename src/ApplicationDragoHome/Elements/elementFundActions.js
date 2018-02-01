@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 import RaisedButton from 'material-ui/RaisedButton';
 import React from 'react';
 import TextField from 'material-ui/TextField';
+import Paper from 'material-ui/Paper'
 
 import {
   Table,
@@ -22,10 +23,11 @@ import {
 import { ERRORS, validateAccount, validatePositiveNumber } from './validation';
 import { formatCoins, formatEth, formatHash, toHex } from '../../format';
 import * as abis from '../../contracts';
-import AccountSelector from './elementAccountSelector'
+import AccountSelector from '../../Elements/elementAccountSelector'
 import ElementFundActionsHeader from './elementFundActionsHeader'
 import IdentityIcon from '../../IdentityIcon';
 import DragoApi from '../../DragoApi/src'
+import ElementFundActionAuthorization from '../../Elements/elementActionAuthorization'
 
 import styles from './elementFundActions.module.css';
 
@@ -35,17 +37,136 @@ const customContentStyle = {
 
 export default class ElementFundActions extends React.Component {
 
+  constructor(props) {
+    super(props)
+    console.log(this.props.actionSelected.action)
+    if (this.props.actionSelected.action == 'buy') {
+      this.state = {
+        open: props.actionSelected.open,
+        action: 'buy',
+        amount: 0,
+        actionSummary: 'BUYING',
+        actionStyleBuySell: this.actionBuyStyle,
+        switchButton: {
+          label: 'Units',
+          denomination: 'ETH',
+          hint: 'Amount'
+        },
+        canSubmit: false,
+        sending: false,
+        complete: false,
+        account: {},
+        accountError: ERRORS.invalidAccount,
+        accountCorrect: false,
+        amount: 0,
+        newDrgBalance: 0,
+        drgBalance: 0,
+        drgOrder: 0,
+        amountError: ERRORS.invalidAmount,
+        amountFieldDisabled: true,
+        unitsSummary: 0,
+        amountSummary: 0,
+      }
+    } else {
+      this.state = {
+        open: props.actionSelected.open,
+        action: 'sell',
+        amount: 0,
+        actionSummary: 'SELLING',
+        actionStyleBuySell: this.actionSellStyle,
+        switchButton: {
+          label: 'Amount',
+          denomination: this.props.dragoDetails.symbol,
+          hint: 'Amount'
+        },
+        canSubmit: false,
+        sending: false,
+        complete: false,
+        account: {},
+        accountError: ERRORS.invalidAccount,
+        accountCorrect: false,
+        amount: 0,
+        newDrgBalance: 0,
+        drgBalance: 0,
+        drgOrder: 0,
+        amountError: ERRORS.invalidAmount,
+        amountFieldDisabled: true,
+        unitsSummary: 0,
+        amountSummary: 0,
+      }
+            this.state = {
+        open: props.actionSelected.open,
+        action: 'sell',
+        amount: 0,
+        actionSummary: 'SELLING',
+        actionStyleBuySell: this.actionSellStyle,
+        switchButton: {
+          label: 'Amount',
+          denomination: this.props.dragoDetails.symbol,
+          hint: 'Amount'
+        },
+        canSubmit: false,
+        sending: false,
+        complete: false,
+        account: {},
+        accountError: ERRORS.invalidAccount,
+        accountCorrect: false,
+        amount: 0,
+        newDrgBalance: 0,
+        drgBalance: 0,
+        drgOrder: 0,
+        amountError: ERRORS.invalidAmount,
+        amountFieldDisabled: true,
+        unitsSummary: 0,
+        amountSummary: 0,
+      }
+    }
+  }
+
   static contextTypes = {
-    api: PropTypes.object.isRequired
+    api: PropTypes.object.isRequired,
+    addTransactionToQueue: PropTypes.func
   };
 
   static propTypes = {
     dragoDetails: PropTypes.object.isRequired, 
+    actionSelected: PropTypes.object,
+    accounts: PropTypes.array.isRequired,
+    onTransactionSent: PropTypes.func.isRequired
   };
   
-  state = {
-    open: false,
-    action: 'buy',
+  // state = {
+  //   open: 'buy',
+  //   openAuth: false,
+  //   authMsg: '',
+  //   action: 'buy',
+  //   actionSummary: 'BUYING',
+  //   account: {},
+  //   accountError: ERRORS.invalidAccount,
+  //   accountCorrect: false,
+  //   amount: 0,
+  //   newDrgBalance: 0,
+  //   drgBalance: 0,
+  //   drgOrder: 0,
+  //   amountError: ERRORS.invalidAmount,
+  //   amountFieldDisabled: true,
+  //   unitsSummary: 0,
+  //   amountSummary: 0,
+  //   actionStyleBuySell: { 
+  //     color: Colors.green300
+  //   },
+  //   canSubmit: false,
+  //   sending: false,
+  //   complete: false,
+  //   switchButton: {
+  //     label: 'Units',
+  //     denomination: 'ETH',
+  //     hint: 'Amount'
+  //   }
+  // }
+
+  resetState = {
+    openAuth: false,
     actionSummary: 'BUYING',
     account: {},
     accountError: ERRORS.invalidAccount,
@@ -79,105 +200,57 @@ export default class ElementFundActions extends React.Component {
     color: Colors.red300,
   }
 
-  // componentWillMount () {
-  //   this.setPrice()
-  // }
+  componentWillMount() {
 
-  // setPrice = () => {
-  //   const { api } = this.context
-  //   const {dragoDetails} = this.props
-  //   var sellPrice = new BigNumber(500000000000000000)
-  //   var buyPrice = new BigNumber(700000000000000000)
-  //   const values = [sellPrice, buyPrice]
-  //   const options = {
-  //     from: '0x00a79Fa87cFb12A05205CaEa3870C1A9C322ae5C',
-  //   }
-  //   const dragoToken = api.newContract(abis.drago, dragoDetails.address).instance;
-  //   dragoToken.setPrices
-  //   .estimateGas(options, values)
-  //   .then((gasEstimate) => {
-  //     options.gas =  gasEstimate.mul(1.2).toFixed(0)
-  //     console.log(`setPrice drago: gas estimated as ${gasEstimate.toFixed(0)} setting to ${options.gas}`)
-      
-  //     dragoToken.setPrices.postTransaction(options, values)
-  //     .then((result) =>{
-  //       console.log(result)
-  //     })
-  //     .catch((error) => {
-  //       console.log(`setPrice drago ERROR ${error}`)
-  //     })      
-      
-  //   })
-  //   .catch((error) => {
-  //     console.log(`estimateGas drago ERROR ${error}`)
-  //   })
-  // }
+  }
 
+  componentWillReceiveProps (nextProps) {
+    console.log(nextProps)
+    if (this.props.actionSelected.action != nextProps.actionSelected.action) {
+      nextProps.actionSelected.action == 'buy' 
+      ? this.handleBuyAction()
+      : this.handleSellAction()
+    }
+
+    this.setState ({
+      open: nextProps.actionSelected.open, 
+    })
+  }
 
   handleOpen = () => {
     this.setState({
       open: true,
-      action: 'buy',
-      actionSummary: 'BUYING',
-      account: {},
-      accountError: ERRORS.invalidAccount,
-      accountCorrect: false,
-      amount: 0,
-      newDrgBalance: 0,
-      drgBalance: 0,
-      drgOrder: 0,
-      amountError: ERRORS.invalidAmount,
-      amountFieldDisabled: true,
-      unitsSummary: 0,
-      amountSummary: 0,
-      actionStyleBuySell: { 
-        color: Colors.green300
-      },
-      canSubmit: false,
-      sending: false,
-      complete: false,
-      switchButton: {
-        label: 'Units',
-        denomination: 'ETH',
-        hint: 'Amount'
-      }    
-    });
+      ...this.resetState  
+    })
   }
 
-  handleClose = () => {
-    this.setState({
-      open: false,
-      action: 'buy',
-      actionSummary: 'BUYING',
-      account: {},
-      accountError: ERRORS.invalidAccount,
-      accountCorrect: false,
-      amount: 0,
-      newDrgBalance: 0,
-      drgBalance: 0,
-      drgOrder: 0,
-      amountError: ERRORS.invalidAmount,
-      amountFieldDisabled: true,
-      unitsSummary: 0,
-      amountSummary: 0,
-      actionStyleBuySell: { 
-        color: Colors.green300
-      },
-      canSubmit: false,
-      sending: false,
-      complete: false,
-      switchButton: {
-        label: 'Units',
-        denomination: 'ETH',
-        hint: 'Amount'
+  handleCloseAuth = () => {
+    this.setState(
+      {
+        openAuth: false,
       }
-    });
+      , this.handleCancel
+    )
+  }
+
+  handleCancel = () => {
+    this.setState(
+      { open: false,
+        ...this.resetState  }
+    ), this.props.onTransactionSent()
+  }
+
+  handleSubmit = () => {
+    this.setState(
+      { openAuth: true }
+    );
   }
   
 
   handleSellAction = () => {
     const {dragoDetails} = this.props
     return this.setState({
+      open: true,
       action: 'sell',
       amount: 0,
       actionSummary: 'SELLING',
@@ -207,6 +280,7 @@ export default class ElementFundActions extends React.Component {
   handleBuyAction = () => {
     const {dragoDetails} = this.props
     return this.setState({
+      open: true,
       action: 'buy',
       amount: 0,
       actionSummary: 'BUYING',
@@ -272,26 +346,6 @@ export default class ElementFundActions extends React.Component {
       } else {
         orderAmount = isNaN(amount) ? new BigNumber(0) : new BigNumber(amount)
       }
-      // switch(action) {
-      //   case "buy":
-      //     // Checking if the amount is expressed in ETH 
-      //     if (this.state.switchButton.label == 'Units') {
-      //       console.log('ETH')
-      //       let amountDRG = orderAmount.times(buyRatio)
-      //       let amountETH = new BigNumber(amount)
-      //       return {amountETH: amountETH, amountDRG: amountDRG} 
-      //     }
-      //     // Checking if the amount is expressed in DRG
-      //     if (this.state.switchButton.label == 'Amount') {
-      //       console.log('DRG')
-      //       let amountDRG = orderAmount
-      //       let amountETH = new BigNumber(amount).times(buyRatio)
-      //       return {amountETH: amountETH, amountDRG: amountDRG} 
-      //     }
-      //     break
-      //   case "sell":
-      //     break
-      // } 
       // Checking if the amount is expressed in ETH 
       if (this.state.switchButton.label == 'Units') { // Buy in ETH amount
         let amountDRG = orderAmount.times(ratio)
@@ -394,107 +448,130 @@ export default class ElementFundActions extends React.Component {
 
   onSendBuy = () => {
     const { api } = this.context;
-    const {dragoDetails} = this.props
-    console.log(this.state.amountSummary.toString())
+    const { dragoDetails } = this.props
     const accountAddress = this.state.account.address
     const amount = api.util.toWei(this.state.amountSummary).toString()
-    if(this.state.account.source === 'MetaMask') {
-      const web3 = window.web3
-      const dragoApi = new DragoApi(web3)
-      dragoApi.contract.drago.init(dragoDetails.address)
-      dragoApi.contract.drago.buyDrago(accountAddress, amount)
-      .then((receipt) =>{ 
-        console.log(receipt)
-      })
-      .catch((error) => {
-        console.error('error', error);
-        this.setState({
-          sending: false
-        })
-      })
-      this.props.snackBar('Buy order waiting for authorization for ' + this.state.amountSummary.toString() + ' ETH')
-      this.setState({
-        sending: false,
-        complete: true,
-        open: false
-      }, this.handleClose)
-    } else {
-      this.setState({
-        sending: true
-      })
-      const dragoApi = new DragoApi(api)
-      dragoApi.contract.drago.init(dragoDetails.address)
-      dragoApi.contract.drago.buyDrago(accountAddress, amount)
-      .then(() => {
-        this.props.snackBar('Buy order waiting for authorization for ' + this.state.amountSummary.toString() + ' ETH')
-        this.setState({
-          sending: false,
-          complete: true,
-          open: false
-        },this.handleClose)
-      })
-      .catch((error) => {
-        console.error('error', error);
-        this.setState({
-          sending: false
-        })
-      })
+    const authMsg = 'You bought ' + this.state.unitsSummary + ' units of ' + dragoDetails.symbol.toUpperCase() + ' for ' + this.state.amountSummary + ' ETH'
+    const transactionId = api.util.sha3(new Date() + accountAddress)
+    var dragoApi, provider = null;
+    // Initializing transaction variables
+    var transactionDetails = {
+      status: this.state.account.source === 'MetaMask' ? 'pending' : 'authorization',
+      hash: '',
+      parityId: null,
+      timestamp: new Date(),
+      account: this.state.account,
+      error: false,
+      action: 'BuyDrago',
+      symbol: dragoDetails.symbol.toUpperCase(),
+      amount: this.state.amountSummary
     }
+    // Setting variables depending on account source
+    var provider = this.state.account.source === 'MetaMask' ? window.web3 : api
+    this.context.addTransactionToQueue(transactionId, transactionDetails)
+    const {account} = this.state
+
+    // Sending the transaction
+    dragoApi = new DragoApi(provider)
+    dragoApi.contract.drago.init(dragoDetails.address)
+    dragoApi.contract.drago.buyDrago(accountAddress, amount)
+      .then((receipt) => {
+        console.log(receipt)
+        // Adding transaciont to the queue
+        // Parity returns an internal transaction ID straighaway. The transaction then needs to be authorized inside the wallet.
+        // MetaMask returns a receipt of the transaction once it has been mined by the network. It can take a long time.
+        if (account.source === 'MetaMask') {
+          transactionDetails.status = 'executed'
+          transactionDetails.receipt = receipt
+          transactionDetails.hash = receipt.transactionHash
+          transactionDetails.timestamp = new Date ()
+          this.context.addTransactionToQueue(transactionId, transactionDetails)
+        } else {
+          transactionDetails.parityId = receipt
+          this.context.addTransactionToQueue(transactionId, transactionDetails)
+        }
+      })
+      .catch((error) => {
+        this.props.snackBar('Your wallet returned an error.')
+        transactionDetails.status = 'error'
+        transactionDetails.error = error
+        console.log(error)
+        this.context.addTransactionToQueue(transactionId, transactionDetails)
+        this.setState({
+          sending: false
+        })
+      })
+    this.setState({
+      authMsg: authMsg,
+      authAccount: { ...this.state.account },
+      sending: false,
+      complete: true,
+    }, this.handleSubmit)
   }
 
   onSendSell = () => {
     const { api } = this.context;
-    const {dragoDetails} = this.props
+    const { dragoDetails } = this.props
     const DIVISOR = 10 ** 6;  //dragos are divisible by 1 million
-    // const amount = new BigNumber(this.state.amountSummary).mul(DIVISOR);    
-    // const values = amount.toFixed(0); 
-    // const options = {
-    //   from: this.state.account.address
-    // }
     const accountAddress = this.state.account.address
-    const amount = new BigNumber(this.state.amountSummary).mul(DIVISOR).toFixed(0)
-    if(this.state.account.source === 'MetaMask') {
-      const web3 = window.web3
-      const dragoApi = new DragoApi(web3)
-      dragoApi.contract.drago.init(dragoDetails.address)
-      dragoApi.contract.drago.sellDrago(accountAddress, amount)
-      .then((receipt) =>{ 
-        console.log(receipt)
-      })
-      .catch((error) => {
-        console.error('error', error);
-        this.setState({
-          sending: false
-        })
-      })
-      this.props.snackBar('Sell order waiting for authorization for ' + this.state.amountSummary + ' ' + dragoDetails.symbol.toUpperCase())
-      this.setState({
-        sending: false,
-        complete: true,
-        open: false
-      }, this.handleClose)
-    } else {
-    this.setState({
-      sending: true
-    })
-      const dragoApi = new DragoApi(api)
-      dragoApi.contract.drago.init(dragoDetails.address)
-      dragoApi.contract.drago.sellDrago(accountAddress, amount)
-      .then(() => {
-        this.props.snackBar('Sell order waiting for authorization for ' + this.state.amountSummary + ' ' + dragoDetails.symbol.toUpperCase())
-        this.setState({
-          sending: false,
-          complete: true,
-          open: false
-        }, this.handleClose)
-      })
-      .catch((error) => {
-        console.error('error', error);
-        this.setState({
-          sending: false
-        })
-      })
+    const amount = new BigNumber(this.state.unitsSummary).mul(DIVISOR).toFixed(0)
+    const authMsg = 'You sold ' + this.state.unitsSummary + ' units of ' + dragoDetails.symbol.toUpperCase() + ' for ' + this.state.amountSummary + ' ETH'
+    const transactionId = api.util.sha3(new Date() + accountAddress)
+    var dragoApi, provider = null;
+    // Initializing transaction variables
+    var transactionDetails = {
+      status: this.state.account.source === 'MetaMask' ? 'pending' : 'authorization',
+      hash: '',
+      parityId: null,
+      timestamp: new Date(),
+      account: this.state.account,
+      error: false,
+      action: 'SellDrago',
+      symbol: dragoDetails.symbol.toUpperCase(),
+      amount: this.state.amountSummary
     }
+    // Setting variables depending on account source
+    var provider = this.state.account.source === 'MetaMask' ? window.web3 : api
+    this.context.addTransactionToQueue(transactionId, transactionDetails)    
+    const {account} = this.state
+    
+    
+    dragoApi = new DragoApi(provider)
+    dragoApi.contract.drago.init(dragoDetails.address)
+    dragoApi.contract.drago.sellDrago(accountAddress, amount)
+      .then((receipt) => {
+        console.log(receipt)
+        // Adding transaciont to the queue
+        // Parity returns an internal transaction ID straighaway. The transaction then needs to be authorized inside the wallet.
+        // MetaMask returns a receipt of the transaction once it has been mined by the network. It can take a long time.
+        if (account.source === 'MetaMask') {
+          transactionDetails.status = 'executed'
+          transactionDetails.receipt = receipt
+          transactionDetails.hash = receipt.transactionHash
+          transactionDetails.timestamp = new Date ()
+          this.context.addTransactionToQueue(transactionId, transactionDetails)
+        } else {
+          transactionDetails.parityId = receipt
+          this.context.addTransactionToQueue(transactionId, transactionDetails)
+        }
+      })
+      .catch((error) => {
+        this.props.snackBar('Your wallet returned an error.')
+        transactionDetails.status = 'error'
+        transactionDetails.error = error
+        console.log(error)
+        this.context.addTransactionToQueue(transactionId, transactionDetails)
+        this.setState({
+          sending: false
+        })
+      })
+    // this.props.snackBar('Sell order waiting for authorization for ' + this.state.amountSummary + ' ' + dragoDetails.symbol.toUpperCase())
+    this.setState({
+      authMsg: authMsg,
+      authAccount: {...this.state.account},
+      sending: false,
+      complete: true,
+    }, this.handleSubmit)
   }
 
   onSend = () => {
@@ -521,6 +598,9 @@ export default class ElementFundActions extends React.Component {
   }
 
   buyFields = () => {
+    const floatingLabelTextAmount = this.state.switchButton.denomination == 'ETH'
+      ? 'Amount in ' + this.state.switchButton.denomination
+      : 'Units of ' + this.state.switchButton.denomination 
     return (
       <Col xs={6}>
         <Row middle="xs" >
@@ -535,14 +615,14 @@ export default class ElementFundActions extends React.Component {
           </Col>
           <Col xs={6}>
             <TextField
+                id='actionBuyAmount'
                 autoComplete='off'
                 floatingLabelFixed
-                floatingLabelText={'Amount in ' + this.state.switchButton.denomination}
+                floatingLabelText={floatingLabelTextAmount}
                 fullWidth
                 hintText={this.state.switchButton.hint}
                 errorText={ this.state.amountError }
                 name='amount'
-                id='amount'
                 disabled={this.state.amountFieldDisabled}
                 value={ this.state.amount }
                 onChange={ this.onChangeAmount } />
@@ -562,11 +642,15 @@ export default class ElementFundActions extends React.Component {
   }
 
   sellFields = () => {
+    const floatingLabelTextAmount = this.state.switchButton.denomination == 'ETH'
+    ? 'Amount in ' + this.state.switchButton.denomination
+    : 'Units of ' + this.state.switchButton.denomination 
     return (
       <Col xs={6}>
         <Row middle="xs" >
           <Col xs={12}>
             <AccountSelector
+            id='actionAccount'
             accounts={ this.props.accounts }
             account={ this.state.account }
             errorText={ this.state.accountError }
@@ -576,14 +660,14 @@ export default class ElementFundActions extends React.Component {
           </Col>
           <Col xs={6}>
             <TextField
+                id='actionSellAmount'
                 autoComplete='off'
                 floatingLabelFixed
-                floatingLabelText={'Amount in ' + this.state.switchButton.denomination}
+                floatingLabelText={floatingLabelTextAmount}
                 fullWidth
                 hintText={this.state.switchButton.hint}
                 errorText={ this.state.amountError }
                 name='amount'
-                id='amount'
                 disabled={this.state.amountFieldDisabled}
                 value={ this.state.amount }
                 onChange={ this.onChangeAmount } />
@@ -632,15 +716,16 @@ export default class ElementFundActions extends React.Component {
 
   render() {
     const { dragoDetails, accounts } = this.props
-    const { actionStyle } = this.state
+    const { actionStyle, openAuth, authMsg, authAccount } = this.state
     const { accountError, amountError, sending } = this.state;
     const hasError = !!(this.state.accountError || this.state.amountError );
+
     const actions = [
       <FlatButton
         label="Cancel"
         primary={true}
-        onClick={this.handleClose}
-        onTouchTap={this.handleClose}
+        onClick={this.handleCancel}
+        onTouchTap={this.handleCancel}
       />,
       <FlatButton
         label="Submit"
@@ -649,10 +734,26 @@ export default class ElementFundActions extends React.Component {
         onClick={this.onSend}
       />,
     ];
+
+    if (openAuth) {
+      console.log(this.state)
+      return (
+        <div>
+          {/* <RaisedButton label="Trade" primary={true} onClick={this.handleOpen}
+            labelStyle={{ fontWeight: 700 }} /> */}
+          <ElementFundActionAuthorization
+            dragoDetails={dragoDetails}
+            authMsg={authMsg}
+            account={authAccount}
+            onClose={this.handleCloseAuth}
+          />
+        </div>
+      )
+    }
     return (
       <div>
-        <RaisedButton label="Actions" primary={true} onClick={this.handleOpen} 
-          labelStyle={{fontWeight: 700}}/>
+        {/* <RaisedButton label="Trade" primary={true} onClick={this.handleOpen} 
+          labelStyle={{fontWeight: 700, fontSize: '20px'}}/> */}
           <Dialog
             title={<ElementFundActionsHeader dragoDetails={dragoDetails} 
               action={this.state.action} 
@@ -663,7 +764,7 @@ export default class ElementFundActions extends React.Component {
             modal={false}
             open={this.state.open}
             contentStyle={customContentStyle}
-            onRequestClose={this.handleClose}
+            onRequestClose={this.handleCancel}
           >
           <Row>
             <Col xs={12}>
@@ -675,6 +776,7 @@ export default class ElementFundActions extends React.Component {
               </Row>
             </Col>
           </Row>
+          <Paper className={styles.paperContainer} zDepth={1}>
           <Row>
               <Col xs={6}>
                 <p>Holding</p>
@@ -690,6 +792,7 @@ export default class ElementFundActions extends React.Component {
             {this.state.action =='buy' ? this.buyFields() : this.sellFields()}
 
           </Row>
+          </Paper>
           <Row>
             <Col xs={12} className={styles.grossAmountWarning}>
               * Gross of fees

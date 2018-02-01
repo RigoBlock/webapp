@@ -1,4 +1,4 @@
-// Copyright 2016-2017 Gabriele Rigo
+// Copyright 2016-2017 Rigo Investment Sarl.
 
 import BigNumber from 'bignumber.js'
 
@@ -12,7 +12,9 @@ export const ERRORS = {
   invalidSymbol: 'Please enter a valid symbol',
   invalidSymbolLeng: 'Symbol has to be 3 chars long',
   invalidSymbolReg: 'Only alphanumeric symbols allowed',
+  invalidPrices: 'The BUY price must be greater or equal to the SELL price',
   tradeIdError: 'Please enter a positive number > 0',
+  invalidRPCEndpoint: 'Please enter a valid URL',
   exchangeNameError: 'Please select an exchange',
   cfdError: 'Please select an CDF',
 };
