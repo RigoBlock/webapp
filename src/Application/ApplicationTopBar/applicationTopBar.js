@@ -23,7 +23,9 @@ class ApplicationTopBar extends Component {
 renderTitle = () =>{
   return (
     <div>
-      <span>RigoBlock</span>&nbsp;<span style={{fontSize: "12px"}}>beta</span>
+      {/* <span>RigoBlock</span>&nbsp;<span style={{fontSize: "12px"}}>beta <img style={{height: "20px", width: "20px"}} src='/img/new_logo_white.png'/></span> */}
+      <span><img style={{height: "32px", paddingTop: "8px"}} src='/img/new_logo_white.png'/></span>&nbsp;<span style={{fontSize: "12px"}}>beta </span>
+      {/* <img style={{height: "100px", width: "100px"}} src='/img/new_logo_white.png'/> */}
     </div>
     
   )

@@ -5,7 +5,9 @@ import TableOrderBook from '../molecules/tableOrderBook';
 import styles from './orderBook.module.css'
 import AppBar from 'material-ui/AppBar'
 import Paper from 'material-ui/Paper'
-
+import Toggle from 'material-ui/Toggle';
+import  * as Colors from 'material-ui/styles/colors'
+import { connect } from 'react-redux';
 
 const paperStyle = {
   // paddingLeft: "12px"
@@ -16,16 +18,47 @@ class OrderBook extends Component {
   static propTypes = {
     bidsOrders: PropTypes.array.isRequired,
     asksOrders: PropTypes.array.isRequired,
+    spread: PropTypes.string.isRequired,
+    aggregated: PropTypes.bool.isRequired,
+    dispatch: PropTypes.func.isRequired,
+    onToggleAggregateOrders: PropTypes.func.isRequired,
   };
 
   static defaultProps = {
     bidsOrders: [],
     asksOrders: [],
+    spread: '0',
   };
 
+
+  onToggleAggregateOrders = (event, isInputChecked) =>{
+    this.props.onToggleAggregateOrders(isInputChecked)
+  }
+
   render() {
-    var ordersAsksSorted = [].concat(this.props.asksOrders)
-    var ordersBidsSorted = [].concat(this.props.bidsOrders).reverse()
+    const ordersAsksSorted = [].concat(this.props.asksOrders)
+    const ordersBidsSorted = [].concat(this.props.bidsOrders)
+    const spread = this.props.spread
+    
+  const aggregatedTogglestyles = {
+    block: {
+      maxWidth: 250,
+    },
+    toggle: {
+      // paddingRight: '5px',
+    },
+    trackSwitched: {
+      backgroundColor: '#bdbdbd',
+    },
+    thumbSwitched: {
+      backgroundColor: Colors.blue500,
+    },
+    labelStyle: {
+      fontSize: '12px',
+      opacity: '0.5',
+      textAlign: 'right'
+    },
+  };
     return (
       <Row>
         <Col xs={12}>
@@ -40,6 +73,25 @@ class OrderBook extends Component {
               />
               <Paper style={paperStyle} zDepth={1} >
                 <Row className={styles.orderBookContainer}>
+                  <Col xs={12}>
+                    <Row center="xs">
+                      <Col xs={12} >
+                      <div style={{marginRight: '5px'}}>
+                        <Toggle
+                          label="AGGREGATE"
+                          style={aggregatedTogglestyles.toggle}
+                          // thumbStyle={aggregatedTogglestyles.thumbOff}
+                          trackStyle={aggregatedTogglestyles.trackOff}
+                          thumbSwitchedStyle={aggregatedTogglestyles.thumbSwitched}
+                          trackSwitchedStyle={aggregatedTogglestyles.trackSwitched}
+                          labelStyle={aggregatedTogglestyles.labelStyle}
+                          onToggle={this.onToggleAggregateOrders}
+                          toggled={this.props.aggregated}
+                        />
+                        </div>
+                      </Col>
+                    </Row>
+                  </Col>
                   <Col xs={12}>
                     <Row className={styles.sectionHeaderOrderTable}>
                       <Col xs={6} className={styles.quantityText}>
@@ -64,7 +116,14 @@ class OrderBook extends Component {
                     </Row>
                   </Col>
                   <Col xs={12}>
-                    <div className={styles.spread}>SPREAD</div>
+                    <Row center="xs">
+                      <Col xs={12} >
+                        {spread === 0
+                          ? <div className={styles.spread}>-</div>
+                          : <div className={styles.spread}>{spread}</div>
+                        }
+                      </Col>
+                    </Row>
                   </Col>
                   <Col xs={12}>
                     <Row className={styles.ordersContainer}>
@@ -90,4 +149,4 @@ class OrderBook extends Component {
   }
 }
 
-export default OrderBook
+export default connect()(OrderBook)

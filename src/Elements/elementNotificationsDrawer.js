@@ -1,4 +1,4 @@
-import {List} from 'material-ui/List';
+import { List } from 'material-ui/List';
 import Drawer from 'material-ui/Drawer'
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
@@ -9,6 +9,7 @@ import classNames from 'classnames'
 import utils from '../_utils/utils'
 import { connect } from 'react-redux';
 import styles from './elementNotificationsDrawer.module.css';
+
 
 var timerId = null;
 
@@ -23,13 +24,13 @@ class ElementNotificationsDrawer extends Component {
   static propTypes = {
     handleToggleNotifications: PropTypes.func.isRequired,
     notificationsOpen: PropTypes.bool.isRequired,
-    dispatch: PropTypes.func.isRequired, 
+    dispatch: PropTypes.func.isRequired,
     recentTransactions: PropTypes.object.isRequired,
   };
 
   static contextTypes = {
     api: PropTypes.object.isRequired,
-    isConnected: PropTypes.bool.isRequired, 
+    isConnected: PropTypes.bool.isRequired,
   };
 
   state = {
@@ -46,13 +47,13 @@ class ElementNotificationsDrawer extends Component {
     }
   };
 
-  shouldComponentUpdate(nextProps, nextState){    
+  shouldComponentUpdate(nextProps, nextState) {
     var stateUpdate = true
     var propsUpdate = true
     // shouldComponentUpdate returns false if no need to update children, true if needed.
     // propsUpdate = (!utils.shallowEqual(this.props, nextProps))
     // stateUpdate = (!utils.shallowEqual(this.state, nextState))
-    return stateUpdate || propsUpdate 
+    return stateUpdate || propsUpdate
   }
 
   componentWillReceiveProps() {
@@ -61,7 +62,7 @@ class ElementNotificationsDrawer extends Component {
     //   // this.detachInterface()
     // }
   }
-  
+
   componentDidMount() {
     const that = this
     var runTick = () => {
@@ -81,11 +82,11 @@ class ElementNotificationsDrawer extends Component {
     this.props.dispatch(this.updateTransactionsQueueAction(newRecentTransactions))
   }
 
-  componentWillUnmount () {
+  componentWillUnmount() {
     this.detachInterface()
   }
 
-  handleToggleNotifications = () =>{
+  handleToggleNotifications = () => {
     // Setting a small timeout to make sure that the state is updated with 
     // the subscription ID before trying to unsubscribe. Otherwise, if an user opens and closes the element very quickly
     // the state would not be updated fast enough and the element could crash
@@ -94,7 +95,7 @@ class ElementNotificationsDrawer extends Component {
     this.props.handleToggleNotifications()
   }
 
-  renderPlaceHolder = () =>{
+  renderPlaceHolder = () => {
     return (
       <div>
         <div className={classNames(styles.module, styles.post)}>
@@ -111,12 +112,15 @@ class ElementNotificationsDrawer extends Component {
   renderNotifications = () => {
     const eventType = 'transaction'
     var eventStatus = 'executed'
-    var primaryText, drgvalue, symbol  = null
+    var primaryText, drgvalue, symbol = null
     var secondaryText = []
     var timeStamp = ''
     var txHash = ''
     const { recentTransactions } = this.props
-    return Array.from(recentTransactions).reverse().map( (transaction) => {
+    if (recentTransactions.size === 0) {
+      return <div className={styles.noRecentTransactions}><p className={styles.noTransacationsMsg}>No recent transactions.</p></div>
+    }
+    return Array.from(recentTransactions).reverse().map((transaction) => {
       secondaryText = []
       var value = transaction.pop()
       var key = transaction.pop()
@@ -146,7 +150,7 @@ class ElementNotificationsDrawer extends Component {
           secondaryText[0] = "Status: " + value.status.charAt(0).toUpperCase() + value.status.slice(1)
           secondaryText[1] = timeStamp
           eventStatus = value.status
-        break;
+          break;
         case "SellVault":
           drgvalue = value.amount
           symbol = value.symbol
@@ -215,19 +219,30 @@ class ElementNotificationsDrawer extends Component {
     })
   }
 
-  render () {
-    const { notificationsOpen } = this.props
+  render() {
+    const { notificationsOpen, recentTransactions } = this.props
+    var drawerHeight = 72
+    if (recentTransactions.size !== 0) {
+      drawerHeight = 72 * recentTransactions.size
+    }
     return (
       <span>
         <Drawer width={300} openSecondary={true}
-          open={notificationsOpen} zDepth={1} docked={false}
-          classNameName={styles.notifications}
+          open={notificationsOpen} zDepth={1} docked={true}
+          containerClassName={styles.notifications}
           onRequestChange={this.handleToggleNotifications}
+          containerStyle={{height: drawerHeight.toString()}}
         >
-          <AppBar
-            title={<span>Network</span>}
-            showMenuIconButton={false}
-          />
+
+          {/* <Row>
+            <Col xs={12}>
+              <AppBar
+                title={<span>Network ok</span>}
+                showMenuIconButton={false}
+              />
+            </Col>
+          </Row> */}
+
           <Row>
             <Col xs={12}>
               <List>
@@ -242,7 +257,7 @@ class ElementNotificationsDrawer extends Component {
 
   detachInterface = () => {
     clearInterval(timerId)
-  }  
+  }
 }
 
 export default connect(mapStateToProps)(ElementNotificationsDrawer)

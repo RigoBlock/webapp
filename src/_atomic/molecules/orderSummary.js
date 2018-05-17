@@ -51,12 +51,15 @@ class OrderSummary extends Component {
     fee = new BigNumber(web3.utils.fromWei(order.details.order.takerFee, 'ether')).toFixed(5)
     total = new BigNumber(price()).mul(amount()).toFixed(5)
 
-    action = (order.orderType === 'asks') ? 'BUY' : 'SELL'
+    order.takerOrder
+    ? action = (order.orderType === 'asks') ? 'buy' : 'sell'
+    : action = (order.orderType === 'bids') ? 'buy' : 'sell'
+
     return (
       
       <Row className={styles.containerOrders}>
-        <Col xs={12} className={classNames(styles.action, styles[order.orderType])}>
-          <div>{action}</div>
+        <Col xs={12} className={classNames(styles.action, styles[action])}>
+          <div>{action.toUpperCase()}</div>
         </Col>
         <Col xs={12}>
           <div className={styles.title}>SUMMARY</div>

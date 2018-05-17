@@ -55,7 +55,10 @@ const transactionStyle = {
       color: Colors.red400,
       backgroundColor: Colors.red100,
     },
-  }, 
+  },
+  innerDiv: {
+    padding: '8px 8px 8px 72px'
+  } 
 }
 
 export default class ElementNotification extends Component {
@@ -118,6 +121,7 @@ export default class ElementNotification extends Component {
           }
           leftAvatar={<Avatar src="img/ETH.svg" />}
           secondaryTextLines={2}
+          style={transactionStyle.innerDiv}
         >
         </ListItem>
         <div className={styles.progressBar}>

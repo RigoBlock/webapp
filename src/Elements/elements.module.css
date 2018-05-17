@@ -1,9 +1,28 @@
-
 /* topBarLinksMenu */
 
 .topbarbuttons {
-    color: white !important;
-  }
+  color: white !important;
+}
+
+.networkIconClosed {
+  margin-right: -8px;
+  margin-top: -4px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  margin-bottom: -4px;
+  padding-right: 8px;
+}
+
+.networkIconOpen {
+  margin-right: -8px;
+  margin-top: -4px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  margin-bottom: -4px;
+  padding-right: 8px;
+  background-color: #fff;
+  color: #2196F3 !important;
+}
 
 /* leftSideDrawer */
 
@@ -38,19 +57,16 @@ a.selected {
   color: red !important;
 }
 
-.notifications {
-
-}
+.notifications {}
 
 .menuItemPrimaryText {
   font-weight: 600 !important;
   margin-bottom: -15px;
 }
 
-.menuAccountType{
+.menuAccountType {
   padding: 5px 0px !important;
 }
-
 
 @media screen and (max-width: 480px) {
   .responsiveLinks {

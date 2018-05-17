@@ -27,10 +27,14 @@
 }
 
 .headline {
-  font-size: 24;
-  padding-top: 16;
-  margin-bottom: 12;
-  font-weight: 400;
+  text-transform: uppercase;
+  font-weight: 700;
+  opacity: 0.8;
+}
+
+.mainlogo {
+  padding-top: 25px;
+  margin-bottom: -10px;
 }
 
 .space {
@@ -64,10 +68,12 @@
   background-color: #2196F3 !important;
   height: 56px !important;
   padding: 0 10px !important;
+  font-weight: 700;
 }
 
 .exchangebutton button[disabled] {
   opacity: 0.25;
+  font-weight: 700;
 }
 
 .tabs {

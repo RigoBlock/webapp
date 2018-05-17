@@ -20,12 +20,12 @@
   font-size: 20px;
 }
 
-.asks {
-  color: #66BB6A;
+.sell {
+  color:  #EF5350; /* asks */
 }
 
-.bids {
-  color:  #EF5350;
+.buy {
+  color: #66BB6A;  /* bids */
 }
 
 .summaryRow {

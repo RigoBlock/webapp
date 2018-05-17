@@ -17,8 +17,11 @@ import 'rxjs/observable/timer';
 import 'rxjs/observable/fromEvent';
 import 'rxjs/add/observable/fromPromise';
 import { timer } from 'rxjs/observable/timer'
-import rp from 'request-promise'
-import { getOrderBookFromRelayERCDex } from '../../_utils/exchange'
+// import rp from 'request-promise'
+import { 
+  getOrderBookFromRelayERCDex,
+  getAggregatedOrdersFromRelayERCDex
+ } from '../../_utils/exchange'
 // import io from 'socket.io-client'
 // import ReconnectingWebSocket from 'reconnectingwebsocket'
 import ReconnectingWebSocket from 'reconnecting-websocket'
@@ -28,7 +31,7 @@ import {
   RELAY_OPEN_WEBSOCKET,
   RELAY_MSG_FROM_WEBSOCKET,
   RELAY_CLOSE_WEBSOCKET,
-  RELAY_INIT_ORDERS,
+  RELAY_GET_ORDERS,
   ORDERBOOK_INIT
 
 } from '../../_utils/const'
@@ -39,25 +42,28 @@ import {
 //
 
 // Creating an observable from the promise
-const getOrderBookFromRelayERCDex$ = (uri, baseTokenAddress, quoteTokenAddress) =>
-  Observable.fromPromise(getOrderBookFromRelayERCDex(uri, baseTokenAddress, quoteTokenAddress));
+const getOrderBookFromRelayERCDex$ = (networkId, baseTokenAddress, quoteTokenAddress, aggregated) =>
+  aggregated 
+  ? Observable.fromPromise(getAggregatedOrdersFromRelayERCDex(networkId, baseTokenAddress, quoteTokenAddress))
+  : Observable.fromPromise(getOrderBookFromRelayERCDex(networkId, baseTokenAddress, quoteTokenAddress))
 
 // Setting the epic
-export const initOrderBookFromRelayERCDexEpic = (action$, store) =>
-  action$.ofType(RELAY_INIT_ORDERS)
+export const initOrderBookFromRelayERCDexEpic = (action$) =>
+  action$.ofType(RELAY_GET_ORDERS)
     .mergeMap((action) => {
       console.log(action)
       console.log('initOrderBookFromRelayERCDexEpic');
-      const state = store.getState()
-      const baseTokenAddress = state.exchange.selectedTokensPair.baseToken.address
-      const quoteTokenAddress = state.exchange.selectedTokensPair.quoteToken.address
-      const uri = `${state.exchange.relay.url}/${state.exchange.relay.networkID}/v0/orderbook`
       return getOrderBookFromRelayERCDex$(
-        uri,
-        baseTokenAddress,
-        quoteTokenAddress
+        action.payload.networkId,
+        action.payload.baseTokenAddress,
+        action.payload.quoteTokenAddress,
+        action.payload.aggregated
       )
-        .map(payload => ({ type: ORDERBOOK_INIT, payload }))
+        .map(payload => {
+          const aggregate = {aggregated: action.payload.aggregated}
+          return { type: ORDERBOOK_INIT, payload: { ...payload, ...aggregate } }
+
+        })
     });
 
 //
@@ -99,46 +105,9 @@ export const webSocketReducer = (state = 0, action) => {
 
 // https://github.com/ReactiveX/rxjs/issues/2048
 
-
-// const websocketStream$ = (baseTokenAddress, quoteTokenAddress) => {
-//   return Observable.create(observer => {
-//     var websocket = new WebSocket('wss://api.ercdex.com');
-//     console.log('websocketStream$')
-//     // websocket.on('open', () => {
-//     //   console.info('connection opened');
-//     //   websocket.send(`sub:ticker`);
-//     // });
-//     websocket.onopen = (msg) => {
-//       console.log(msg)
-//       console.log('WebSocket open.')
-//       // websocket.send(`sub:ticker`);
-//       websocket.send(`sub:pair-order-change/${baseTokenAddress}/${quoteTokenAddress}`);
-//       websocket.send(`sub:pair-order-change/${quoteTokenAddress}/${baseTokenAddress}`);
-//       return observer.next(msg.data);
-//     }
-//     websocket.onmessage = (msg) => {
-//       console.log(msg)
-//       return observer.next(msg.data);
-//     }
-//     websocket.onclose = (msg) => {
-//       console.log(msg)
-//       return observer.error(msg);
-//     }
-//     websocket.onerror = function (error) {
-//       console.log(error)
-//       console.log('WebSocket error.');
-//       return observer.error(error)
-//     };
-
-//     console.log(websocket)
-//     return () => websocket.close();
-//   })
-// }
-
 const reconnectingWebsocket$ = (baseTokenAddress, quoteTokenAddress) => {
   return Observable.create(observer => {
     var websocket = new ReconnectingWebSocket('wss://api.ercdex.com')
-    console.log('reconnectingWebsocket$')
     websocket.addEventListener('open', (msg) => {
       console.log('WebSocket open.')
       // websocket.send(`sub:ticker`);
@@ -159,19 +128,15 @@ const reconnectingWebsocket$ = (baseTokenAddress, quoteTokenAddress) => {
   })
 }
 
-
 // const socket$ = Observable.webSocket('wss://api.ercdex.com');
 
-export const relayWebSocketEpic = (action$, store) =>
+export const relayWebSocketEpic = (action$) =>
   action$.ofType(RELAY_OPEN_WEBSOCKET)
     .mergeMap((action) => {
       console.log(action)
-      const state = store.getState()
-      const baseTokenAddress = state.exchange.selectedTokensPair.baseToken.address
-      const quoteTokenAddress = state.exchange.selectedTokensPair.quoteToken.address
       return reconnectingWebsocket$(
-        baseTokenAddress,
-        quoteTokenAddress
+        action.payload.baseTokenAddress,
+        action.payload.quoteTokenAddress
       )
         // .retryWhen((err) => {
         //   console.log('Retry when error');
@@ -186,7 +151,12 @@ export const relayWebSocketEpic = (action$, store) =>
     });
 
 
-export const orderBookEpic = action$ => {
+export const orderBookEpic = (action$, store) => {
+  const state = store.getState()
+  const networkId = state.exchange.relay.networkId
+  const baseTokenAddress = state.exchange.selectedTokensPair.baseToken.address
+  const quoteTokenAddress = state.exchange.selectedTokensPair.quoteToken.address
+  const aggregated = state.exchange.orderBook.aggregated
   return action$.ofType(RELAY_MSG_FROM_WEBSOCKET)
     .map(action => action.payload)
     .bufferTime(2000)
@@ -196,7 +166,15 @@ export const orderBookEpic = action$ => {
     })
     .bufferCount(1)
     // .map(updateOrderBook)
-    .map(payload => ({ type: RELAY_INIT_ORDERS }))
+    .map(() => ({
+      type: RELAY_GET_ORDERS,
+      payload: {
+        networkId,
+        baseTokenAddress,
+        quoteTokenAddress,
+        aggregated
+      }
+    }))
 }
 
 

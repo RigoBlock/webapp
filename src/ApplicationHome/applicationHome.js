@@ -85,7 +85,9 @@ class ApplicationHome extends Component {
             <div className={styles.shadow}>
               <Row>
                 <Col xs={12}>
-                  <h1 className={styles.headline}>RigoBlock: Decentralized Pools of Digital Tokens </h1>
+                  
+                  <div className={styles.mainlogo}><img style={{height: "80px"}} src='/img/new_logo_full.png'/></div>
+                  <h2 className={styles.headline}>Decentralized Pools of Digital Tokens</h2>
                   <p>&nbsp;</p>
                   <a href="https://t.me/rigoblockprotocol" target="_blank" rel="noopener noreferrer">
                     <FlatButton
@@ -103,7 +105,7 @@ class ApplicationHome extends Component {
               <Row className={styles.cards}>
                 <Col xs={6}>
                   <Card className={styles.column}>
-                    <CardTitle title="RigoBlock Vault" className={styles.cardtitle} titleColor="white" />
+                    <CardTitle title="Vault" className={styles.cardtitle} titleColor="white" />
                     <CardText>
                       Pools of ether and proof-of-stake mining
                 </CardText>
@@ -116,7 +118,7 @@ class ApplicationHome extends Component {
                 </Col>
                 <Col xs={6}>
                   <Card className={styles.column}>
-                    <CardTitle title="RigoBlock Drago" className={styles.cardtitle} titleColor="white" />
+                    <CardTitle title="Drago" className={styles.cardtitle} titleColor="white" />
                     <CardText>
                       Pools of ether and trading on decentralized exchanges
                 </CardText>

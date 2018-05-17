@@ -1,7 +1,11 @@
 .spread {
   padding-top: 5px;
   padding-bottom: 5px;
-  font-size: 12px;
+  font-size: 16px;
+  color: #616161;
+  width: 100%;
+  text-align: right;
+  padding-right: 15px;
 }
 
 .sectionHeaderOrderTable {

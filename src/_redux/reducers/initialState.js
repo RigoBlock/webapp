@@ -22,10 +22,14 @@ const initialState = {
         ZRX: new BigNumber(0),
       }
     },
+    makerAddress: '',
     selectedExchange: EXCHANGES.zeroEx[DEFAULT_NETWORK_NAME],
+    // selectedExchange: EXCHANGES.rigoBlock[DEFAULT_NETWORK_NAME],
     selectedTokensPair: {
       baseToken: ERC20_TOKENS[DEFAULT_NETWORK_NAME].ZRX,
-      quoteToken: ERC20_TOKENS[DEFAULT_NETWORK_NAME].WETH
+      quoteToken: ERC20_TOKENS[DEFAULT_NETWORK_NAME].WETH,
+      baseTokenAllowance: false,
+      quoteTokenAllowance: false
     },
     selectedOrder: {
       details: {},
@@ -42,12 +46,14 @@ const initialState = {
       },
     },
     orderBook: {
+      aggregated: false,
       asks: [],
-      bids: []
+      bids: [],
+      spread: '0'
     },
     relay: {
       url: 'https://api.ercdex.com/api/standard',
-      networkID: '42'
+      networkId: '42'
     }
 
   },

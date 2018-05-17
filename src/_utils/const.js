@@ -2,7 +2,7 @@ import { ERC20_TOKENS } from './tokens'
 export { ERC20_TOKENS }
 
 export const APP = "app";
-export const APP_VERSION = "v0.2.1-beta180508"
+export const APP_VERSION = "v0.2.1-beta180517"
 export const DS = "/";
 export const DRG_ISIN = "DR";
 export const LOGGER = true;
@@ -214,7 +214,7 @@ export const EXCHANGES = {
     kovan :{
       tokenTransferProxyAddress: "0x087eed4bc1ee3de49befbd66c662b434b15d49d4",
       exchangeContractAddress: "0x90fe2af704b34e0224bf2299c838e04d4dcf1364", 
-      name: 'ZeroEx'
+      networkId: 42
     },
     mainnet:{
 
@@ -224,7 +224,7 @@ export const EXCHANGES = {
     kovan: {
       tokenTransferProxy: "0xcc040edf6e508c4372a62b1a902c69dcc52ceb1d",
       exchangeContractAddress: "0xf307de6528fa16473d8f6509b7b1d8851320dba5",
-      name: 'RigoBlock' 
+      networkId: 42
     },
     mainnet:{
 
@@ -260,6 +260,9 @@ export const UPDATE_TRANSACTIONS_VAULT_MANAGER = 'UPDATE_TRANSACTIONS_VAULT_MANA
 
 // EXCHANGE
 
+// Account
+export const SET_MAKER_ADDRESS = 'SET_MAKER_ADDRESS'
+
 // Order selection
 export const UPDATE_SELECTED_FUND = 'UPDATE_SELECTED_FUND'
 export const UPDATE_SELECTED_ORDER = 'UPDATE_SELECTED_ORDER'
@@ -268,15 +271,18 @@ export const UPDATE_TRADE_TOKENS_PAIR = 'UPDATE_TRADE_TOKENS_PAIR'
 export const CANCEL_SELECTED_ORDER = 'CANCEL_SELECTED_ORDER'
 
 // Orderbook
-
 export const ORDERBOOK_UPDATE = 'ORDERBOOK_UPDATE'
 export const ORDERBOOK_INIT = 'ORDERBOOK_INIT'
+export const ORDERBOOK_AGGREGATE_ORDERS = 'ORDERBOOK_AGGREGATE_ORDERS'
 
 // Websocket
 export const RELAY_OPEN_WEBSOCKET = 'RELAY_OPEN_WEBSOCKET'
 export const RELAY_MSG_FROM_WEBSOCKET = 'RELAY_MSG_FROM_WEBSOCKET'
 export const RELAY_CLOSE_WEBSOCKET = 'RELAY_CLOSE_WEBSOCKET'
-export const RELAY_INIT_ORDERS = 'RELAY_INIT_ORDERS'
+export const RELAY_GET_ORDERS = 'RELAY_GET_ORDERS'
+
+// Tokens
+export const SET_TOKEN_ALLOWANCE = 'SET_TOKEN_ALLOWANCE'
 
 
 

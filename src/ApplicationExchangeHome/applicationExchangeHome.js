@@ -9,7 +9,6 @@ import {
   ERC20_TOKENS
 } from '../_utils/const'
 import { Row, Col, Grid } from 'react-flexbox-grid';
-// import LeftSideDrawerFunds from '../Elements/leftSideDrawerFunds';
 import PropTypes from 'prop-types';
 import utils from '../_utils/utils'
 import ElementNotificationsDrawer from '../Elements/elementNotificationsDrawer'
@@ -23,14 +22,17 @@ import {
   UPDATE_SELECTED_FUND,
   UPDATE_TRANSACTIONS_DRAGO_MANAGER,
   UPDATE_TRADE_TOKENS_PAIR,
-  CANCEL_SELECTED_ORDER
+  CANCEL_SELECTED_ORDER,
+  RELAY_OPEN_WEBSOCKET,
+  RELAY_GET_ORDERS,
+  ORDERBOOK_AGGREGATE_ORDERS
 } from '../_utils/const'
-import { fakeOrders } from '../_utils/fakeOrders'
 import Paper from 'material-ui/Paper'
 import { connect } from 'react-redux';
 import OrderBook from '../_atomic/organisms/orderBook';
 import OrderBox from '../_atomic/organisms/orderBox'
 import Exchange from '../_utils/exchange'
+import { getMarketTakerOrder, getAvailableAddresses } from '../_utils/exchange'
 import FlatButton from 'material-ui/FlatButton'
 
 function mapStateToProps(state) {
@@ -74,7 +76,7 @@ class ApplicationExchangeHome extends Component {
   state = {
     exchangeUtils: {},
     orders: {
-      bidsOrders: [], 
+      bidsOrders: [],
       asksOrders: [],
     }
   }
@@ -91,7 +93,7 @@ class ApplicationExchangeHome extends Component {
 
   updateSelectedFundDetails = (liquidity, fund) => {
     const payload = {
-      details: fund, 
+      details: fund,
       liquidity: {
         ETH: liquidity[0],
         WETH: liquidity[1],
@@ -108,6 +110,20 @@ class ApplicationExchangeHome extends Component {
     return {
       type: UPDATE_TRADE_TOKENS_PAIR,
       payload: tradeTokensPair
+    }
+  };
+
+  setAggregateOrders = (isInputChecked) => {
+    return {
+      type: ORDERBOOK_AGGREGATE_ORDERS,
+      payload: isInputChecked
+    }
+  };
+
+  relayGetOrders = (filter) => {
+    return {
+      type: RELAY_GET_ORDERS,
+      payload: filter
     }
   };
 
@@ -132,12 +148,15 @@ class ApplicationExchangeHome extends Component {
   }
 
   componentDidMount() {
-    const {accounts } = this.props.endpoint
-    const { selectedTokensPair} = this.props.exchange
-    this.getTransactions (null, accounts)
+    const { accounts } = this.props.endpoint
+    const { selectedTokensPair, selectedExchange  } = this.props.exchange
+    this.getTransactions(null, accounts)
     // this.connectToRadarRelay()
     this.connectToExchange(selectedTokensPair)
-    // this.props.dispatch({ type: 'PING' })
+    getAvailableAddresses(selectedExchange)
+    .then (adreesses => {
+      this.props.dispatch({ type: 'SET_MAKER_ADDRESS', payload: adreesses[0] })
+    })
   }
 
   componentWillUnmount() {
@@ -149,12 +168,6 @@ class ApplicationExchangeHome extends Component {
   }
 
   componentDidUpdate() {
-    // The following code is needed to fix a bug in tables. The scrolling posision is reset at every component re-render.
-    // Setting the page scroll position
-    // console.log(`${this.sourceLogClass} -> componentDidUpdate`);
-    // const { ws } = this.state
-    // console.log(ws)
-    // const element = ReactDOM.findDOMNode(this);
     const element = this.node
     if (element != null) {
       window.scrollTo(0, this.scrollPosition)
@@ -168,12 +181,23 @@ class ApplicationExchangeHome extends Component {
     }
   }
 
+  onToggleAggregateOrders = (isInputChecked) => {
+    this.props.dispatch(this.setAggregateOrders(isInputChecked))
+    const filter = {
+      networkId: this.props.exchange.relay.networkId,
+      baseTokenAddress: this.props.exchange.selectedTokensPair.baseToken.address,
+      quoteTokenAddress: this.props.exchange.selectedTokensPair.quoteToken.address,
+      aggregated: isInputChecked
+    }
+    this.props.dispatch(this.relayGetOrders(filter))
+  }
+
   onSelectFund = (fund) => {
     const { api } = this.context
     utils.getDragoLiquidity(fund.address, api)
-    .then(liquidity => {
-      this.props.dispatch(this.updateSelectedFundDetails(liquidity, fund))
-    })
+      .then(liquidity => {
+        this.props.dispatch(this.updateSelectedFundDetails(liquidity, fund))
+      })
   }
 
   onSelectTokenTrade = (token) => {
@@ -199,17 +223,34 @@ class ApplicationExchangeHome extends Component {
   onButtonTest = () => {
     console.log('open')
     // this.props.dispatch({ type: 'PING', payload: 'resttter' })
-    this.props.dispatch({ type: 'RELAY_OPEN_WEBSOCKET', payload: { url: 'wss://api.ercdex.com'}})
-    this.props.dispatch({ type: 'RELAY_INIT_ORDERS', payload: { 
-      uri: `${this.props.exchange.relay.url}/${this.props.exchange.relay.id}/v0/orderbook`,
-      // baseTokenAddress: '0x6ff6c0ff1d68b964901f986d4c9fa3ac68346570',
-      // quoteTokenAddress: '0xd0a1e359811322d97991e03f863a0c30c2cf029c' 
-    }})
+    // this.props.dispatch({ type: RELAY_OPEN_WEBSOCKET, payload: { 
+    //   url: 'wss://api.ercdex.com',
+    //   baseTokenAddress: this.props.exchange.selectedTokensPair.baseToken.address,
+    //   quoteTokenAddress: this.props.exchange.selectedTokensPair.quoteToken.address
+    // }})
+    var filter = {
+      networkId: this.props.exchange.relay.networkId,
+      baseTokenAddress: this.props.exchange.selectedTokensPair.baseToken.address,
+      quoteTokenAddress: this.props.exchange.selectedTokensPair.quoteToken.address,
+      aggregated: this.props.exchange.orderBook.aggregated
+    }
+    this.props.dispatch(this.relayGetOrders(filter))
     // this.props.dispatch({ type: 'RELAY_SUBSCRIBE_WEBSOCKET', payload: { sub: 'sub:ticker2' }})
   }
 
   onButtonTest2 = () => {
     console.log('subcribe')
+    getMarketTakerOrder(
+      this.props.exchange.selectedTokensPair.baseToken.address,
+      this.props.exchange.selectedTokensPair.quoteToken.address,
+      this.props.exchange.selectedTokensPair.baseToken.address,
+      '95000000000000000000',
+      this.props.exchange.relay.networkId,
+      "0x57072759Ba54479669CAdF1A25528a472Af95cEF".toLowerCase()
+    )
+      .then(results => {
+        console.log(results)
+      })
     // this.props.dispatch({ type: 'PING', payload: 'resttter' })
     // this.props.dispatch({ type: 'RELAY_OPEN_WEBSOCKET', payload: { url: 'wss://api.ercdex.com'}})
     // this.props.dispatch({ type: 'RELAY_SUBSCRIBE_WEBSOCKET', payload: { sub: 'sub:ticker' }})
@@ -242,17 +283,18 @@ class ApplicationExchangeHome extends Component {
     }
 
     if (user.isManager) {
-      const { bids, asks} = this.props.exchange.orderBook
-      const asksOrderNormalized = asks.slice(asks.length-20,asks.length)
-      const bidsOrderNormalized = bids.slice(bids.length-20,bids.length)
-      console.log(this.props.exchange.selectedExchange)
+      const { bids, asks, spread, aggregated } = this.props.exchange.orderBook
+      const asksOrderNormalized = asks.slice(asks.length - 20, asks.length)
+      const bidsOrderNormalized = bids.slice(bids.length - 20, bids.length)
+      // console.log(this.props.exchange.selectedExchange)
       // const bidsOrderNormalizedFilled = [ ...Array(20 - bidsOrderNormalized.length).fill(null), ...bidsOrderNormalized ]
       // const asksOrderNormalizedFilled = [ ...Array(20 - asksOrderNormalized.length).fill(null), ...asksOrderNormalized]
-      const selectedOrder = {...exchange.selectedOrder}
+      const selectedOrder = { ...exchange.selectedOrder }
+      console.log(aggregated)
       return (
         <div ref={node => this.node = node}>
           <Row className={styles.maincontainer}>
-              <Col xs={12}>
+            <Col xs={12}>
               <Paper className={styles.paperTopBarContainer} zDepth={1}>
                 <Row>
                   <Col xs={4}>
@@ -270,32 +312,37 @@ class ApplicationExchangeHome extends Component {
                     />
                   </Col>
                 </Row>
-                </ Paper>
-              </Col>
-              <Col xs={12}>
-                <Row>
+              </ Paper>
+            </Col>
+            <Col xs={12}>
+              <Row>
                 <Col xs={6}>
-                    <OrderBox />
-                  </Col>
-                  <Col xs={6}>
-                    <OrderBook 
-                    bidsOrders={bidsOrderNormalized} 
-                    asksOrders={asksOrderNormalized} 
+                  <OrderBox />
+                  <Col xs={12}>
+                    <FlatButton primary={true} label="Submit"
+                      labelStyle={{ fontWeight: 700, fontSize: '18px' }}
+                      onClick={this.onButtonTest}
                     />
-                    {/* <ElementListBids list={this.state.bidsList} /> */}
+                    <FlatButton primary={true} label="Submit2"
+                      labelStyle={{ fontWeight: 700, fontSize: '18px' }}
+                      onClick={this.onButtonTest2}
+                    />
                   </Col>
-                </Row>
-              </Col>
-              <Col xs={12}>
-              <FlatButton primary={true} label="Submit"
-                labelStyle={{ fontWeight: 700, fontSize: '18px'}}
-                onClick={this.onButtonTest}
-              />
-              <FlatButton primary={true} label="Submit2"
-                labelStyle={{ fontWeight: 700, fontSize: '18px'}}
-                onClick={this.onButtonTest2}
-              />
-              </Col>
+                </Col>
+                <Col xs={6}>
+                  <OrderBook
+                    bidsOrders={bidsOrderNormalized}
+                    asksOrders={asksOrderNormalized}
+                    spread={spread}
+                    aggregated={aggregated}
+                    onToggleAggregateOrders={this.onToggleAggregateOrders}
+                  />
+                  {/* <ElementListBids list={this.state.bidsList} /> */}
+                </Col>
+
+              </Row>
+            </Col>
+
           </Row>
           <Row>
             <Col xs={12}>
@@ -366,58 +413,6 @@ class ApplicationExchangeHome extends Component {
     }, this.onNewEventZeroExExchange)
     exchangeUtils.tradeTokensPair = tradeTokensPair
 
-    // var ordersERCDex = await exchangeUtils.getOrderBookFromRelayERCDex()
-    // console.log(ordersERCDex)
-    // const ws = ordersERCDex.ws
-    // const bidsOrders = exchangeUtils.formatOrders(ordersERCDex.bids, 'bids')
-    // console.log(bidsOrders)
-    // const asksOrders = exchangeUtils.formatOrders(ordersERCDex.asks, 'asks')
-    // console.log(asksOrders)
-    // ws.onmessage = (event) => {
-    //   // if (data.channel === `sub:account-notification/${myAccountAddress}`) {
-    //   //   /**
-    //   //    * {
-    //   //    *   "channel": "account-notification/0x5409ed021d9299bf6814279a6a1411a7e866a631",
-    //   //    *   "data":{
-    //   //    *     "notification":{
-    //   //    *       "account":"0x5409ed021d9299bf6814279a6a1411a7e866a631",
-    //   //    *       "label":"An order was canceled.",
-    //   //    *       "expirationDate":"2018-02-09T15:49:45.197Z",
-    //   //    *       "dateUpdated":"2018-02-08T15:49:45.199Z",
-    //   //    *       "dateCreated":"2018-02-08T15:49:45.199Z",
-    //   //    *       "id":1657
-    //   //    *     }
-    //   //    *   }
-    //   //    * }
-    //   //    */
-    //   //   console.log(data);
-    //   //   return;
-    //   // }
-    //   console.log(event)
-    //   const msg = JSON.parse(event.data)
-    //   console.log(msg.data.eventType)
-    //   console.log(this.state.orders)
-    //   var newOrders
-    //   switch (msg.data.eventType) {
-    //     case 'created':
-    //       console.log(JSON.parse(event.data));
-    //       newOrders = exchangeUtils.updateOrderToOrderBook(msg.data.order, this.state.orders, 'add')
-    //       break;
-    //     case 'canceled':
-    //       console.log(JSON.parse(event.data));
-    //       newOrders = exchangeUtils.updateOrderToOrderBook(msg.data.order, this.state.orders, 'remove')
-    //       break;
-    //     default:
-    //       console.log('default')
-    //       newOrders = {...this.state.orders}
-    //       break;
-    //   }
-    //   console.log(newOrders)
-    //   this.setState({
-    //     exchangeUtils: exchangeUtils,
-    //     orders: newOrders
-    //   })
-    // };
     this.setState({
       exchangeUtils: exchangeUtils,
       // orders: {

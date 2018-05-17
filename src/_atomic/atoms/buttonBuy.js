@@ -16,7 +16,7 @@ class ButtonBuy extends Component {
   };
 
   buttonBuyClick = () =>{
-    this.props.onBuySell('asks')
+    this.props.onBuySell('bids')
   }
 
   render() {
