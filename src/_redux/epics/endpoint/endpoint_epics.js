@@ -16,7 +16,6 @@ import {
   takeUntil
 } from 'rxjs/operators'
 import { ofType } from 'redux-observable'
-import { sha3_512 } from 'js-sha3'
 import Web3Wrapper from '../../../_utils/web3Wrapper/src'
 import utils from '../../../_utils/utils'
 
@@ -65,6 +64,8 @@ const attachInterfacePromise = async (api, endpoint) => {
 
       break
   }
+  // console.log(newEndpoint)
+  // throw new Error('error')
   return newEndpoint
 }
 
@@ -77,62 +78,17 @@ const attachInterface$ = (api, endpoint) => {
   )
 }
 
-export const attachInterfaceEpic = (action$, state$) =>
+export const attachInterfaceEpic = action$ =>
   action$.pipe(
     ofType(TYPE_.ATTACH_INTERFACE),
     switchMap(action => {
-      const web3 = Web3Wrapper.getInstance(state$.value.endpoint.networkInfo.id)
-      return attachInterface$(web3, action.payload.endpoint).pipe(
+      return attachInterface$(action.payload.api, action.payload.endpoint).pipe(
         mergeMap(endpoint => {
-          let accounts = endpoint.accounts.map(element => {
-            return element.address
-          })
-          const currentAccountsAddressHash = sha3_512(accounts.toString())
-          const savedAccountsAddressHash = state$.value.app.accountsAddressHash
-          if (currentAccountsAddressHash !== savedAccountsAddressHash) {
-            return Observable.concat(
-              Observable.of(
-                Actions.drago.updateTransactionsDragoHolder([
-                  Array(0),
-                  Array(0),
-                  Array(0)
-                ])
-              ),
-              Observable.of(
-                Actions.drago.updateTransactionsDragoManager([
-                  Array(0),
-                  Array(0),
-                  Array(0)
-                ])
-              ),
-              Observable.of(
-                Actions.vault.updateTransactionsVaultHolder([
-                  Array(0),
-                  Array(0),
-                  Array(0)
-                ])
-              ),
-              Observable.of(
-                Actions.vault.updateTransactionsVaultManager([
-                  Array(0),
-                  Array(0),
-                  Array(0)
-                ])
-              ),
-              Observable.of(
-                Actions.app.updateAppStatus({
-                  appLoading: false,
-                  accountsAddressHash: currentAccountsAddressHash
-                })
-              ),
-              Observable.of(Actions.endpoint.updateInterface(endpoint))
-            )
-          }
           return Observable.concat(
             Observable.of(
               Actions.app.updateAppStatus({
-                appLoading: false,
-                accountsAddressHash: currentAccountsAddressHash
+                appLoading: false
+                // isConnected: true
               })
             ),
             Observable.of(Actions.endpoint.updateInterface(endpoint))
@@ -169,9 +125,9 @@ export const delayShowAppEpic = action$ =>
 // SUBSCRIBE TO NEW BLOCK AND MONITOR ACCOUNTS
 //
 
-const monitorAccounts$ = state$ => {
-  const api = Web3Wrapper.getInstance(state$.value.endpoint.networkInfo.id)
-  return api.rigoblock.ob.newBlock$.pipe(
+const monitorAccounts$ = (api, state$) => {
+  const instance = Web3Wrapper.getInstance(state$.value.endpoint.networkInfo.id)
+  return instance.rigoblock.ob.newBlock$.pipe(
     switchMap(newBlock => {
       return from(utils.updateAccounts(api, newBlock, state$))
     })
@@ -181,8 +137,8 @@ const monitorAccounts$ = state$ => {
 export const monitorAccountsEpic = (action$, state$) => {
   return action$.pipe(
     ofType(TYPE_.MONITOR_ACCOUNTS_START),
-    mergeMap(() => {
-      return monitorAccounts$(state$).pipe(
+    mergeMap(action => {
+      return monitorAccounts$(action.payload.api, state$).pipe(
         takeUntil(action$.pipe(ofType(TYPE_.MONITOR_ACCOUNTS_STOP))),
         mergeMap(accountsUpdate => {
           console.log(accountsUpdate)
@@ -243,6 +199,7 @@ export const monitorAccountsEpic = (action$, state$) => {
               observablesArray.push(
                 Observable.of(
                   Actions.endpoint.getAccountsTransactions(
+                    action.payload.api,
                     null,
                     currentState.endpoint.accounts,
                     {
@@ -261,6 +218,7 @@ export const monitorAccountsEpic = (action$, state$) => {
               observablesArray.push(
                 Observable.of(
                   Actions.endpoint.getAccountsTransactions(
+                    action.payload.api,
                     null,
                     currentState.endpoint.accounts,
                     {
@@ -281,6 +239,7 @@ export const monitorAccountsEpic = (action$, state$) => {
               observablesArray.push(
                 Observable.of(
                   Actions.endpoint.getAccountsTransactions(
+                    action.payload.api,
                     null,
                     currentState.endpoint.accounts,
                     {
@@ -299,6 +258,7 @@ export const monitorAccountsEpic = (action$, state$) => {
               observablesArray.push(
                 Observable.of(
                   Actions.endpoint.getAccountsTransactions(
+                    action.payload.api,
                     null,
                     currentState.endpoint.accounts,
                     {

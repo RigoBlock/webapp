@@ -9,7 +9,6 @@ import {
   validateAccount,
   validatePositiveNumber
 } from '../../_utils/validation'
-import { METAMASK } from '../../_utils/const'
 import { connect } from 'react-redux'
 import ActionsDialogHeader from '../../_atomic/molecules/actionsDialogHeader'
 import AppBar from 'material-ui/AppBar'
@@ -346,9 +345,8 @@ class ElementFundActionSetPrice extends Component {
       .then(receipt => {
         console.log(receipt)
         this.props.dispatch(
-          Actions.drago.getPoolDetails(dragoDetails.dragoId, {
-            poolType: 'drago',
-            wallet: METAMASK
+          Actions.drago.getPoolDetails(dragoDetails.dragoId, provider, {
+            poolType: 'drago'
           })
         )
         if (account.source === 'MetaMask') {

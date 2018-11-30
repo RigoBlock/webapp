@@ -29,7 +29,6 @@ import PoolApi from '../PoolsApi/src'
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import Web3 from 'web3'
-import Web3Wrapper from './web3Wrapper/src'
 import palette from './palete'
 
 class NotificationAlert extends Component {
@@ -128,7 +127,7 @@ class utilities {
       // console.log(`endpoint_epic -> New nonce: ` + newNonce)
       try {
         const poolApi = new PoolApi(api)
-        await poolApi.contract.rigotoken.init()
+        poolApi.contract.rigotoken.init()
         // Checking GRG balance
         const grgQueries = accounts.map(account => {
           // console.log(
@@ -176,8 +175,8 @@ class utilities {
           // )
           if (
             !new BigNumber(newEthBalance).eq(prevEthBalance) &&
-            Number(prevBlockNumber) !== 0 &&
-            Number(prevNonce) !== 0
+            // prevBlockNumber !== 0 &&
+            prevNonce !== 0
           ) {
             console.log(`ETH ${account.name} balance changed.`)
             fetchTransactions = true
@@ -214,8 +213,8 @@ class utilities {
           // console.log(newgrgBalance, prevGrgBalance)
           if (
             !new BigNumber(newgrgBalance).eq(prevGrgBalance) &&
-            Number(prevBlockNumber) !== 0 &&
-            Number(prevNonce) !== 0
+            // prevBlockNumber !== 0 &&
+            prevNonce !== 0
           ) {
             console.log(`GRG ${account.name} balance changed.`)
             fetchTransactions = true
@@ -467,9 +466,6 @@ class utilities {
   }
 
   dateFromTimeStamp = timestamp => {
-    if (typeof timestamp === 'string') {
-      timestamp = new Date(timestamp)
-    }
     const day = ('0' + timestamp.getDate()).slice(-2)
     const month = ('0' + (timestamp.getMonth() + 1)).slice(-2)
     function addZero(i) {
@@ -557,8 +553,7 @@ class utilities {
 
   getTransactionsSingleVault = getTransactionsSingleVault
 
-  getPoolDetailsFromId = async (dragoId, networkInfo) => {
-    let api = Web3Wrapper.getInstance(networkInfo.id)
+  getPoolDetailsFromId = async (dragoId, api) => {
     const poolApi = new PoolApi(api)
     await poolApi.contract.dragoregistry.init()
     const dragoDetails = await poolApi.contract.dragoregistry.fromId(dragoId)

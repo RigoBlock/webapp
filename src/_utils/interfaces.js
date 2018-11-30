@@ -163,53 +163,50 @@ class Interfaces {
         try {
           wrapper = Web3Wrapper.getInstance()
           poolsApi = new PoolsApi(wrapper)
-          await poolsApi.contract.rigotoken.init()
+          poolsApi.contract.rigotoken.init()
         } catch (err) {
           console.warn(err)
           throw new Error(`Error on Web3Wrapper.getInstance()`)
         }
 
-        // ethBalance = wrapper.eth.getBalance(accounts[0]).catch(err => {
-        //   console.warn(err)
-        //   // throw new Error(`Cannot get ETH balance of account ${accounts[0]}`)
-        // })
-        // grgBalance = poolsApi.contract.rigotoken
-        //   .balanceOf(accounts[0])
-        //   .catch(err => {
-        //     console.warn(err)
-        //     // throw new Error(`Cannot get GRG balance of account ${accounts[0]}`)
-        //   })
-        // nonce = wrapper.eth.getTransactionCount(accounts[0]).catch(err => {
-        //   console.warn(err)
-        //   // throw new Error(
-        //   //   `Cannot get transactions count of account ${accounts[0]}`
-        //   // )
-        // })
+        ethBalance = wrapper.eth.getBalance(accounts[0]).catch(err => {
+          console.warn(err)
+          // throw new Error(`Cannot get ETH balance of account ${accounts[0]}`)
+        })
+        grgBalance = poolsApi.contract.rigotoken
+          .balanceOf(accounts[0])
+          .catch(err => {
+            console.warn(err)
+            // throw new Error(`Cannot get GRG balance of account ${accounts[0]}`)
+          })
+        nonce = wrapper.eth.getTransactionCount(accounts[0]).catch(err => {
+          console.warn(err)
+          // throw new Error(
+          //   `Cannot get transactions count of account ${accounts[0]}`
+          // )
+        })
 
-        // try {
-        //   ethBalance = await ethBalance
-        // } catch (err) {
-        //   console.warn(err)
-        //   throw new Error(`Cannot get ETH balance of account ${accounts[0]}`)
-        // }
-        // try {
-        //   grgBalance = await grgBalance
-        // } catch (err) {
-        //   console.warn(err)
-        //   throw new Error(`Cannot get GRG balance of account ${accounts[0]}`)
-        // }
-        // try {
-        //   nonce = await nonce
-        // } catch (err) {
-        //   console.warn(err)
-        //   throw new Error(
-        //     `Cannot get transactions count of account ${accounts[0]}`
-        //   )
-        // }
+        try {
+          ethBalance = await ethBalance
+        } catch (err) {
+          console.warn(err)
+          throw new Error(`Cannot get ETH balance of account ${accounts[0]}`)
+        }
+        try {
+          grgBalance = await grgBalance
+        } catch (err) {
+          console.warn(err)
+          throw new Error(`Cannot get GRG balance of account ${accounts[0]}`)
+        }
+        try {
+          nonce = await nonce
+        } catch (err) {
+          console.warn(err)
+          throw new Error(
+            `Cannot get transactions count of account ${accounts[0]}`
+          )
+        }
 
-        ethBalance = '0'
-        grgBalance = '1'
-        nonce = new BigNumber(0)
         let accountsMetaMask = {
           [accounts[0]]: {
             ethBalance: new BigNumber(web3.utils.fromWei(ethBalance)).toFixed(

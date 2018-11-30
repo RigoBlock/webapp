@@ -284,6 +284,7 @@ class TokenLockInfo extends Component {
           // Updating selected tokens pair balances and fund liquidity (ETH, ZRX)
           this.props.dispatch(
             Actions.exchange.updateLiquidityAndTokenBalances(
+              api,
               '',
               selectedFund.details.address
             )
@@ -443,6 +444,7 @@ class TokenLockInfo extends Component {
           // Updating selected tokens pair balances and fund liquidity (ETH, ZRX)
           this.props.dispatch(
             Actions.exchange.updateLiquidityAndTokenBalances(
+              api,
               '',
               selectedFund.details.address
             )

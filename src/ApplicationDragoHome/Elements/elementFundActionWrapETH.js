@@ -23,9 +23,7 @@ import RaisedButton from 'material-ui/RaisedButton'
 import React, { Component } from 'react'
 
 function mapStateToProps(state) {
-  return {
-    endpoint: state.endpoint
-  }
+  return state
 }
 
 class ElementFundActionWrapETH extends Component {
@@ -36,7 +34,6 @@ class ElementFundActionWrapETH extends Component {
   static propTypes = {
     accounts: PropTypes.array.isRequired,
     dragoDetails: PropTypes.object.isRequired,
-    endpoint: PropTypes.object.isRequired,
     openActionForm: PropTypes.func.isRequired,
     dispatch: PropTypes.func.isRequired
   }
@@ -277,10 +274,10 @@ class ElementFundActionWrapETH extends Component {
 
   onSendUnwrap = () => {
     const { api } = this.context
-    const { dragoDetails, endpoint } = this.props
+    const { dragoDetails } = this.props
     // const { instance } = this.context;
     let poolApi = null
-    const WETHaddress = ERC20_TOKENS[endpoint.networkInfo.name].WETH.address
+    const WETHaddress = ERC20_TOKENS[api._rb.network.name].WETH.address
     this.setState({
       sending: true
     })
@@ -373,10 +370,10 @@ class ElementFundActionWrapETH extends Component {
 
   onSendWrap = () => {
     const { api } = this.context
-    const { dragoDetails, endpoint } = this.props
+    const { dragoDetails } = this.props
     // const { instance } = this.context;
     let poolApi = null
-    const WETHaddress = ERC20_TOKENS[endpoint.networkInfo.name].WETH.address
+    const WETHaddress = ERC20_TOKENS[api._rb.network.name].WETH.address
     this.setState({
       sending: true
     })

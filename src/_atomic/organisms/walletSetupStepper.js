@@ -17,9 +17,7 @@ import SectionHeader from '../atoms/sectionHeader'
 import styles from './walletSetupStepper.module.css'
 
 function mapStateToProps(state) {
-  return {
-    endpoint: state.endpoint
-  }
+  return state
 }
 
 class WalletSetupStepper extends Component {
@@ -110,8 +108,8 @@ class WalletSetupStepper extends Component {
   }
 
   getGRGFromFaucet = async () => {
-    const { networkInfo } = this.props.endpoint
-    const faucetAddress = ERC20_TOKENS[networkInfo.name].GRG.faucetAddress
+    const { api } = this.context
+    const faucetAddress = ERC20_TOKENS[api._rb.network.name].GRG.faucetAddress
     const accounts = await window.web3.eth.getAccounts()
     const poolApi = new PoolApi(window.web3)
     await poolApi.contract.rigotokenfaucet.init(faucetAddress)
@@ -124,9 +122,8 @@ class WalletSetupStepper extends Component {
   }
 
   renderStepActions(step) {
-    const { locked, correctNetwork, holdsTokens, stepIndex } = this.state
-    const { networkInfo } = this.props.endpoint
-    const faucetAddress = ERC20_TOKENS[networkInfo.name].GRG.faucetAddress
+    const { stepIndex } = this.state
+    const { locked, correctNetwork, holdsTokens } = this.state
     const buttonDisable = () => {
       switch (step) {
         case 0:
@@ -169,7 +166,6 @@ class WalletSetupStepper extends Component {
             label={'Get GRG'}
             disableTouchRipple={true}
             disableFocusRipple={true}
-            disabled={!faucetAddress}
             primary={true}
             onClick={this.getGRGFromFaucet}
             style={{ marginRight: 12 }}
@@ -328,6 +324,14 @@ class WalletSetupStepper extends Component {
                 <span className={styles.titleStep}>Select a network</span>
               </StepLabel>
               <StepContent>
+                {/* <p>
+                You need to connect your wallet to <b>Rospen</b> Ethereum
+                testnet.
+              </p>
+              <p>
+                RigoBlock also supports Kovan and you will be once finished this
+                setup.
+              </p> */}
                 {correctNetwork && (
                   <div>
                     <p>
@@ -354,6 +358,13 @@ class WalletSetupStepper extends Component {
                     section.
                   </div>
                 )}
+                {/* <a
+                  href="https://help.rigoblock.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Tell me more about this.
+                </a> */}
                 {this.renderStepActions(1)}
               </StepContent>
             </Step>

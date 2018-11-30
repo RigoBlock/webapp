@@ -3,25 +3,27 @@
 import * as TYPE_ from './const'
 
 const drago = {
-  getTokenBalancesDrago: (dragoDetails, relay) => {
+  getTokenBalancesDrago: (dragoDetails, api, relay) => {
     return {
       type: TYPE_.GET_TOKEN_BALANCES_DRAGO,
       payload: {
         dragoDetails,
+        api,
         relay
       }
     }
   },
-  getPoolDetails: (dragoId, options = { poolType: 'drago', wallet: '' }) => {
+  getPoolDetails: (dragoId, api, options = { poolType: 'drago' }) => {
     return {
       type: TYPE_.GET_POOL_DETAILS,
-      payload: { dragoId, options }
+      payload: { dragoId, api, options }
     }
   },
-  getPoolTransactions: (dragoAddress, accounts, options) => {
+  getPoolTransactions: (api, dragoAddress, accounts, options) => {
     return {
       type: TYPE_.GET_POOL_TRANSACTIONS,
       payload: {
+        api,
         dragoAddress,
         accounts,
         options
@@ -39,6 +41,7 @@ const drago = {
     }
   },
   getPoolsSearchList: (
+    api,
     options = {
       topics: [null, null, null, null],
       fromBlock: 0,
@@ -49,6 +52,7 @@ const drago = {
     return {
       type: TYPE_.GET_POOLS_SEARCH_LIST,
       payload: {
+        api,
         options
       }
     }

@@ -3,7 +3,7 @@
 
 import * as abis from '../../contracts/abi'
 import { RIGOTOKEN_ADDRESSES } from '../../utils/const'
-import { utils } from 'ethers'
+import { ethers } from 'ethers'
 import BigNumber from 'bignumber.js'
 import Registry from '../registry'
 
@@ -25,11 +25,10 @@ class RigoTokenWeb3 {
     return this._instance
   }
 
-  init = async () => {
+  init = () => {
     const api = this._api
     const abi = this._abi
-    const networkId = await api.eth.net.getId()
-    const address = RIGOTOKEN_ADDRESSES[networkId]
+    const address = RIGOTOKEN_ADDRESSES[api._rb.network.id]
     this._instance = new api.eth.Contract(abi)
     this._instance.options.address = address
     return this._instance
@@ -58,7 +57,7 @@ class RigoTokenWeb3 {
     if (BigNumber.isBigNumber(amount)) {
       amount = '0x' + new BigNumber(amount).toString(16)
     }
-    amount = utils.hexlify(utils.bigNumberify(amount))
+    amount = ethers.utils.hexlify(ethers.utils.bigNumberify(amount))
     return instance.methods
       .transfer(toAddress, amount)
       .estimateGas(options)

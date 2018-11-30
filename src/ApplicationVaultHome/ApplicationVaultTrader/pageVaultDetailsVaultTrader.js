@@ -60,11 +60,12 @@ class PageFundDetailsVaultTrader extends Component {
   }
 
   componentDidMount = async () => {
+    const { api } = this.context
     const dragoId = this.props.match.params.dragoid
 
     // Getting Drago details and transactions
     this.props.dispatch(
-      Actions.drago.getPoolDetails(dragoId, { poolType: 'vault' })
+      Actions.drago.getPoolDetails(dragoId, api, { poolType: 'vault' })
     )
   }
 

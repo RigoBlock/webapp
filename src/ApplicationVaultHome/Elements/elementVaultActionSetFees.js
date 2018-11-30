@@ -9,7 +9,6 @@ import {
   validateAccount,
   validatePositiveNumber
 } from '../../_utils/validation'
-import { METAMASK } from '../../_utils/const'
 import { connect } from 'react-redux'
 import AccountSelector from '../../Elements/elementAccountSelector'
 import ActionsDialogHeader from '../../_atomic/molecules/actionsDialogHeader'
@@ -337,8 +336,7 @@ class ElementVaultActionSetFees extends Component {
           vaultDetails.vaultDetails.vaultId,
           provider,
           {
-            poolType: 'vault',
-            wallet: METAMASK
+            poolType: 'vault'
           }
         )
         if (account.source === 'MetaMask') {

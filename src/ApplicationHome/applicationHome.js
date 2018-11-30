@@ -94,7 +94,9 @@ class ApplicationHome extends PureComponent {
       toBlock: 'latest',
       poolType: 'drago'
     }
-    this.props.dispatch(Actions.drago.getPoolsSearchList(options))
+    this.props.dispatch(
+      Actions.drago.getPoolsSearchList(this.context.api, options)
+    )
   }
 
   componentWillUnmount = () => {

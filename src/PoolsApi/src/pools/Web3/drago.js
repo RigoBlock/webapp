@@ -49,13 +49,12 @@ class DragoWeb3 {
     return api.eth.getBalance(instance._address)
   }
 
-  getBalanceWETH = async () => {
+  getBalanceWETH = () => {
     const api = this._api
     const instance = this._instance
-    const networkId = await api.eth.net.getId()
     const wethInstance = new api.eth.Contract(
       abis.weth,
-      WETH_ADDRESSES[networkId]
+      WETH_ADDRESSES[api._rb.network.id]
     )
     return wethInstance.methods.balanceOf(instance._address).call({})
   }

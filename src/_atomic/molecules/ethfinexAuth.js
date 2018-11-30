@@ -10,12 +10,7 @@ import Web3 from 'web3'
 import styles from './ethfinexAuth.module.css'
 
 function mapStateToProps(state) {
-  return {
-    exchange: state.exchange,
-    endpoint: {
-      networkInfo: state.endpoint.networkInfo
-    }
-  }
+  return state
 }
 
 class EthfinexAuth extends Component {
@@ -32,7 +27,7 @@ class EthfinexAuth extends Component {
   }
 
   onAuthEF = async () => {
-    const { endpoint } = this.props
+    const { api } = this.context
     this.setState({ showSignMsg: true })
 
     try {
@@ -57,7 +52,7 @@ class EthfinexAuth extends Component {
       this.props.dispatch(
         Actions.exchange.getAccountOrdersStart(
           this.props.exchange.selectedRelay,
-          endpoint.networkInfo.id,
+          api._rb.network.id,
           accountSignature,
           this.props.exchange.selectedTokensPair.baseToken,
           this.props.exchange.selectedTokensPair.quoteToken

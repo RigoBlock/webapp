@@ -7,7 +7,6 @@ import PoolApi from '../../PoolsApi/src'
 import Web3 from 'web3'
 import Web3Wrapper from '../../_utils/web3Wrapper/src'
 import moment from 'moment'
-import { HTTP_EVENT_FETCHING, METAMASK } from '../const'
 
 /**
  * Get the event logs from a the Drago registry
@@ -26,7 +25,7 @@ import { HTTP_EVENT_FETCHING, METAMASK } from '../const'
  * This function can be a performance hit, so it will need to be optimized as much as possible.
  **/
 export const getTransactionsDragoOptV2 = async (
-  networkInfo,
+  api,
   poolAddress,
   accounts = [],
   options = {
@@ -37,37 +36,26 @@ export const getTransactionsDragoOptV2 = async (
     drago: true
   }
 ) => {
+  //
+  // return Promise.reject(new Error('fail'))
+
   if (poolAddress)
-    return getTransactionsSingleDrago(
-      poolAddress,
-      networkInfo,
-      accounts,
-      options
-    )
+    return getTransactionsSingleDrago(poolAddress, api, accounts, options)
   let startTime = new Date()
   if (accounts.length === 0) {
     return [Array(0), Array(0), Array(0)]
   }
+  let web3 = Web3Wrapper.getInstance(api._rb.network.id)
+  web3._rb = window.web3._rb
 
-  let web3
-  switch (options.wallet) {
-    case METAMASK: {
-      web3 = window.web3
-      break
-    }
-    default: {
-      if (HTTP_EVENT_FETCHING) {
-        web3 = new Web3(networkInfo.transportHttp)
-      } else {
-        web3 = Web3Wrapper.getInstance(networkInfo.id)
-      }
-    }
-  }
+  // HTTP
+  let web3Http = new Web3(api._rb.network.transportHttp)
+  web3Http._rb = window.web3._rb
 
-  const poolApi = new PoolApi(web3)
+  const poolApi = new PoolApi(web3Http)
   let dragoSymbolRegistry = new Map()
   let fromBlock
-  switch (networkInfo.id) {
+  switch (api._rb.network.id) {
     case 1:
       fromBlock = '6000000'
       break
@@ -151,7 +139,7 @@ export const getTransactionsDragoOptV2 = async (
       const getChunkedEvents = topics => {
         let arrayPromises = []
         return web3.eth.getBlockNumber().then(async lastBlock => {
-          let chunck = 250000
+          let chunck = 100000
           lastBlock = new BigNumber(lastBlock).toNumber()
           const chunks = await getBlockChunks(fromBlock, lastBlock, chunck)
           arrayPromises = chunks.map(async chunk => {
@@ -274,7 +262,7 @@ export const getTransactionsDragoOptV2 = async (
                       address
                     } = dragoSymbolRegistry.get(k)
                     supply.push({
-                      supply: formatCoins(new BigNumber(dragoSupply), 4),
+                      supply: formatCoins(new BigNumber(dragoSupply), 4, api),
                       name: name.trim(),
                       symbol: symbol,
                       dragoId: dragoId,
@@ -391,7 +379,8 @@ export const getTransactionsDragoOptV2 = async (
                           address: balancesRegistry.get(k).address,
                           balance: formatCoins(
                             balancesRegistry.get(k).balance,
-                            4
+                            4,
+                            api
                           )
                         })
                       }

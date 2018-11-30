@@ -102,10 +102,7 @@ class ElementNotConnected extends Component {
 
   render() {
     const { isSyncing } = this.props.app
-    if (this.props.app.connectionRetries > 2) {
-      return isSyncing ? this.renderSyncing() : this.renderNotConnected()
-    }
-    return <div />
+    return isSyncing ? this.renderSyncing() : this.renderNotConnected()
   }
 }
 

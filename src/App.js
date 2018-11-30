@@ -2,9 +2,8 @@
 import 'babel-polyfill'
 import 'react-virtualized/styles.css'
 import * as Sentry from '@sentry/browser'
+import { PROD } from './_utils/const'
 import { Redirect, Route, Router, Switch } from 'react-router-dom'
-import { connect } from 'react-redux'
-import AppLoading from './Elements/elementAppLoading'
 import ApplicationConfigPage from './Application/applicationConfig'
 import ApplicationDragoPage from './Application/applicationDrago'
 import ApplicationExchangePage from './Application/applicationExchange'
@@ -14,12 +13,15 @@ import Endpoint from './_utils/endpoint'
 import NotificationSystem from 'react-notification-system'
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
+import Web3 from 'web3'
 import Whoops404 from './Application/whoops404'
 import createHashHistory from 'history/createHashHistory'
+
+import { connect } from 'react-redux'
+import AppLoading from './Elements/elementAppLoading'
 import utils from './_utils/utils'
 // import ElementNotConnected from './Elements/elementNotConnected'
 import { Actions } from './_redux/actions'
-import { notificationWrapper } from './_utils/notificationWrapper'
 import ReactGA from 'react-ga'
 
 let appHashPath = true
@@ -67,8 +69,6 @@ export class App extends Component {
     }
   }
 
-  // notificationSystem = React.createRef()
-
   scrollPosition = 0
   tdIsConnected = null
   tdIsMetaMaskUnlocked = null
@@ -90,13 +90,6 @@ export class App extends Component {
     dispatch: PropTypes.func.isRequired
   }
 
-  initNotificationSystem = instance => {
-    if (!this._notificationSystem) {
-      this._notificationSystem = React.createRef()
-      notificationWrapper.getInstance(instance)
-    }
-  }
-
   // Passing down the context variables to children
   getChildContext() {
     return {
@@ -107,6 +100,7 @@ export class App extends Component {
   shouldComponentUpdate(nextProps, nextState) {
     const propsUpdate = !utils.shallowEqual(this.props, nextProps)
     const stateUpdate = !utils.shallowEqual(this.state, nextState)
+    // console.log(`${this.constructor.name} -> propsUpdate: %c${propsUpdate}.%c stateUpdate: %c${stateUpdate}`, `color: ${propsUpdate ? 'green' : 'red'}; font-weight: bold;`,'',`color: ${stateUpdate ? 'green' : 'red'}; font-weight: bold;`)
     return stateUpdate || propsUpdate
   }
 
@@ -120,18 +114,31 @@ export class App extends Component {
   }
 
   componentDidMount = async () => {
-    // this.props.dispatch(
-    //   Actions.notifications.initNotificationsSystemAction(
-    //     this.notificationSystem
-    //   )
-    // )
+    this.props.dispatch(
+      Actions.notifications.initNotificationsSystemAction(
+        this._notificationSystem
+      )
+    )
     const { endpoint } = this.props
-    this.props.dispatch(Actions.endpoint.checkIsConnectedToNode())
-    this.props.dispatch(Actions.endpoint.attachInterface(endpoint))
-    if (typeof window.web3 !== 'undefined') {
-      this.props.dispatch(Actions.endpoint.checkMetaMaskIsUnlocked())
+    let WsSecureUrl = ''
+    const networkName = this.props.endpoint.networkInfo.name
+    if (PROD) {
+      WsSecureUrl = this.props.endpoint.endpointInfo.wss[networkName].prod
+    } else {
+      WsSecureUrl = this.props.endpoint.endpointInfo.wss[networkName].dev
     }
-    this.props.dispatch(Actions.endpoint.monitorAccountsStart())
+    const web3 = new Web3(WsSecureUrl)
+    this.props.dispatch(Actions.endpoint.checkIsConnectedToNode(this._api))
+    this.props.dispatch(
+      Actions.endpoint.attachInterface(web3, this._api, endpoint)
+    )
+    if (typeof window.web3 !== 'undefined') {
+      const web3 = window.web3
+      this.props.dispatch(
+        Actions.endpoint.checkMetaMaskIsUnlocked(this._api, web3)
+      )
+    }
+    this.props.dispatch(Actions.endpoint.monitorAccountsStart(this._api))
   }
 
   render() {
@@ -199,7 +206,7 @@ export class App extends Component {
     return (
       <div>
         <NotificationSystem
-          ref={this.initNotificationSystem}
+          ref={n => (this._notificationSystem = n)}
           style={notificationStyle}
         />
         {this.props.app.appLoading ? (

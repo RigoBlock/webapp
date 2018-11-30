@@ -4,37 +4,27 @@ import BigNumber from 'bignumber.js'
 import PoolApi from '../../PoolsApi/src'
 import Web3 from 'web3'
 import Web3Wrapper from '../../_utils/web3Wrapper/src'
-import { HTTP_EVENT_FETCHING, METAMASK } from '../const'
 
 export const getTransactionsSingleVault = async (
   poolAddress,
-  networkInfo,
+  api,
   accounts,
   options = {
     limit: 20
   }
 ) => {
-  let web3
-  switch (options.wallet) {
-    case METAMASK: {
-      web3 = window.web3
-      break
-    }
-    default: {
-      if (HTTP_EVENT_FETCHING) {
-        web3 = new Web3(networkInfo.transportHttp)
-      } else {
-        web3 = Web3Wrapper.getInstance(networkInfo.id)
-      }
-    }
-  }
+  let web3 = Web3Wrapper.getInstance(api._rb.network.id)
+  web3._rb = window.web3._rb
+  // HTTP
+  let web3Http = new Web3(api._rb.network.transportHttp)
+  web3Http._rb = window.web3._rb
 
-  const poolApi = new PoolApi(web3)
+  const poolApi = new PoolApi(web3Http)
 
   await poolApi.contract.vaulteventful.init()
   const contract = poolApi.contract.vaulteventful
   let fromBlock
-  switch (networkInfo.id) {
+  switch (api._rb.network.id) {
     case 1:
       fromBlock = '6000000'
       break
@@ -49,7 +39,7 @@ export const getTransactionsSingleVault = async (
   }
 
   const logToEvent = log => {
-    const key = web3.utils.sha3(JSON.stringify(log))
+    const key = api.utils.sha3(JSON.stringify(log))
     const {
       address,
       blockNumber,
@@ -129,7 +119,7 @@ export const getTransactionsSingleVault = async (
   const getChunkedEvents = topics => {
     let arrayPromises = []
     return web3.eth.getBlockNumber().then(async lastBlock => {
-      let chunck = 250000
+      let chunck = 100000
       lastBlock = new BigNumber(lastBlock).toNumber()
       const chunks = await getBlockChunks(fromBlock, lastBlock, chunck)
       arrayPromises = chunks.map(async chunk => {

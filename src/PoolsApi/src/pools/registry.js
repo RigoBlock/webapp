@@ -17,9 +17,8 @@ class Registry {
     this._getContractAddressFromRegister = this._getContractAddressFromRegister.bind(
       this
     )
-    this._getParityRegistryContractAddress = this._getParityRegistryContractAddress.bind(
-      this
-    )
+    this._parityRegistryContractAddress =
+      PARITY_REGISTRY_ADDRESSES[api._rb.network.id]
     this._isWeb3 = isMetamask(api)
     this._isParity = typeof api._parity !== 'undefined' ? true : false
     this._isInfura = () => {
@@ -35,7 +34,7 @@ class Registry {
 
   _getParityRegistryContractAddress = () => {
     const api = this._api
-    // Checking if using Web3
+    // // Checking if using Web3
     // if (typeof api.version !== 'undefined') {
     //   return api.eth.net.getId()
     //     .then((id) => {
@@ -49,22 +48,56 @@ class Registry {
     //     return PARITY_REGISTRY_ADDRESSES[id]
     //   }
     //   )
-    return api.eth.net.getId().then(networkId => {
-      return PARITY_REGISTRY_ADDRESSES[networkId]
-    })
+    return PARITY_REGISTRY_ADDRESSES[api._rb.network.id]
   }
 
   /**
    * @param  {} contractName
    */
-  _getContractAddressFromRegister = async contractName => {
+  _getContractAddressFromRegister = contractName => {
     const api = this._api
-    const parityRegistryContractAddress = await this._getParityRegistryContractAddress()
+    const parityRegistryContractAddress = this._parityRegistryContractAddress
     if (!contractName) {
       throw new Error('contractName needs to be provided to Registry')
     }
     // console.log(`${this.constructor.name} -> Looking for contract: ${contractName}`)
-
+    // Checking if using Parity API and/or connected to Infura
+    if (typeof api._parity !== 'undefined') {
+      if (typeof api.provider !== 'undefined') {
+        if (api.provider._url.includes('infura')) {
+          // console.log(`${this.constructor.name} -> Infura/MetaMask detected.`)
+          // console.log(
+          //   `${
+          //     this.constructor.name
+          //   } -> Registry found at ${parityRegistryContractAddress}`
+          // )
+          const registry = api.newContract(
+            abis.parityregister,
+            parityRegistryContractAddress
+          ).instance
+          return Promise.all([
+            registry.getAddress.call({}, [api.utils.sha3(contractName), 'A'])
+          ])
+        }
+      }
+      console.log(`${this.constructor.name} -> RigoBlock node detected.`)
+      return api.parity
+        .registryAddress()
+        .then(parityRegistryContractAddress => {
+          // console.log(
+          //   `${
+          //     this.constructor.name
+          //   } -> Registry found at ${parityRegistryContractAddress}`
+          // )
+          const registry = api.newContract(
+            abis.parityregister,
+            parityRegistryContractAddress
+          ).instance
+          return Promise.all([
+            registry.getAddress.call({}, [api.utils.sha3(contractName), 'A'])
+          ])
+        })
+    }
     // Checking if using Web3
     if (typeof api.version !== 'undefined') {
       const registryContract = new api.eth.Contract(abis.parityregister)

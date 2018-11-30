@@ -6,6 +6,7 @@ import { connect } from 'react-redux'
 import ActionAssessment from 'material-ui/svg-icons/action/assessment'
 import ActionList from 'material-ui/svg-icons/action/list'
 import ActionShowChart from 'material-ui/svg-icons/editor/show-chart'
+import BigNumber from 'bignumber.js'
 import CopyContent from 'material-ui/svg-icons/content/content-copy'
 import ElementAccountBox from '../../Elements/elementAccountBox'
 import ElementFundCreateAction from '../Elements/elementFundCreateAction'
@@ -50,6 +51,27 @@ class PageDashboardDragoManager extends Component {
 
   componentDidMount() {
     console.log('componentDidMount')
+  }
+
+  UNSAFE_componentWillReceiveProps(nextProps) {
+    // Updating the lists on each new block if the accounts balances have changed
+    // Doing this this to improve performances by avoiding useless re-rendering
+    // const { accounts } = this.props.endpoint
+    // const { api } = this.context
+    // const options = { balance: true, supply: false, limit: 20, trader: true, drago: true }
+    // console.log(`${this.constructor.name} -> UNSAFE_componentWillReceiveProps-> nextProps received.`);
+    // Updating the transaction list if there have been a change in total accounts balance and the previous balance is
+    // different from 0 (balances are set to 0 on app loading)
+    const currentBalance = new BigNumber(this.props.endpoint.ethBalance)
+    const nextBalance = new BigNumber(nextProps.endpoint.ethBalance)
+    if (!currentBalance.eq(nextBalance) && !currentBalance.eq(0)) {
+      // console.log(
+      //   `${
+      //     this.constructor.name
+      //   } -> UNSAFE_componentWillReceiveProps -> Accounts have changed.`
+      // )
+      // this.props.dispatch(Actions.endpoint.getAccountsTransactions(api, null, accounts, options))
+    }
   }
 
   shouldComponentUpdate(nextProps, nextState) {

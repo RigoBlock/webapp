@@ -4,7 +4,7 @@ import { formatCoins, formatEth } from './../format'
 import BigNumber from 'bignumber.js'
 import Web3 from 'web3'
 
-export const logToEvent = (log, dragoSymbolRegistry) => {
+export const logToEvent = (log, dragoSymbolRegistry, api) => {
   const key = Web3.utils.sha3(JSON.stringify(log))
 
   const {

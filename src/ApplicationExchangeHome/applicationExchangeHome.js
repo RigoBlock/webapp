@@ -78,18 +78,18 @@ class ApplicationExchangeHome extends PureComponent {
   }
 
   componentDidMount = async () => {
+    const { api } = this.context
     const { ui } = this.props.exchange
     const { endpoint } = this.props
-    const defaultRelay = RELAYS[DEFAULT_RELAY[endpoint.networkInfo.name]]
-    const defaultExchange =
-      EXCHANGES[defaultRelay.name][endpoint.networkInfo.name]
+    const defaultRelay = RELAYS[DEFAULT_RELAY[api._rb.network.name]]
+    const defaultExchange = EXCHANGES[defaultRelay.name][api._rb.network.name]
     const defaultTokensPair = {
       baseToken:
-        ERC20_TOKENS[endpoint.networkInfo.name][
+        ERC20_TOKENS[api._rb.network.name][
           defaultRelay.defaultTokensPair.baseTokenSymbol
         ],
       quoteToken:
-        ERC20_TOKENS[endpoint.networkInfo.name][
+        ERC20_TOKENS[api._rb.network.name][
           defaultRelay.defaultTokensPair.quoteTokenSymbol
         ]
     }
@@ -110,7 +110,7 @@ class ApplicationExchangeHome extends PureComponent {
       // Set available relays
       this.props.dispatch(
         Actions.exchange.updateAvailableRelays(
-          utils.availableRelays(RELAYS, endpoint.networkInfo.id)
+          utils.availableRelays(RELAYS, api._rb.network.id)
         )
       )
 
@@ -128,7 +128,7 @@ class ApplicationExchangeHome extends PureComponent {
           utils.availableTradeTokensPair(
             TRADE_TOKENS_PAIRS,
             defaultRelay.name,
-            endpoint.networkInfo.id
+            api._rb.network.id
           )
         )
       )
@@ -140,7 +140,7 @@ class ApplicationExchangeHome extends PureComponent {
 
       // Updating selected tokens pair balances and fund liquidity (ETH, ZRX)
       this.props.dispatch(
-        Actions.exchange.updateLiquidityAndTokenBalances('START')
+        Actions.exchange.updateLiquidityAndTokenBalances(api, 'START')
       )
 
       // Starting chart, ticker feed, order book
@@ -177,13 +177,14 @@ class ApplicationExchangeHome extends PureComponent {
 
   componentWillUnmount = () => {
     console.log('***** UNMOUNT *****')
+    const { api } = this.context
     const { selectedExchange } = this.props.exchange
     // Stopping exchange contract events
     this.props.dispatch(Actions.exchange.monitorEventsStop(selectedExchange))
     this.props.dispatch(Actions.exchange.fetchCandleDataSingleStop())
     this.props.dispatch(Actions.exchange.relayCloseWs())
     this.props.dispatch(
-      Actions.exchange.updateLiquidityAndTokenBalances('STOP')
+      Actions.exchange.updateLiquidityAndTokenBalances(api, 'STOP')
     )
     this.props.dispatch(Actions.exchange.getAccountOrdersStop())
   }
@@ -275,7 +276,12 @@ class ApplicationExchangeHome extends PureComponent {
   }
 
   onSelectFund = async fund => {
-    const { selectedTokensPair, selectedExchange } = this.props.exchange
+    const { api } = this.context
+    const {
+      selectedTokensPair,
+      selectedExchange,
+      selectedRelay
+    } = this.props.exchange
     const { networkInfo, accounts } = this.props.endpoint
 
     const walletAddress = accounts.find(
@@ -311,7 +317,8 @@ class ApplicationExchangeHome extends PureComponent {
     this.props.dispatch(Actions.exchange.cancelSelectedOrder())
 
     try {
-      let web3 = await Web3Wrapper.getInstance(networkInfo.id)
+      let web3 = await Web3Wrapper.getInstance(api._rb.network.id)
+      web3._rb = window.web3._rb
       const poolApi = new PoolApi(web3)
       poolApi.contract.drago.init(fund.address)
 
@@ -326,7 +333,7 @@ class ApplicationExchangeHome extends PureComponent {
 
       // Updating selected tokens pair balances and fund liquidity (ETH, ZRX)
       this.props.dispatch(
-        Actions.exchange.updateLiquidityAndTokenBalances('', fund.address)
+        Actions.exchange.updateLiquidityAndTokenBalances(api, '', fund.address)
       )
       // let allowanceBaseToken,
       //   allowanceQuoteToken = 0
@@ -378,16 +385,15 @@ class ApplicationExchangeHome extends PureComponent {
   }
 
   onSelectTokenTrade = async pair => {
+    const { api } = this.context
     const {
       selectedExchange,
       selectedRelay,
       selectedFund
     } = this.props.exchange
-    const { endpoint } = this.props
     const selectedTokens = pair.split('-')
-    const baseToken = ERC20_TOKENS[endpoint.networkInfo.name][selectedTokens[0]]
-    const quoteToken =
-      ERC20_TOKENS[endpoint.networkInfo.name][selectedTokens[1]]
+    const baseToken = ERC20_TOKENS[api._rb.network.name][selectedTokens[0]]
+    const quoteToken = ERC20_TOKENS[api._rb.network.name][selectedTokens[1]]
 
     const liquidity = {
       loading: false,
@@ -411,10 +417,10 @@ class ApplicationExchangeHome extends PureComponent {
     //   Actions.exchange.updateLiquidityAndTokenBalances(api, 'RESET')
     // )
     this.props.dispatch(
-      Actions.exchange.updateLiquidityAndTokenBalances('STOP')
+      Actions.exchange.updateLiquidityAndTokenBalances(api, 'STOP')
     )
     this.props.dispatch(
-      Actions.exchange.updateLiquidityAndTokenBalances('START')
+      Actions.exchange.updateLiquidityAndTokenBalances(api, 'START')
     )
 
     // Updating selected tokens pair

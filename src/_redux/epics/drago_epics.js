@@ -12,7 +12,8 @@ import {
   map,
   mergeMap,
   retryWhen,
-  takeUntil
+  takeUntil,
+  tap
 } from 'rxjs/operators'
 import { ofType } from 'redux-observable'
 
@@ -23,12 +24,13 @@ import { ERC20_TOKENS } from '../../_utils/tokens'
 import Web3Wrapper from '../../_utils/web3Wrapper/src'
 import utils from '../../_utils/utils'
 
-const getTokensBalances$ = (dragoAddress, networkInfo) => {
+const getTokensBalances$ = (dragoAddress, api) => {
   //
   // Initializing Drago API
   //
 
-  let web3 = Web3Wrapper.getInstance(networkInfo.id)
+  let web3 = Web3Wrapper.getInstance(api._rb.network.id)
+  web3._rb = window.web3._rb
   const poolApi = new PoolApi(web3)
   // const poolApi = new PoolApi(api)
   try {
@@ -39,7 +41,7 @@ const getTokensBalances$ = (dragoAddress, networkInfo) => {
   }
 
   const getTokensBalances = async () => {
-    let allowedTokens = ERC20_TOKENS[networkInfo.name]
+    let allowedTokens = ERC20_TOKENS[api._rb.network.name]
     let dragoAssets = {}
     for (let token in allowedTokens) {
       let balances = {
@@ -94,8 +96,10 @@ export const getTokensBalancesEpic = (action$, state$) => {
   return action$.pipe(
     ofType(TYPE_.GET_TOKEN_BALANCES_DRAGO),
     mergeMap(action => {
-      const { networkInfo } = state$.value.endpoint
-      return getTokensBalances$(action.payload.dragoDetails, networkInfo).pipe(
+      return getTokensBalances$(
+        action.payload.dragoDetails,
+        action.payload.api
+      ).pipe(
         map(dragoAssets => {
           const ordered = {}
           Object.keys(dragoAssets)
@@ -105,13 +109,18 @@ export const getTokensBalancesEpic = (action$, state$) => {
             })
           return ordered
         }),
+        tap(val => {
+          console.log(val)
+          return val
+        }),
         map(dragoAssets => {
           if (state$.value.app.config.isMock) {
             if (
               Object.keys(state$.value.transactionsDrago.selectedDrago.assets)
                 .length === 0
             ) {
-              dragoAssets = utils.generateMockAssets(networkInfo.name)
+              const networkName = state$.value.endpoint.networkInfo.name
+              dragoAssets = utils.generateMockAssets(networkName)
             }
           }
           return dragoAssets
@@ -123,7 +132,7 @@ export const getTokensBalancesEpic = (action$, state$) => {
             }),
             Actions.tokens.priceTickersStart(
               action.payload.relay,
-              networkInfo.id,
+              action.payload.api._rb.network.id,
               dragoAssets
             )
           ]
@@ -131,14 +140,14 @@ export const getTokensBalancesEpic = (action$, state$) => {
             observablesArray.push(
               Actions.exchange.getPortfolioChartDataStart(
                 action.payload.relay,
-                networkInfo.id
+                action.payload.api._rb.network.id
               )
             )
           }
           return Observable.concat(observablesArray)
         }),
         catchError(error => {
-          console.warn(error)
+          console.log(error)
           return Observable.of({
             type: TYPE_.QUEUE_ERROR_NOTIFICATION,
             payload: 'Error fetching fund assets balances.'
@@ -153,12 +162,11 @@ export const getTokensBalancesEpic = (action$, state$) => {
 // GET DETAILS FOR A DRAGO
 //
 
-const getPoolDetails$ = (poolId, networkInfo, options, state$) => {
+const getPoolDetails$ = (poolId, api, options, state$) => {
   return Observable.create(observer => {
     let poolDetails
-    const { accounts } = state$.value.endpoint
     utils
-      .getPoolDetailsFromId(poolId, networkInfo)
+      .getPoolDetailsFromId(poolId, api)
       .then(details => {
         poolDetails = details
         return options.poolType === 'drago'
@@ -193,26 +201,26 @@ const getPoolDetails$ = (poolId, networkInfo, options, state$) => {
             })
       })
       .then(() => {
+        const accounts = state$.value.endpoint.accounts
         return options.poolType === 'drago'
           ? utils
-              .getDragoDetails(poolDetails, accounts, networkInfo)
+              .getDragoDetails(poolDetails, accounts, api)
               .then(details => {
                 return observer.next(details)
               })
               .catch(error => observer.error(error))
           : utils
-              .getVaultDetails(poolDetails, accounts, networkInfo)
+              .getVaultDetails(poolDetails, accounts, api)
               .then(details => {
                 return observer.next(details)
               })
               .catch(error => observer.error(error))
       })
       .then(() => {
+        const accounts = state$.value.endpoint.accounts
         return options.poolType === 'drago'
           ? utils
-              .getDragoDetails(poolDetails, accounts, networkInfo, {
-                dateOnly: true
-              })
+              .getDragoDetails(poolDetails, accounts, api, { dateOnly: true })
               .then(details => {
                 return observer.next(details)
               })
@@ -221,9 +229,7 @@ const getPoolDetails$ = (poolId, networkInfo, options, state$) => {
                 observer.error(error)
               })
           : utils
-              .getVaultDetails(poolDetails, accounts, networkInfo, {
-                dateOnly: true
-              })
+              .getVaultDetails(poolDetails, accounts, api, { dateOnly: true })
               .then(details => {
                 return observer.next(details)
               })
@@ -244,11 +250,9 @@ export const getPoolDetailsEpic = (action$, state$) => {
   return action$.pipe(
     ofType(TYPE_.GET_POOL_DETAILS),
     mergeMap(action => {
-      const { networkInfo, accounts } = state$.value.endpoint
-      // debugger
       return getPoolDetails$(
         action.payload.dragoId,
-        networkInfo,
+        action.payload.api,
         action.payload.options,
         state$
       ).pipe(
@@ -262,7 +266,7 @@ export const getPoolDetailsEpic = (action$, state$) => {
             drago: drago
           }
           let relayName
-          switch (networkInfo.id) {
+          switch (action.payload.api._rb.network.id) {
             case 1:
               relayName = Ethfinex
               break
@@ -288,11 +292,16 @@ export const getPoolDetailsEpic = (action$, state$) => {
             if (details.totalSupply !== null) {
               observablesArray.push(
                 Actions.drago.getPoolTransactions(
+                  action.payload.api,
                   details.address,
-                  accounts,
+                  state$.value.endpoint.accounts,
                   options
                 ),
-                Actions.drago.getTokenBalancesDrago(details.address, relay)
+                Actions.drago.getTokenBalancesDrago(
+                  details.address,
+                  action.payload.api,
+                  relay
+                )
               )
             }
           } else {
@@ -304,10 +313,16 @@ export const getPoolDetailsEpic = (action$, state$) => {
             if (details.totalSupply !== null) {
               observablesArray.push(
                 Actions.drago.getPoolTransactions(
+                  action.payload.api,
                   details.address,
-                  accounts,
+                  state$.value.endpoint.accounts,
                   options
                 )
+                // Actions.drago.getTokenBalancesDrago(
+                //   details.address,
+                //   action.payload.api,
+                //   relay
+                // )
               )
             }
           }

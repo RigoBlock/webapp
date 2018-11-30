@@ -1,6 +1,5 @@
 import { dateFromTimeStampHuman } from './dateFromTimeStampHuman'
-// import { ethers } from 'ethers'
-import { HTTP_EVENT_FETCHING, METAMASK } from '../const'
+import { ethers } from 'ethers'
 import { formatCoins, formatEth } from './../format'
 import { getBlockChunks } from './blockChunks'
 import BigNumber from 'bignumber.js'
@@ -11,33 +10,22 @@ import Web3Wrapper from '../web3Wrapper/src'
 export const getDragoDetails = async (
   dragoDetails,
   accounts,
-  networkInfo,
-  options = { dateOnly: false, wallet: '' }
+  api,
+  options = { dateOnly: false }
 ) => {
   //
   // Initializing Drago API
   //
+  let web3Http = new Web3(api._rb.network.transportHttp)
+  let newWeb3 = Web3Wrapper.getInstance(api._rb.network.id)
 
-  let web3
-  switch (options.wallet) {
-    case METAMASK: {
-      web3 = window.web3
-      break
-    }
-    default: {
-      if (HTTP_EVENT_FETCHING) {
-        web3 = new Web3(networkInfo.transportHttp)
-      } else {
-        web3 = Web3Wrapper.getInstance(networkInfo.id)
-      }
-    }
-  }
-
-  const poolApi = new PoolApi(web3)
+  newWeb3._rb = window.web3._rb
+  web3Http._rb = window.web3._rb
+  const poolApiWeb3 = new PoolApi(api)
 
   const dragoAddress = dragoDetails[0][0]
   let fromBlock
-  switch (networkInfo.id) {
+  switch (api._rb.network.id) {
     case 1:
       fromBlock = '6000000'
       break
@@ -52,8 +40,8 @@ export const getDragoDetails = async (
   }
 
   await Promise.all([
-    poolApi.contract.dragoeventful.init(),
-    poolApi.contract.drago.init(dragoAddress)
+    poolApiWeb3.contract.dragoeventful.init(),
+    poolApiWeb3.contract.drago.init(dragoAddress)
   ]).catch(e => new Error(e))
 
   //
@@ -64,17 +52,17 @@ export const getDragoDetails = async (
     const hexPoolAddress = '0x' + address.substr(2).padStart(64, '0')
 
     let topics = [
-      [poolApi.contract.dragoeventful.hexSignature.DragoCreated],
+      [poolApiWeb3.contract.dragoeventful.hexSignature.DragoCreated],
       [hexPoolAddress],
       null,
       null
     ]
 
     let arrayPromises = []
-    return web3.eth.getBlockNumber().then(async lastBlock => {
-      let chunck = 250000
+    return newWeb3.eth.getBlockNumber().then(async lastBlock => {
+      let chunck = 100000
       lastBlock = new BigNumber(lastBlock).toNumber()
-      const chunks = await getBlockChunks(fromBlock, lastBlock, chunck, web3)
+      const chunks = await getBlockChunks(fromBlock, lastBlock, chunck, newWeb3)
       // const chunks = blockChunks(fromBlock, lastBlock, chunck)
       arrayPromises = chunks.map(async chunk => {
         // Pushing chunk logs into array
@@ -84,8 +72,8 @@ export const getDragoDetails = async (
           toBlock: chunk.toBlock
         }
         // let contractHttp = new web3Http.eth.Contract(
-        //   poolApi.contract.dragoeventful._abi,
-        //   poolApi.contract.dragoeventful._contractAddress
+        //   poolApiWeb3.contract.dragoeventful._abi,
+        //   poolApiWeb3.contract.dragoeventful._contractAddress
         // )
 
         // return contractHttp
@@ -99,7 +87,7 @@ export const getDragoDetails = async (
         //     return logs
         //   })
 
-        return poolApi.contract.dragoeventful
+        return poolApiWeb3.contract.dragoeventful
           .getAllLogs(options)
           .then(logs => {
             return logs
@@ -115,7 +103,7 @@ export const getDragoDetails = async (
           if (results.length > 0) {
             let logs = [].concat(...results)
             if (logs.length !== 0) {
-              return web3.eth
+              return newWeb3.eth
                 .getBlock(logs[0].blockNumber.toFixed(0))
                 .then(result => {
                   let date
@@ -154,10 +142,10 @@ export const getDragoDetails = async (
   }
 
   let balanceDRG = new BigNumber(0)
-  let dragoData = poolApi.contract.drago.getData()
-  let dragoTotalSupply = poolApi.contract.drago.totalSupply()
-  let dragoETH = poolApi.contract.drago.getBalance()
-  let dragoWETH = poolApi.contract.drago.getBalanceWETH()
+  let dragoData = poolApiWeb3.contract.drago.getData()
+  let dragoTotalSupply = poolApiWeb3.contract.drago.totalSupply()
+  let dragoETH = poolApiWeb3.contract.drago.getBalance()
+  let dragoWETH = poolApiWeb3.contract.drago.getBalanceWETH()
 
   //
   // Getting balance for each user account
@@ -165,14 +153,14 @@ export const getDragoDetails = async (
   if (accounts.length > 1) {
     balanceDRG = Promise.all(
       accounts.map(async account => {
-        const balance = await poolApi.contract.drago
+        const balance = await poolApiWeb3.contract.drago
           .balanceOf(account.address)
           .catch(e => new Error(e))
         balanceDRG = balanceDRG.plus(balance)
       })
     )
   } else {
-    balanceDRG = poolApi.contract.drago.balanceOf(accounts[0].address)
+    balanceDRG = poolApiWeb3.contract.drago.balanceOf(accounts[0].address)
   }
 
   try {
@@ -210,8 +198,46 @@ export const getDragoDetails = async (
     throw new Error(err)
   }
 
-  let sellPrice = formatEth(dragoData[2], 4)
-  let buyPrice = formatEth(dragoData[3], 4)
+  // try {
+  //   ;[
+  //     // dragoCreatedDate,
+  //     dragoData,
+  //     dragoTotalSupply,
+  //     dragoETH,
+  //     dragoWETH,
+  //     balanceDRG
+  //   ] = await Promise.all([
+  //     // dragoCreatedDate,
+  //     dragoData,
+  //     dragoTotalSupply,
+  //     dragoETH,
+  //     dragoWETH,
+  //     balanceDRG
+  //   ]).catch(e => {
+  //     console.log(e)
+  //     return new Error(e)
+  //   })
+  //   console.log(
+  //     // dragoCreatedDate,
+  //     dragoData,
+  //     dragoTotalSupply,
+  //     dragoETH,
+  //     dragoWETH,
+  //     balanceDRG
+  //   )
+  // } catch (e) {
+  //   console.log(e)
+  //   return new Error(e)
+  // }
+
+  let sellPrice = ethers.utils.bigNumberify(dragoData[2]).toHexString()
+  let buyPrice = ethers.utils.bigNumberify(dragoData[3]).toHexString()
+
+  sellPrice = api.utils.fromWei(sellPrice)
+  buyPrice = api.utils.fromWei(buyPrice)
+
+  sellPrice = new BigNumber(sellPrice).toFormat(4)
+  buyPrice = new BigNumber(buyPrice).toFormat(4)
 
   let details = {
     address: dragoDetails[0][0],

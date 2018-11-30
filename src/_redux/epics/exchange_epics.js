@@ -187,18 +187,25 @@ export const getOrderBookFromRelayEpic = action$ => {
 // UPDATE LIQUIDITY AND TOKEN BALANCES IN FUND
 //
 
-const updateLiquidityAndTokenBalances$ = (fundAddress, state$) => {
-  const { selectedRelay, selectedTokensPair } = state$.value.exchange
-  const { networkInfo } = state$.value.endpoint
+const updateLiquidityAndTokenBalances$ = (api, fundAddress, currentState) => {
+  // const tokens = {
+  //   baseToken: currentState.exchange.selectedTokensPair.baseToken,
+  //   quoteToken: currentState.exchange.selectedTokensPair.quoteToken
+  // }
+  const exchange = Object.assign(currentState.exchange.selectedRelay)
+  const selectedTokensPair = Object.assign(
+    currentState.exchange.selectedTokensPair
+  )
   return from(
     utils.getDragoLiquidityAndTokenBalances(
       fundAddress,
-      networkInfo,
+      api,
       selectedTokensPair,
-      selectedRelay
+      exchange
     )
   ).pipe(
     mergeMap(liquidity => {
+      // console.log(liquidity)
       const payload = {
         loading: false,
         liquidity: {
@@ -213,6 +220,7 @@ const updateLiquidityAndTokenBalances$ = (fundAddress, state$) => {
           }
         }
       }
+      // console.log(payload)
       return Observable.concat(
         Observable.of(Actions.exchange.updateSelectedFund(payload)),
         Observable.of(
@@ -230,9 +238,11 @@ export const getLiquidityAndTokenBalancesEpic = (action$, state$) => {
   return action$.pipe(
     ofType(TYPE_.UPDATE_LIQUIDITY_AND_TOKENS_BALANCE),
     exhaustMap(action => {
+      const currentState = state$.value
       return updateLiquidityAndTokenBalances$(
+        action.payload.api,
         action.payload.dragoAddress,
-        state$
+        currentState
       )
     })
   )
@@ -267,7 +277,7 @@ export const resetLiquidityAndTokenBalancesEpic = action$ => {
 export const updateLiquidityAndTokenBalancesEpic = (action$, state$) => {
   return action$.pipe(
     ofType(TYPE_.UPDATE_LIQUIDITY_AND_TOKENS_BALANCE_START),
-    switchMap(() => {
+    switchMap(action => {
       return timer(0, 10000).pipe(
         takeUntil(
           action$.pipe(ofType(TYPE_.UPDATE_LIQUIDITY_AND_TOKENS_BALANCE_STOP))
@@ -283,9 +293,11 @@ export const updateLiquidityAndTokenBalancesEpic = (action$, state$) => {
           return val
         }),
         exhaustMap(() => {
+          const currentState = state$.value
           return updateLiquidityAndTokenBalances$(
-            state$.value.exchange.selectedFund.details.address,
-            state$
+            action.payload.api,
+            currentState.exchange.selectedFund.details.address,
+            currentState
           )
         })
       )

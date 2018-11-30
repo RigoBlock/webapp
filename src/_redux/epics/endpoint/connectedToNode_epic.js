@@ -12,8 +12,10 @@ import Web3Wrapper from '../../../_utils/web3Wrapper/src'
 export const connectedToNodeEpic = (action$, state$) =>
   action$.ofType(TYPE_.CHECK_APP_IS_CONNECTED).pipe(
     mergeMap(() => {
-      const web3 = Web3Wrapper.getInstance(state$.value.endpoint.networkInfo.id)
-      return web3.rigoblock.ob.nodeStatus$.pipe(
+      const instance = Web3Wrapper.getInstance(
+        state$.value.endpoint.networkInfo.id
+      )
+      return instance.rigoblock.ob.nodeStatus$.pipe(
         distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b))
       )
     }),

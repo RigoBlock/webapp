@@ -65,13 +65,12 @@ const saveSubsetFilterApp = createFilter('app', [
   // 'isConnected',
   // 'isSyncing',
   'lastBlockNumberUpdate',
-  'accountsAddressHash',
+  // 'accountsAddressHash',
   'config'
 ])
-const saveSubsetFilterTransactionsDrago = createFilter('transactionsDrago', [
-  'holder',
-  'manager'
-])
+// const saveSubsetFilterTransactionsDrago = createFilter('transactionsDrago', [
+//   'dragosList'
+// ])
 //   const saveSubsetBlacklistFilter = createBlacklistFilter(
 //     'endpoint',
 //     ['accounts']
@@ -81,11 +80,11 @@ const persistConfig = {
   key: 'rigoblock',
   storage,
   stateReconciler: autoMergeLevel2,
-  whitelist: ['endpoint', 'app', 'user', 'transactionsDrago'],
+  whitelist: ['endpoint', 'app', 'user'],
   transforms: [
     saveSubsetFilterEndpoint,
-    saveSubsetFilterApp,
-    saveSubsetFilterTransactionsDrago
+    saveSubsetFilterApp
+    // saveSubsetFilterTransactionsDrago
     // saveSubsetFilterApp
     // saveSubsetBlacklistFilter
   ]
@@ -108,6 +107,7 @@ let store = createStore(persistedReducer, enhancer)
 epicMiddleware.run(rootEpic)
 
 let persistor = persistStore(store)
+console.log(store.getState())
 
 ReactDOM.render(
   <Provider store={store}>

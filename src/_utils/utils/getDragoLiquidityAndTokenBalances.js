@@ -4,14 +4,93 @@ import BigNumber from 'bignumber.js'
 import PoolApi from '../../PoolsApi/src'
 import Web3Wrapper from '../web3Wrapper/src'
 
-export const getDragoLiquidityAndTokenBalances = async (
+export const getDragoLiquidityAndTokenBalances2 = async (
   dragoAddress,
-  networkInfo,
+  api,
   selectedTokensPair,
   exchange
 ) => {
-  let web3 = Web3Wrapper.getInstance(networkInfo.id)
-  const poolApi = new PoolApi(web3)
+  let newWeb3 = Web3Wrapper.getInstance(api._rb.network.id)
+  newWeb3._rb = window.web3._rb
+  const poolApi = new PoolApi(newWeb3)
+  poolApi.contract.drago.init(dragoAddress)
+  let { baseTokenLockWrapExpire, quoteTokenLockWrapExpire } = selectedTokensPair
+  let dragoETHBalance = await poolApi.contract.drago.getBalance()
+  // dragoZRXBalance: await poolApi.contract.drago.getBalanceZRX(),
+  let baseTokenBalance =
+    selectedTokensPair.baseToken.address !== '0x0'
+      ? await poolApi.contract.drago.getPoolBalanceOnToken(
+          selectedTokensPair.baseToken.address
+        )
+      : await poolApi.contract.drago.getBalance()
+
+  let quoteTokenBalance =
+    selectedTokensPair.quoteToken.address !== '0x0'
+      ? await poolApi.contract.drago.getPoolBalanceOnToken(
+          selectedTokensPair.quoteToken.address
+        )
+      : await poolApi.contract.drago.getBalance()
+
+  let baseTokenWrapperBalance,
+    quoteTokenWrapperBalance = new BigNumber(0)
+  if (exchange.isTokenWrapper) {
+    // Getting token wrapper balance
+    baseTokenWrapperBalance = await poolApi.contract.drago.getPoolBalanceOnToken(
+      selectedTokensPair.baseToken.wrappers[exchange.name].address
+    )
+    quoteTokenWrapperBalance = await poolApi.contract.drago.getPoolBalanceOnToken(
+      selectedTokensPair.quoteToken.wrappers[exchange.name].address
+    )
+    // Getting token wrapper lock time
+    baseTokenLockWrapExpire = await getTokenWrapperLockTime(
+      api,
+      selectedTokensPair.baseToken.wrappers[exchange.name].address,
+      dragoAddress
+    )
+    // console.log(
+    //   `Exp base token: ${moment
+    //     .unix(baseTokenLockWrapExpire)
+    //     .format('MMMM Do YYYY, h:mm:ss a')}`
+    // )
+    quoteTokenLockWrapExpire = await getTokenWrapperLockTime(
+      api,
+      selectedTokensPair.quoteToken.wrappers[exchange.name].address,
+      dragoAddress
+    )
+    //   console.log(
+    //   `Exp quote token: ${moment
+    //     .unix(quoteTokenLockWrapExpire)
+    //     .format('MMMM Do YYYY, h:mm:ss a')}`
+    // )
+  }
+
+  const liquidity = {
+    dragoETHBalance,
+    // dragoZRXBalance: await poolApi.contract.drago.getBalanceZRX(),
+    baseTokenBalance,
+    baseTokenWrapperBalance,
+    quoteTokenBalance,
+    quoteTokenWrapperBalance
+  }
+  for (let key in liquidity) {
+    liquidity[key] = new BigNumber(liquidity[key])
+  }
+
+  liquidity.baseTokenLockWrapExpire = baseTokenLockWrapExpire
+  liquidity.quoteTokenLockWrapExpire = quoteTokenLockWrapExpire
+
+  return liquidity
+}
+
+export const getDragoLiquidityAndTokenBalances = async (
+  dragoAddress,
+  api,
+  selectedTokensPair,
+  exchange
+) => {
+  let newWeb3 = Web3Wrapper.getInstance(api._rb.network.id)
+  newWeb3._rb = window.web3._rb
+  const poolApi = new PoolApi(newWeb3)
   poolApi.contract.drago.init(dragoAddress)
   let { baseTokenLockWrapExpire, quoteTokenLockWrapExpire } = selectedTokensPair
 
@@ -47,7 +126,7 @@ export const getDragoLiquidityAndTokenBalances = async (
     )
     // Getting token wrapper lock time
     baseTokenLockWrapExpire = getTokenWrapperLockTime(
-      web3,
+      api,
       selectedTokensPair.baseToken.wrappers[exchange.name].address,
       dragoAddress
     )
@@ -58,7 +137,7 @@ export const getDragoLiquidityAndTokenBalances = async (
     //     .format('MMMM Do YYYY, h:mm:ss a')}`
     // )
     quoteTokenLockWrapExpire = getTokenWrapperLockTime(
-      web3,
+      api,
       selectedTokensPair.quoteToken.wrappers[exchange.name].address,
       dragoAddress
     )

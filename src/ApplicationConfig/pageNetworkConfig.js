@@ -175,11 +175,7 @@ class PageNetworkConfig extends Component {
                 value={this.state.selectedNetwork}
                 onChange={this.onChangeNetwork}
               >
-                <MenuItem
-                  value={0}
-                  disabled={true}
-                  primaryText="Ethereum Kovan"
-                />
+                <MenuItem value={0} primaryText="Ethereum Kovan" />
                 <MenuItem value={1} primaryText="Ethereum Ropsten" />
                 <MenuItem
                   // disabled={true}
