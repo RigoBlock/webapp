@@ -1,7 +1,7 @@
 // Copyright 2017 Rigo Investment Sagl.
 // This file is part of RigoBlock.
 
-import { ENDPOINTS, INFURA, KOVAN, PROD, WS } from './const'
+import { ENDPOINTS, KOVAN, PROD, WS } from './const'
 import Web3 from 'web3'
 import Web3Wrapper from '../_utils/web3Wrapper/src'
 

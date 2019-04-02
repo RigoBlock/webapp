@@ -25,11 +25,11 @@ import {
 import { sha3_512 } from 'js-sha3'
 // import ToggleSwitch from '../atoms/toggleSwitch'
 import { notificationWrapper } from '../../_utils/notificationWrapper'
-import { toBaseUnitAmount } from '../../_utils/format'
-import BigNumber from 'bignumber.js'
+// import { toBaseUnitAmount } from '../../_utils/format'
+// import BigNumber from 'bignumber.js'
 import BoxDecorator from '../molecules/boxDecorator'
 import ShowStatusMsg from '../atoms/showStatusMsg'
-import moment from 'moment'
+// import moment from 'moment'
 import serializeError from 'serialize-error'
 import utils from '../../_utils/utils'
 
@@ -111,11 +111,11 @@ class OrderBox extends Component {
       selectedOrder,
       selectedExchange,
       walletAddress,
-      selectedTokensPair,
-      selectedFund
+      selectedTokensPair, // eslint-disable-line no-unused-vars
+      selectedFund // eslint-disable-line no-unused-vars
     } = this.props.exchange
 
-    let balanceWrapper, decimals, orderAmountBaseUnit, tokenSymbol
+    let balanceWrapper, decimals, orderAmountBaseUnit, tokenSymbol // eslint-disable-line no-unused-vars
 
 /*
 // TODO: remove after testing
@@ -294,7 +294,7 @@ class OrderBox extends Component {
           })
 
 
-          let parsedBody = await submitOrderToRelayEFX(
+          let parsedBody = await submitOrderToRelayEFX( // eslint-disable-line no-unused-vars
             efxOrder,
             endpoint.networkInfo.id
           )
@@ -349,7 +349,7 @@ class OrderBox extends Component {
 
   onBuySell = async orderType => {
 
-    const { selectedTokensPair } = this.props.exchange
+    const { selectedTokensPair } = this.props.exchange // eslint-disable-line no-unused-vars
 
     /*if (orderType === 'asks') {
       if (

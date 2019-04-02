@@ -19,6 +19,7 @@
     "css-loader": "^1.0.0",
     "d3-dsv": "^1.0.8",
     "detect-browser": "^3.0.0",
+    "es6-promise": "^4.2.6",
     "ethers": "^4.0.13",
     "install": "^0.12.2",
     "is-number": "^7.0.0",

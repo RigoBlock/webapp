@@ -1,14 +1,13 @@
-import { HTTP_EVENT_FETCHING, METAMASK } from '../const'
 import { formatCoins } from './../format'
 import { getBlockChunks } from '../blockChain/getBlockChunks'
 import { getTransactionsSingleVault } from './getTransactionsSingleVault'
 import { logToEvent } from '../blockChain/logToEvent'
-import BigNumber from 'bignumber.js'
+import { BigNumber } from 'bignumber.js'
 import PoolApi from '../../PoolsApi/src'
-import Web3 from 'web3'
-import Web3Wrapper from '../../_utils/web3Wrapper/src'
+import { getFromBlock, getWeb3 } from '../../_utils/misc'
 import moment from 'moment'
 
+// TODO: if error in upgrading from v0, comment console.log()
 export const getTransactionsVaultOptV2 = async (
   networkInfo,
   poolAddress,
@@ -32,38 +31,11 @@ export const getTransactionsVaultOptV2 = async (
   if (accounts.length === 0) {
     return [Array(0), Array(0), Array(0)]
   }
-
-  let web3
-  switch (options.wallet) {
-    case METAMASK: {
-      web3 = window.web3
-      break
-    }
-    default: {
-      if (HTTP_EVENT_FETCHING) {
-        web3 = new Web3(networkInfo.transportHttp)
-      } else {
-        web3 = Web3Wrapper.getInstance(networkInfo.id)
-      }
-    }
-  }
+  const web3 = getWeb3(networkInfo)
+  const fromBlock = getFromBlock(networkInfo)
 
   const poolApi = new PoolApi(web3)
   let dragoSymbolRegistry = new Map()
-  let fromBlock
-  switch (networkInfo.id) {
-    case 1:
-      fromBlock = '6000000'
-      break
-    case 42:
-      fromBlock = '7000000'
-      break
-    case 3:
-      fromBlock = '3000000'
-      break
-    default:
-      fromBlock = '3000000'
-  }
 
   console.log(
     `***** ${moment().format()} Utils: ${
