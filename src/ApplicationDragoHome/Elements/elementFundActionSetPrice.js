@@ -19,6 +19,7 @@ import Paper from 'material-ui/Paper'
 import PoolApi from '../../PoolsApi/src'
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
+import Web3 from 'web3'
 import styles from './elementFundActionSetPrice.module.css'
 
 function mapStateToProps(state) {
@@ -316,7 +317,7 @@ class ElementFundActionSetPrice extends Component {
     this.setState({
       sending: true
     })
-    let provider = this.state.account.source === 'MetaMask' ? window.web3 : api
+    let provider = this.state.account.source === 'MetaMask' ? new Web3(window.ethereum) : api
     const { account } = this.state
 
     // Initializing transaction variables

@@ -17,6 +17,7 @@ import PoolApi from '../../PoolsApi/src'
 import PropTypes from 'prop-types'
 import React from 'react'
 import TextField from 'material-ui/TextField'
+import Web3 from 'web3'
 
 const customContentStyle = {
   minHeight: '500px'
@@ -127,7 +128,7 @@ class ElementFundCreateAction extends React.Component {
       symbol: dragoSymbol
     }
     // Setting variables depending on account source
-    let provider = this.state.account.source === 'MetaMask' ? window.web3 : api
+    let provider = this.state.account.source === 'MetaMask' ? new Web3(window.ethereum) : api
     let poolApi = null
     // Initializing transaction variables
     const authMsg = 'You deployed the fund ' + dragoSymbol + ' | ' + dragoName

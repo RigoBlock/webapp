@@ -111,7 +111,8 @@ export class App extends Component {
     const { endpoint } = this.props
     this.props.dispatch(Actions.endpoint.checkIsConnectedToNode())
     this.props.dispatch(Actions.endpoint.attachInterface(endpoint))
-    if (typeof window.web3 !== 'undefined') {
+    //if (typeof window.web3 !== 'undefined') {
+    if (typeof window.ethereum !== 'undefined') {
       this.props.dispatch(Actions.endpoint.checkMetaMaskIsUnlocked())
     }
     this.props.dispatch(Actions.endpoint.monitorAccountsStart())

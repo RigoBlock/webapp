@@ -4,7 +4,7 @@
 import * as TYPE_ from '../../actions/const'
 // import { Actions } from '../../actions'
 import { DEBUGGING } from '../../../_utils/const'
-import { Observable, merge, timer } from 'rxjs'
+import { Observable, throwError, merge, timer } from 'rxjs'
 import {
   finalize,
   flatMap,
@@ -78,25 +78,30 @@ export const monitorEventfulEpic = (action$, state$) => {
           return Observable.concat(...observablesArray)
         }),
         retryWhen(error => {
-
-          let scalingDuration = 10000
+          const maxRetryAttempts = 10
+          let scalingDuration = 1000
+          let excludedStatusCodes = []
           return error.pipe(
             mergeMap((error, i) => {
               console.warn(error)
               const retryAttempt = i + 1
-
-              return timer(scalingDuration)
+              // if maximum number of retries have been met
+              // or response is a status code we don't wish to retry, throw error
+              if (
+                retryAttempt > maxRetryAttempts ||
+                excludedStatusCodes.find(e => e === error.status)
+              ) {
+                return throwError(error)
+              }
+              console.log(
+                `Attempt ${retryAttempt}: retrying in ${retryAttempt *
+                  scalingDuration}ms`
+              )
+              return timer(retryAttempt + scalingDuration)
             }),
             finalize(() => console.log('We are done!'))
           )
         })
-        // catchError(error => {
-        //   console.log(error)
-        //   return Observable.of({
-        //     type: TYPE_.QUEUE_ERROR_NOTIFICATION,
-        //     payload: 'Error: cannot subscribe to eventful.'
-        //   })
-        // })
       )
     })
   )

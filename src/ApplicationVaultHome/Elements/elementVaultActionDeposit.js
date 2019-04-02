@@ -195,7 +195,7 @@ export default class ElementVaultActionDeposit extends Component {
     })
     //let web3
     if (this.state.account.source === 'MetaMask') {
-      const web3 = window.web3
+      const web3 = new Web3(window.ethereum)
       /*if (typeof window.ethereum !== 'undefined') {
         web3 = new Web3(window.ethereum)
         try {

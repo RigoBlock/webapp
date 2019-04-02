@@ -24,11 +24,10 @@ class JoyrideMainIntro extends React.Component {
     if (typeof window.ethereum !== 'undefined') {
       try {
         await window.ethereum.enable()
-      } catch (error) {}
-    } else if (typeof window.web3 !== 'undefined') {
-    }
-    // Non-dapp browsers...
-    else {
+      } catch (error) {
+        console.warn('User denied account access')
+      }
+    } else {
       console.log(
         'Non-Ethereum browser detected. You should consider trying MetaMask!'
       )
@@ -136,7 +135,10 @@ class JoyrideMainIntro extends React.Component {
                   <div style={{ fontWeight: 700 }}>
                     {hasGRGBalance && (
                       <div className={styles.icoDate}>
-                      <a>
+                      <a
+                        href="https://rigoblock.com"
+                        target="_blank"
+                        rel="noopener noreferrer">
                         GRG gives you the full benefit of Proof of Performance. Receive GRG by operating a Vault.
                       </a>
                       </div>

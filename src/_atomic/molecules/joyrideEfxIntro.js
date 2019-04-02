@@ -77,7 +77,10 @@ class JoyrideEfxIntro extends React.Component {
               <div style={{ fontWeight: 700 }}>
                 {hasGRGBalance && (
                   <div className={styles.icoDate}>
-                    <a>
+                    <a
+                      href="https://rigoblock.com"
+                      target="_blank"
+                      rel="noopener noreferrer">
                       GRG gives you the full benefit of Proof of Performance. Receive GRG by operating a Vault.
                     </a>
                   </div>

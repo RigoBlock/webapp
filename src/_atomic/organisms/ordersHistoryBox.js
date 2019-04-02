@@ -56,7 +56,7 @@ class OrdersHistoryBox extends Component {
         this.props.exchange.walletAddress
       )
 
-      let parsedBody = await cancelOrderFromRelayEFX(
+      /*let parsedBody =*/ await cancelOrderFromRelayEFX(
         order.order.id,
         sig,
         endpoint.networkInfo.id

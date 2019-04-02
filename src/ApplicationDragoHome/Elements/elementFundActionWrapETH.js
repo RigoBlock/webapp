@@ -21,6 +21,7 @@ import PoolApi from '../../PoolsApi/src'
 import PropTypes from 'prop-types'
 import RaisedButton from 'material-ui/RaisedButton'
 import React, { Component } from 'react'
+import Web3 from 'web3'
 
 function mapStateToProps(state) {
   return {
@@ -285,7 +286,7 @@ class ElementFundActionWrapETH extends Component {
     this.setState({
       sending: true
     })
-    let provider = account.source === 'MetaMask' ? window.web3 : api
+    let provider = account.source === 'MetaMask' ? new Web3(window.ethereum) : api
 
     const authMsg = 'You un-wrapped ' + amount + ' ETH'
 
@@ -379,7 +380,7 @@ class ElementFundActionWrapETH extends Component {
     this.setState({
       sending: true
     })
-    let provider = account.source === 'MetaMask' ? window.web3 : api
+    let provider = account.source === 'MetaMask' ? new Web3(window.ethereum) : api
 
     const authMsg = 'You wrapped ' + amount + ' ETH'
 

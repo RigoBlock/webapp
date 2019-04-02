@@ -34,7 +34,7 @@ class ErcdexAllowance extends Component {
       : (amount = '0')
     const notificationEngine = notificationWrapper.getInstance()
     try {
-      const result = await setAllowaceOnExchangeThroughDrago(
+      await setAllowaceOnExchangeThroughDrago(
         selectedFund,
         selectedTokensPair.quoteToken,
         selectedExchange,
@@ -62,7 +62,7 @@ class ErcdexAllowance extends Component {
       ? (amount = UNLIMITED_ALLOWANCE_IN_BASE_UNITS)
       : (amount = '0')
     try {
-      const result = await setAllowaceOnExchangeThroughDrago(
+      await setAllowaceOnExchangeThroughDrago(
         selectedFund,
         selectedTokensPair.baseToken,
         selectedExchange,

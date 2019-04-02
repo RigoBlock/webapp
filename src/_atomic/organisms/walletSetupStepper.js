@@ -15,6 +15,7 @@ import PropTypes from 'prop-types'
 import RaisedButton from 'material-ui/RaisedButton'
 import React, { Component } from 'react'
 import SectionHeader from '../atoms/sectionHeader'
+import Web3 from 'web3'
 import styles from './walletSetupStepper.module.css'
 
 function mapStateToProps(state) {
@@ -113,8 +114,11 @@ class WalletSetupStepper extends Component {
   getGRGFromFaucet = async () => {
     const { networkInfo } = this.props.endpoint
     const faucetAddress = ERC20_TOKENS[networkInfo.name].GRG.faucetAddress
-    const accounts = await window.web3.eth.getAccounts()
-    const poolApi = new PoolApi(window.web3)
+    const web3 = window.web3.currentProvider.isMetaMask
+                      ? new Web3(window.ethereum)
+                      : window.web3
+    const accounts = await web3.eth.getAccounts()
+    const poolApi = new PoolApi(web3)
     await poolApi.contract.rigotokenfaucet.init(faucetAddress)
     try {
       await poolApi.contract.rigotokenfaucet.drip1Token(accounts[0])

@@ -9,7 +9,7 @@ import PropTypes from 'prop-types'
 import RaisedButton from 'material-ui/RaisedButton'
 import React from 'react'
 import TextField from 'material-ui/TextField'
-
+import Web3 from 'web3'
 import { Table, TableBody, TableRow, TableRowColumn } from 'material-ui/Table'
 
 import {
@@ -257,7 +257,7 @@ class ElementVaultActions extends React.Component {
     const { vaultDetails } = this.props
     const accountError = validateAccount(account, api)
     // Setting variables depending on account source
-    // var provider = account.source === 'MetaMask' ? window.web3 : api
+    // var provider = account.source === 'MetaMask' ? new Web3(window.ethereum) : api
     let provider = api
     this.setState(
       {
@@ -450,7 +450,7 @@ class ElementVaultActions extends React.Component {
       vaultDetails.symbol.toUpperCase()
     const transactionId = api.utils.sha3(new Date() + accountAddress)
     // Setting variables depending on account source
-    let provider = this.state.account.source === 'MetaMask' ? window.web3 : api
+    let provider = this.state.account.source === 'MetaMask' ? new Web3(window.ethereum) : api
     let poolApi = null
     // Initializing transaction variables
     let transactionDetails = {
@@ -549,7 +549,7 @@ class ElementVaultActions extends React.Component {
       vaultDetails.symbol.toUpperCase()
     const transactionId = api.utils.sha3(new Date() + accountAddress)
     // Setting variables depending on account source
-    let provider = this.state.account.source === 'MetaMask' ? window.web3 : api
+    let provider = this.state.account.source === 'MetaMask' ? new Web3(window.ethereum) : api
     let poolApi = null
     // Initializing transaction variables
     let transactionDetails = {
@@ -846,7 +846,7 @@ class ElementVaultActions extends React.Component {
     }
     return (
       <div>
-        {/* <RaisedButton label="Trade" primary={true} onClick={this.handleOpen} 
+        {/* <RaisedButton label="Trade" primary={true} onClick={this.handleOpen}
           labelStyle={{fontWeight: 700, fontSize: '20px'}}/> */}
         <Dialog
           title={

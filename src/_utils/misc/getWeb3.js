@@ -1,4 +1,4 @@
-import { HTTP_EVENT_FETCHING, METAMASK } from '../const'
+import { /*HTTP_EVENT_FETCHING,*/ METAMASK } from '../const'
 import Web3 from 'web3'
 import Web3Wrapper from '../web3Wrapper/src'
 
@@ -10,9 +10,15 @@ export const getWeb3 = (networkInfo, options = { wallet: '' }) => {
 
   switch (options.wallet) {
     case METAMASK: {
-      if (typeof window !== 'undefined') {
-        //web3 = window.web3
+      if (typeof window.ethereum !== 'undefined') {
         web3 = new Web3(window.ethereum)
+        /*try {
+          await window.ethereum.enable()
+        } catch (error) {
+          console.warn('User denied account access')
+        }*/
+      } else if (typeof window.web3 !== 'undefined') {
+        web3 = window.web3
       } else {
         web3 = 'Test env'
       }
@@ -20,13 +26,12 @@ export const getWeb3 = (networkInfo, options = { wallet: '' }) => {
     }
     default: {
       web3 = Web3Wrapper.getInstance(networkInfo.id)
-      if (HTTP_EVENT_FETCHING) {
+      /*if (HTTP_EVENT_FETCHING) {
         web3 = new Web3(web3._rb.network.transportHttp)
       } else {
         web3 = Web3Wrapper.getInstance(networkInfo.id)
-      }
+      }*/
     }
   }
   return web3
 }
-// TODO: review web3 injection

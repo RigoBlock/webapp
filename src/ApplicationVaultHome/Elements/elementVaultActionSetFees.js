@@ -20,6 +20,7 @@ import Paper from 'material-ui/Paper'
 import PoolApi from '../../PoolsApi/src'
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
+import Web3 from 'web3'
 import styles from './elementVaultActionSetFees.module.css'
 
 //TODO: add address exchange
@@ -301,7 +302,7 @@ class ElementVaultActionSetFees extends Component {
     const price = this.state.price
     const accountAddress = this.state.account.address
     let poolApi = null
-    let provider = this.state.account.source === 'MetaMask' ? window.web3 : api
+    let provider = this.state.account.source === 'MetaMask' ? new Web3(window.ethereum) : api
     this.setState({
       sending: true
     })

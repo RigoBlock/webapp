@@ -23,6 +23,7 @@ import PropTypes from 'prop-types'
 import RaisedButton from 'material-ui/RaisedButton'
 import React from 'react'
 import TextField from 'material-ui/TextField'
+import Web3 from 'web3'
 import styles from './elementFundActions.module.css'
 
 const customContentStyle = {
@@ -275,7 +276,7 @@ class ElementFundActions extends React.Component {
     const { dragoDetails } = this.props
     const accountError = validateAccount(account, api)
     // Setting variables depending on account source
-    let provider = account.source === 'MetaMask' ? window.web3 : api
+    let provider = account.source === 'MetaMask' ? new Web3(window.ethereum) : api
     // let provider = api
     this.setState(
       {
@@ -463,7 +464,7 @@ class ElementFundActions extends React.Component {
     const transactionId = api.utils.sha3(new Date() + account.address)
 
     // Setting variables depending on account source
-    let provider = account.source === 'MetaMask' ? window.web3 : api
+    let provider = account.source === 'MetaMask' ? new Web3(window.ethereum) : api
     let poolApi = null
 
     // Initializing transaction variables
@@ -593,7 +594,7 @@ class ElementFundActions extends React.Component {
     const transactionId = api.utils.sha3(new Date() + account.address)
 
     // Setting variables depending on account source
-    let provider = account.source === 'MetaMask' ? window.web3 : api
+    let provider = account.source === 'MetaMask' ? new Web3(window.ethereum) : api
     let poolApi = null
 
     // Initializing transaction variables
@@ -886,7 +887,7 @@ class ElementFundActions extends React.Component {
     }
     return (
       <div>
-        {/* <RaisedButton label="Trade" primary={true} onClick={this.handleOpen} 
+        {/* <RaisedButton label="Trade" primary={true} onClick={this.handleOpen}
           labelStyle={{fontWeight: 700, fontSize: '20px'}}/> */}
         <Dialog
           title={

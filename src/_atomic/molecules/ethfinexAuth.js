@@ -36,9 +36,11 @@ class EthfinexAuth extends Component {
     this.setState({ showSignMsg: true })
 
     try {
-      // var provider = account.source === 'MetaMask' ? window.web3 : api
+      // var provider = account.source === 'MetaMask' ? new Web3(window.ethereum) : api
       const token = Date.now() / 1000 + 3600 + ''
-      let web3 = new Web3(window.web3)
+      const web3 = window.web3.currentProvider.isMetaMask
+                        ? new Web3(window.ethereum)
+                        : new Web3(window.web3)
       let result = await web3.eth.personal.sign(
         token,
         this.props.exchange.walletAddress

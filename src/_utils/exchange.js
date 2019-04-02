@@ -32,8 +32,8 @@ export const setAllowaceOnExchangeThroughDrago = (
   selectedExchange,
   amount
 ) => {
-  // var provider = account.source === 'MetaMask' ? window.web3 : api
-  const poolApi = new PoolApi(window.web3)
+  //const web3 = account.source === 'MetaMask' ? new Web3(window.ethereum) : api
+  const poolApi = new PoolApi(new Web3(window.ethereum))
   poolApi.contract.drago.init(selectedFund.details.address)
 
   console.log(
@@ -330,7 +330,6 @@ export const signOrder = async (order, selectedExchange, walletAddress) => {
   const quoteTokenDecimals = order.selectedTokensPair.quoteToken.decimals
 
   let makerAssetAmount, takerAssetAmount
-  //const zeroEx = new ZeroEx(window.web3.currentProvider, selectedExchange)
   const providerEngine = window.web3.currentProvider.isMetaMask
                     ? new MetamaskSubprovider(window.web3.currentProvider)
                     : window.web3.currentProvider
@@ -716,7 +715,7 @@ export const fillOrderToExchangeViaProxy = async (
   )
 
   let poolApi = null
-  poolApi = new PoolApi(window.web3)
+  poolApi = new PoolApi(new Web3(window.ethereum))
   poolApi.contract.drago.init(selectedFund.details.address)
   return poolApi.contract.drago.fillOrderOnZeroExExchange(
     selectedFund.managerAccount,
@@ -768,7 +767,7 @@ export const cancelOrderOnExchangeViaProxy = async (
   )
 
   let poolApi = null
-  poolApi = new PoolApi(window.web3)
+  poolApi = new PoolApi(new Web3(window.ethereum))
   poolApi.contract.drago.init(selectedFund.details.address)
   return poolApi.contract.drago.cancelOrderOnZeroExExchange(
     selectedFund.managerAccount,
