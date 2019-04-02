@@ -256,7 +256,8 @@ const ethfinexEventful$ = (fund, networkInfo) => {
   const web3 = Web3Wrapper.getInstance(networkInfo.id)
   return web3.rigoblock.ob.exchangeEfxV0$.pipe(
     filter(val => {
-      return val.returnValues.maker.toLowerCase() === fund.address.toLowerCase()
+      // TODO: verify whiy val.returnValues (return values from 0x v2 exchange) is empty object
+      return val.returnValues.makerAddress.toLowerCase() === fund.address.toLowerCase()
     }),
     map(val => [val])
   )

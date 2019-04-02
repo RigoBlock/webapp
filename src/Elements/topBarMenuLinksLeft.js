@@ -3,7 +3,7 @@ import { Hidden, Visible } from 'react-grid-system'
 import { Link, withRouter } from 'react-router-dom'
 import { THEME_COLOR } from './../_utils/const'
 import { Toolbar, ToolbarGroup } from 'material-ui/Toolbar'
-import { connect } from 'react-redux'
+// import { connect } from 'react-redux'
 import ActionAccountBalance from 'material-ui/svg-icons/action/account-balance'
 import ActionHome from 'material-ui/svg-icons/action/home'
 import ActionPolymer from 'material-ui/svg-icons/action/polymer'
@@ -15,7 +15,7 @@ import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert'
 import PropTypes from 'prop-types'
 import React, { PureComponent } from 'react'
 import TopMenuLinkLong from '../_atomic/molecules/topMenuLinkLong'
-import utils from '../_utils/utils'
+// import utils from '../_utils/utils'
 
 // function mapStateToProps(state) {
 //   return state

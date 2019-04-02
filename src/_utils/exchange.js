@@ -2,7 +2,7 @@
 // This file is part of RigoBlock.
 
 import * as abis from '../PoolsApi/src/contracts/abi'
-import { INFURA, KOVAN, PROD, WS } from './const'
+import { KOVAN, PROD, WS } from './const'
 import {
     //assetDataUtils,
     BigNumber,
@@ -16,7 +16,7 @@ import {
 import { Web3Wrapper } from '@0x/web3-wrapper'
 import { MetamaskSubprovider } from '@0x/subproviders'
 //import { ECSignature, SignatureType, SignedOrder, ValidatorSignature } from '@0x/types';
-import { SignatureType } from '@0x/types';
+//import { SignatureType } from '@0x/types';
 //import ExchangeConnectorWrapper from './exchangeConnector'
 //import { EFX } from 'efx-api-node'
 
@@ -392,10 +392,13 @@ export const signOrder = async (order, selectedExchange, walletAddress) => {
       )
       break
   }
+
+/*
   const tokensAmounts = {
     makerAssetAmount,
     takerAssetAmount
   }
+*/
 
   order.details.order.makerAssetAmount = makerAssetAmount.toString()
   order.details.order.takerAssetAmount = takerAssetAmount.toString()
@@ -665,7 +668,7 @@ export const fillOrderToExchange = async (
       shouldValidate: false
     }
   )
-  const txReceipt = await zeroEx.awaitTransactionMinedAsync(txHash)
+  /*const txReceipt =*/ await zeroEx.awaitTransactionMinedAsync(txHash)
 
 }
 

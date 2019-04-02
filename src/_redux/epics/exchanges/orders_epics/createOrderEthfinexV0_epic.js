@@ -1,7 +1,7 @@
 import * as TYPE_ from '../../../actions/const'
 import { Actions } from '../../../actions/'
 import { Observable, of } from 'rxjs'
-import { signatureUtils, generatePseudoRandomSalt } from '0x.js'
+import { /*signatureUtils,*/ generatePseudoRandomSalt } from '0x.js'
 import { map, mergeMap, tap } from 'rxjs/operators'
 import { ofType } from 'redux-observable'
 import {
@@ -56,6 +56,7 @@ const newMakerOrderV0 = (orderSide, options, state$) => {
 
   const web3 = new Web3()
 
+/*
   const ERC20_METHOD_ABI = {
     constant: false,
     inputs: [
@@ -71,7 +72,6 @@ const newMakerOrderV0 = (orderSide, options, state$) => {
     type: 'function',
   }
 
-/*
   const encodedMakerToken = web3.eth.abi.encodeFunctionCall(
     ERC20_METHOD_ABI,
     [makerTokenAddress.toLowerCase()]
