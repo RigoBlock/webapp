@@ -445,7 +445,7 @@ export const signOrder = async (order, selectedExchange, walletAddress) => {
     signatureWallerType,
     order.details.order.makerAddress
     )
-  console.log(isValidSignature, signatureWallerType)
+
 */
   const signedWalletOrder = {
       ...signedOrderDefaultType
@@ -928,7 +928,7 @@ class Exchange {
         orderPrice,
         orderHash
       }
-      console.log(orderObject)
+
       return orderObject
     })
     return formattedOrders
