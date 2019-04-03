@@ -40,7 +40,7 @@ class EthfinexAuth extends Component {
       const token = Date.now() / 1000 + 3600 + ''
       const web3 = window.web3.currentProvider.isMetaMask
                         ? new Web3(window.ethereum)
-                        : new Web3(window.web3)
+                        : window.web3.currentProvider
       let result = await web3.eth.personal.sign(
         token,
         this.props.exchange.walletAddress

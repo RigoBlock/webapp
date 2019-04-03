@@ -464,8 +464,21 @@ class ElementFundActions extends React.Component {
     const transactionId = api.utils.sha3(new Date() + account.address)
 
     // Setting variables depending on account source
-    let provider = account.source === 'MetaMask' ? new Web3(window.ethereum) : api
-    let poolApi = null
+    // let provider = account.source === 'MetaMask' ? new Web3(window.ethereum) : api
+    let provider = {}
+    if (typeof window.ethereum !== 'undefined') {
+      provider = new Web3(window.ethereum)
+      /*try {
+        await window.ethereum.enable()
+      } catch (error) {
+        console.warn('User denied account access')
+      }*/
+    } else if (typeof window.web3 !== 'undefined') {
+      provider = window.web3.currentProvider
+    } else {
+      provider = api
+    }
+    let poolApi = {}
 
     // Initializing transaction variables
     let transactionDetails = {

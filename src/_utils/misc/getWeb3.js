@@ -18,7 +18,7 @@ export const getWeb3 = (networkInfo, options = { wallet: '' }) => {
           console.warn('User denied account access')
         }*/
       } else if (typeof window.web3 !== 'undefined') {
-        web3 = window.web3
+        web3 = window.web3.currentProvider
       } else {
         web3 = 'Test env'
       }

@@ -31,24 +31,25 @@ const checkMetaMaskIsUnlocked$ = async (endpoint) => {
   let newEndpoint = { ...endpoint }
   let oldAccounts = [].concat(endpoint.accounts)
   let newAccounts = []
-  let accounts = []
+  //let accounts = []
   let metaMaskAccountAddress = ''
   //const web3Metamask = window.web3
   // the following generates eventEmitter leak
   let provider = {}
   if (typeof window.ethereum !== 'undefined') {
-    provider = window['ethereum'] //new Web3(window.ethereum)
+    provider = new Web3(window.ethereum)
     // following has a potential conflict
-    try {
+    /*try {
       accounts = await window.ethereum.enable()
     } catch (error) {
       console.warn('User denied account access')
-    }
+    }*/ // TODO: check where we should
   }
   else {
     provider = window.web3.currentProvider
-    accounts = provider.eth.getAccounts()
+    //accounts = await provider.eth.getAccounts()
   }
+  const accounts = await provider.eth.getAccounts()
   const api = Web3Wrapper.getInstance(endpoint.networkInfo.id)
   // console.log('checkMetaMaskIsUnlocked$')
   return from(accounts).pipe(

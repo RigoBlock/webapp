@@ -113,29 +113,31 @@ class Interfaces {
 
   getAccountsMetamask = async () => {
     // console.log(`${this.constructor.name} -> getAccountsMetamask`)
-    //const web3 = window.web3
-    let web3
+    let provider = {}
+    let accounts = []
     if (typeof window.ethereum !== 'undefined') {
-      web3 = new Web3(window.ethereum)
+      provider = new Web3(window.ethereum) //
+      // this is the first that app calls, call enable here first
       try {
-        await window.ethereum.enable()
+        accounts = await window.ethereum.enable()
       } catch (error) {
         console.warn('User denied account access')
       }
     } else if (typeof window.web3 !== 'undefined') {
-      web3 = window.web3
-      //try {} catch (error) {}
+      provider = window.web3.currentProvider
+      //accounts = await provider.eth.getAccounts()
     }
+    //const accounts = await provider.eth.getAccounts()
     const parityNetworkId = this._parityNetworkId
     let accountsMetaMask = {}
-    if (typeof web3 === 'undefined') {
+    if (typeof window.web3 === 'undefined') {
       console.warn('MetaMask not detected')
       return
     }
     try {
       // Check if MetaMask is connected to the same network as the endpoint
-      let accounts = await web3.eth.getAccounts()
-      let metaMaskNetworkId = await web3.eth.net.getId()
+      //let accounts = await web3.eth.getAccounts()
+      let metaMaskNetworkId = await provider.eth.net.getId()
 
       let isMetaMaskLocked = accounts.length === 0 ? true : false
       let currentState = { ...this._success }
@@ -223,11 +225,11 @@ class Interfaces {
         nonce = new BigNumber(0)
         let accountsMetaMask = {
           [accounts[0]]: {
-            ethBalance: new BigNumber(web3.utils.fromWei(ethBalance)).toFixed(
+            ethBalance: new BigNumber(provider.utils.fromWei(ethBalance)).toFixed(
               3
             ),
             ethBalanceWei: ethBalance,
-            grgBalance: new BigNumber(web3.utils.fromWei(grgBalance)).toFixed(
+            grgBalance: new BigNumber(provider.utils.fromWei(grgBalance)).toFixed(
               3
             ),
             grgBalanceWei: grgBalance,

@@ -193,63 +193,40 @@ export default class ElementVaultActionDeposit extends Component {
     this.setState({
       sending: true
     })
-    //let web3
-    if (this.state.account.source === 'MetaMask') {
-      const web3 = new Web3(window.ethereum)
-      /*if (typeof window.ethereum !== 'undefined') {
-        web3 = new Web3(window.ethereum)
-        try {
-          await window.ethereum.enable()
-        } catch (error) {
-          console.warn('User denied account access')
-        }
-      } else if (typeof window.web3 !== 'undefined') {
-          web3 = window.web3
-        }
-      }*/
-      poolApi = new PoolApi(web3)
-      poolApi.contract.drago.init(vaultDetails.address)
-      poolApi.contract.drago
-        .depositToExchange(
-          this.state.account.address,
-          exchangeAddress.toString(),
-          ADDRESS_0,
-          api.utils.toWei(this.state.amount).toString()
-        )
-        .then(result => {
 
-          this.setState({
-            sending: false
-          })
-        })
-        .catch(error => {
-          console.error('error', error)
-          this.setState({
-            sending: false
-          })
-        })
-      this.onClose()
-      this.props.snackBar('Deposit awaiting for authorization')
+    let provider = {}
+    if (typeof window.ethereum !== 'undefined') {
+      provider = new Web3(window.ethereum)
+      /*try {
+        await window.ethereum.enable()
+      } catch (error) {
+        console.warn('User denied account access')
+      }*/
+    } else if (typeof window.web3 !== 'undefined') {
+      provider = window.web3.currentProvider
     } else {
-      poolApi = new PoolApi(api)
-      poolApi.contract.drago.init(vaultDetails.address)
-      poolApi.contract.drago
-        .depositToExchange(
-          this.state.account.address,
-          exchangeAddress.toString(),
-          ADDRESS_0,
-          api.utils.toWei(this.state.amount).toString()
-        )
-        .then(() => {
-          this.onClose()
-          this.props.snackBar('Deposit awaiting for authorization')
+      provider = api
+    }
+
+    poolApi = new PoolApi(provider)
+    poolApi.contract.drago.init(vaultDetails.address)
+    poolApi.contract.drago
+      .depositToExchange(
+        this.state.account.address,
+        exchangeAddress.toString(),
+        ADDRESS_0,
+        provider.utils.toWei(this.state.amount).toString()
+      )
+      .then(() => {
+        this.onClose()
+        this.props.snackBar('Deposit awaiting for authorization')
+      })
+      .catch(error => {
+        console.error('error', error)
+        this.setState({
+          sending: false
         })
-        .catch(error => {
-          console.error('error', error)
-          this.setState({
-            sending: false
-          })
-        })
+      })
     }
   }
 }

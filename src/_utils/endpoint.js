@@ -63,17 +63,17 @@ class Endpoint {
     // Checking if Web3 has been injected by the browser (Mist/MetaMask)
     if (typeof window.ethereum !== 'undefined') {
       window.web3 = new Web3(window.ethereum)
-      try {
+      /*try {
         // Request account access if needed
         await window.ethereum.enable()
         console.warn('User allowed account access')
       } catch (error) {
         console.warn('User denied account access')
-      }
+      }*/
     } else
     if (typeof window.web3 !== 'undefined') {
       try {
-        window.web3 = new Web3(window.web3.currentProvider)
+        window.web3 = window.web3.currentProvider
       } catch (error) {
 
       }

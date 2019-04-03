@@ -116,7 +116,7 @@ class WalletSetupStepper extends Component {
     const faucetAddress = ERC20_TOKENS[networkInfo.name].GRG.faucetAddress
     const web3 = window.web3.currentProvider.isMetaMask
                       ? new Web3(window.ethereum)
-                      : window.web3
+                      : window.web3.currentProvider
     const accounts = await web3.eth.getAccounts()
     const poolApi = new PoolApi(web3)
     await poolApi.contract.rigotokenfaucet.init(faucetAddress)
