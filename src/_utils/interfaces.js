@@ -120,6 +120,7 @@ class Interfaces {
       // this is the first that app calls, call enable here first
       try {
         accounts = await window.ethereum.enable()
+        console.warn('User allowed account access')
       } catch (error) {
         console.warn('User denied account access')
       }

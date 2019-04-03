@@ -182,9 +182,7 @@ class TokenLockInfo extends Component {
       }
     } catch (error) {}
 
-    const web3 = window.web3.currentProvider.isMetaMask
-                      ? new Web3(window.ethereum)
-                      : window.web3.currentProvider
+    const web3 = window.web3
 
     const poolApi = await new PoolApi(web3)
     switch (action) {
