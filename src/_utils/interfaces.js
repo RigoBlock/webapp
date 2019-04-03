@@ -133,7 +133,7 @@ class Interfaces {
     const provider = new Web3(window.web3)
     const accounts = await provider.eth.getAccounts()
 
-    console.log(accounts)
+
     const parityNetworkId = this._parityNetworkId
     let accountsMetaMask = {}
     if (typeof window.web3 === 'undefined') {
