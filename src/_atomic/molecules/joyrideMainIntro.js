@@ -19,7 +19,7 @@ class JoyrideMainIntro extends React.Component {
     showHideOption: true
   }
 
-  checkWalletBalance = async () => {
+  /*checkWalletBalance = async () => {
     // Modern dapp browsers...
     if (typeof window.ethereum !== 'undefined') {
       try {
@@ -32,7 +32,7 @@ class JoyrideMainIntro extends React.Component {
         'Non-Ethereum browser detected. You should consider trying MetaMask!'
       )
     }
-  }
+  }*/
 
   render() {
     const buttonCreateDrago = {

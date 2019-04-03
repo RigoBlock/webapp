@@ -2,7 +2,8 @@
 // This file is part of RigoBlock.
 
 import { ENDPOINTS, KOVAN, PROD, WS } from './const'
-import Web3 from 'web3'
+import { MetamaskSubprovider } from '@0x/subproviders'
+// import Web3 from 'web3'
 import Web3Wrapper from '../_utils/web3Wrapper/src'
 
 class Endpoint {
@@ -60,29 +61,31 @@ class Endpoint {
   }
 
   _checkWeb3 = async () => {
+    window.web3 = window.web3.currentProvider.isMetaMask
+                  ? new MetamaskSubprovider(window.web3.currentProvider)
+                  : window.web3.currentProvider
     // Checking if Web3 has been injected by the browser (Mist/MetaMask)
-    if (typeof window.ethereum !== 'undefined') {
-      window.web3 = window.ethereum //new Web3(window.ethereum)
-      /*try {
+    /*if (typeof window.ethereum !== 'undefined') {
+      window.web3 = new Web3(window.ethereum)
+      try {
         // Request account access if needed
         await window.ethereum.enable()
         console.warn('User allowed account access')
       } catch (error) {
         console.warn('User denied account access')
-      }*/
-    } else
-    if (typeof window.web3 !== 'undefined') {
-      try {
-        window.web3 = window.web3.currentProvider
-      } catch (error) {
-
       }
+    } else if (typeof window.web3 !== 'undefined') {
+      try {
+        window.web3 = wnew Web3(window.web3) //.currentProvide?
+      } catch (error) {
+        console.warn('error injecting provider')
+      }*/
       window.web3._rb = {}
       window.web3._rb.network = this._network
       window.web3._rb.wss = ENDPOINTS.infura.wss[this._network.name].dev
-    } else {
+    /*} else {
 
-    }
+    }*/
   }
 
   connect = () => {

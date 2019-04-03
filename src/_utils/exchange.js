@@ -16,7 +16,7 @@ import {
 import { Web3Wrapper } from '@0x/web3-wrapper'
 import { MetamaskSubprovider } from '@0x/subproviders'
 //import { ECSignature, SignatureType, SignedOrder, ValidatorSignature } from '@0x/types';
-//import { SignatureType } from '@0x/types';
+import { SignatureType } from '@0x/types';
 //import ExchangeConnectorWrapper from './exchangeConnector'
 //import { EFX } from 'efx-api-node'
 
@@ -330,9 +330,10 @@ export const signOrder = async (order, selectedExchange, walletAddress) => {
   const quoteTokenDecimals = order.selectedTokensPair.quoteToken.decimals
 
   let makerAssetAmount, takerAssetAmount
-  const providerEngine = window.web3.currentProvider.isMetaMask
-                    ? new MetamaskSubprovider(window.web3.currentProvider)
-                    : window.web3.currentProvider
+  const web3 = new Web3(window.web3)
+  const providerEngine = web3.currentProvider.isMetaMask
+                    ? new MetamaskSubprovider(web3.currentProvider)
+                    : web3.currentProvider
 
   //const contractWrappers = new ContractWrappers(providerEngine, { networkId: selectedExchange.networkId })
   // Initialize the Web3Wrapper, this provides helper functions around fetching
@@ -404,9 +405,9 @@ export const signOrder = async (order, selectedExchange, walletAddress) => {
 
   // NOTE: mock test of normal transaction
   // overwriting variables
-  const signer = await web3Wrapper.getAvailableAddressesAsync()
-  order.details.order.makerAddress = signer.toString()
-  order.details.order.expirationTimeSeconds = new BigNumber(1554209301 + 36000).toString()
+  //const signer = await web3Wrapper.getAvailableAddressesAsync()
+  //order.details.order.makerAddress = signer.toString()
+  //order.details.order.expirationTimeSeconds = new BigNumber(1554209301 + 36000).toString()
 
   //let orderToBeSigned = { ...order.details.order, ...tokensAmounts }
   let orderToBeSigned = { ...order.details.order }
@@ -418,7 +419,7 @@ export const signOrder = async (order, selectedExchange, walletAddress) => {
   // }
   // console.log(orderToBeSigned)
 
-  //const signer = await web3Wrapper.getAvailableAddressesAsync()
+  const signer = await web3Wrapper.getAvailableAddressesAsync()
 
   const signedOrderDefaultType = await signatureUtils.ecSignOrderAsync(
     providerEngine,
@@ -426,7 +427,6 @@ export const signOrder = async (order, selectedExchange, walletAddress) => {
     signer[0]
   )
 
-/*
   const defaultSignature = signedOrderDefaultType.signature
   const vrsSignature = await defaultSignature.slice(0, -2)
   const signatureWallerType = await signatureUtils.convertToSignatureWithType(
@@ -445,7 +445,6 @@ export const signOrder = async (order, selectedExchange, walletAddress) => {
     order.details.order.makerAddress
     )
 
-*/
   const signedWalletOrder = {
       ...signedOrderDefaultType
     }

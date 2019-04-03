@@ -182,7 +182,7 @@ class TokenLockInfo extends Component {
       }
     } catch (error) {}
 
-    const web3 = window.web3
+    const web3 = new Web3(window.web3)
 
     const poolApi = await new PoolApi(web3)
     switch (action) {
@@ -215,7 +215,7 @@ class TokenLockInfo extends Component {
         console.log(
           selectedFund.managerAccount,
           selectedFund.details.address,
-          selectedExchange.exchangeAddress,
+          selectedExchange.feeRecipient, // selectedExchange.exchangeAddress,
           tokenAddress,
           tokenWrapperAddress,
           toBaseUnitAmount(new BigNumber(amount), decimals),
@@ -248,7 +248,7 @@ class TokenLockInfo extends Component {
           receipt = await poolApi.contract.drago.operateOnExchangeEFXLock(
             selectedFund.managerAccount,
             selectedFund.details.address,
-            selectedExchange.exchangeAddress,
+            selectedExchange.feeRecipient, // selectedExchange.exchangeAddress,
             tokenAddress,
             tokenWrapperAddress,
             toBeLocked,
@@ -362,7 +362,7 @@ class TokenLockInfo extends Component {
         console.log(
           selectedFund.managerAccount,
           selectedFund.details.address,
-          selectedExchange.exchangeAddress,
+          selectedExchange.feeRecipient, // selectedExchange.exchangeAddress,
           tokenAddress,
           tokenWrapperAddress,
           toBaseUnitAmount(new BigNumber(amount), decimals)
@@ -410,7 +410,7 @@ class TokenLockInfo extends Component {
           receipt = await poolApi.contract.drago.operateOnExchangeEFXUnlock(
             selectedFund.managerAccount,
             selectedFund.details.address,
-            selectedExchange.exchangeAddress,
+            selectedExchange.feeRecipient, // selectedExchange.exchangeAddress,
             tokenAddress,
             tokenWrapperAddress,
             toBeUnlocked

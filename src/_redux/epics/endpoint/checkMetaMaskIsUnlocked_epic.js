@@ -33,7 +33,7 @@ const checkMetaMaskIsUnlocked$ = async (endpoint) => {
   let newAccounts = []
   //let accounts = []
   let metaMaskAccountAddress = ''
-  const web3Metamask = window.web3
+  const web3Metamask = new Web3(window.web3)
   const accounts = await web3Metamask.eth.getAccounts()
   const api = Web3Wrapper.getInstance(endpoint.networkInfo.id)
   // console.log('checkMetaMaskIsUnlocked$')
@@ -105,6 +105,7 @@ const checkMetaMaskIsUnlocked$ = async (endpoint) => {
   )
 }
 
+// TODO: skip checks as they create a conflict with metamask
 export const checkMetaMaskIsUnlockedEpic = (action$, state$) => {
   return action$.pipe(
     ofType(TYPE_.CHECK_METAMASK_IS_UNLOCKED),

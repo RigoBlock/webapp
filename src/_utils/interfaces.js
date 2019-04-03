@@ -9,6 +9,7 @@ import BigNumber from 'bignumber.js'
 import PoolsApi from '../PoolsApi/src'
 import Web3Wrapper from './web3Wrapper/src/web3Wrapper'
 import Web3 from 'web3'
+// import MetamaskSubprovider from '@0x/subproviders'
 import utils from '../_utils/utils'
 
 class Interfaces {
@@ -113,7 +114,8 @@ class Interfaces {
 
   getAccountsMetamask = async () => {
     // console.log(`${this.constructor.name} -> getAccountsMetamask`)
-    let provider = {}
+
+    /*let provider = {}
     let accounts = []
     if (typeof window.ethereum !== 'undefined') {
       provider = new Web3(window.ethereum) //
@@ -127,8 +129,11 @@ class Interfaces {
     } else if (typeof window.web3 !== 'undefined') {
       provider = window.web3.currentProvider
       //accounts = await provider.eth.getAccounts()
-    }
-    //const accounts = await provider.eth.getAccounts()
+    }*/
+    const provider = new Web3(window.web3)
+    const accounts = await provider.eth.getAccounts()
+
+    console.log(accounts)
     const parityNetworkId = this._parityNetworkId
     let accountsMetaMask = {}
     if (typeof window.web3 === 'undefined') {
