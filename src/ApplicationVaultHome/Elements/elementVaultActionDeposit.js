@@ -195,15 +195,15 @@ export default class ElementVaultActionDeposit extends Component {
     })
 
     let provider = {}
-    if (typeof window.ethereum !== 'undefined') {
+    /*if (typeof window.ethereum !== 'undefined') {
       provider = new Web3(window.ethereum)
-      /*try {
+      try {
         await window.ethereum.enable()
       } catch (error) {
         console.warn('User denied account access')
-      }*/
-    } else if (typeof window.web3 !== 'undefined') {
-      provider = window.web3.currentProvider
+      }
+    } else*/ if (typeof window.web3 !== 'undefined') {
+      provider = new Web3(window.web3)
     } else {
       provider = api
     }

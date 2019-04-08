@@ -286,7 +286,8 @@ class ElementFundActionWrapETH extends Component {
     this.setState({
       sending: true
     })
-    let provider = account.source === 'MetaMask' ? new Web3(window.ethereum) : api
+    // let provider = account.source === 'MetaMask' ? new Web3(window.ethereum) : api
+    let provider = account.source === 'MetaMask' ? new Web3(window.web3) : api
 
     const authMsg = 'You un-wrapped ' + amount + ' ETH'
 
@@ -380,7 +381,8 @@ class ElementFundActionWrapETH extends Component {
     this.setState({
       sending: true
     })
-    let provider = account.source === 'MetaMask' ? new Web3(window.ethereum) : api
+    // let provider = account.source === 'MetaMask' ? new Web3(window.ethereum) : api
+    let provider = account.source === 'MetaMask' ? new Web3(window.web3) : api
 
     const authMsg = 'You wrapped ' + amount + ' ETH'
 

@@ -112,8 +112,8 @@ export class App extends Component {
     this.props.dispatch(Actions.endpoint.checkIsConnectedToNode())
     this.props.dispatch(Actions.endpoint.attachInterface(endpoint))
     // TODO: the following check creates a conflit
-    if (typeof window.ethereum !== 'undefined'
-      || typeof window.web3 !== 'undefined') {
+    if (/*typeof window.ethereum !== 'undefined'
+      ||*/ typeof window.web3 !== 'undefined') {
       this.props.dispatch(Actions.endpoint.checkMetaMaskIsUnlocked())
     }
     this.props.dispatch(Actions.endpoint.monitorAccountsStart())

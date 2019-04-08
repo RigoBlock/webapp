@@ -317,7 +317,8 @@ class ElementFundActionSetPrice extends Component {
     this.setState({
       sending: true
     })
-    let provider = this.state.account.source === 'MetaMask' ? new Web3(window.ethereum) : api
+    // let provider = this.state.account.source === 'MetaMask' ? new Web3(window.ethereum) : api
+    let provider = this.state.account.source === 'MetaMask' ? new Web3(window.web3) : api
     const { account } = this.state
 
     // Initializing transaction variables

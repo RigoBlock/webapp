@@ -302,7 +302,8 @@ class ElementVaultActionSetFees extends Component {
     const price = this.state.price
     const accountAddress = this.state.account.address
     let poolApi = null
-    let provider = this.state.account.source === 'MetaMask' ? new Web3(window.ethereum) : api
+    // let provider = this.state.account.source === 'MetaMask' ? new Web3(window.ethereum) : api
+    let provider = this.props.account.source === 'MetaMask' ? new Web3(window.web3) : api
     this.setState({
       sending: true
     })

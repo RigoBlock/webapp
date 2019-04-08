@@ -276,7 +276,8 @@ class ElementFundActions extends React.Component {
     const { dragoDetails } = this.props
     const accountError = validateAccount(account, api)
     // Setting variables depending on account source
-    let provider = account.source === 'MetaMask' ? new Web3(window.ethereum) : api
+    // let provider = account.source === 'MetaMask' ? new Web3(window.ethereum) : api
+    let provider = account.source === 'MetaMask' ? new Web3(window.web3) : api
     // let provider = api
     this.setState(
       {
@@ -464,20 +465,20 @@ class ElementFundActions extends React.Component {
     const transactionId = api.utils.sha3(new Date() + account.address)
 
     // Setting variables depending on account source
-    // let provider = account.source === 'MetaMask' ? new Web3(window.ethereum) : api
-    let provider = {}
+    let provider = account.source === 'MetaMask' ? new Web3(window.web3) : api
+    /*let provider = {}
     if (typeof window.ethereum !== 'undefined') {
       provider = new Web3(window.ethereum)
-      /*try {
+      try {
         await window.ethereum.enable()
       } catch (error) {
         console.warn('User denied account access')
-      }*/
+      }
     } else if (typeof window.web3 !== 'undefined') {
-      provider = window.web3.currentProvider
+      provider = new Web3(window.web3)
     } else {
       provider = api
-    }
+    }*/
     let poolApi = {}
 
     // Initializing transaction variables
@@ -607,7 +608,8 @@ class ElementFundActions extends React.Component {
     const transactionId = api.utils.sha3(new Date() + account.address)
 
     // Setting variables depending on account source
-    let provider = account.source === 'MetaMask' ? new Web3(window.ethereum) : api
+    // let provider = account.source === 'MetaMask' ? new Web3(window.ethereum) : api
+    let provider = account.source === 'MetaMask' ? new Web3(window.web3) : api
     let poolApi = null
 
     // Initializing transaction variables

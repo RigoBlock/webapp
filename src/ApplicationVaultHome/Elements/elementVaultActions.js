@@ -257,8 +257,8 @@ class ElementVaultActions extends React.Component {
     const { vaultDetails } = this.props
     const accountError = validateAccount(account, api)
     // Setting variables depending on account source
-    // var provider = account.source === 'MetaMask' ? new Web3(window.ethereum) : api
-    let provider = api
+    let provider = account.source === 'MetaMask' ? new Web3(window.web3) : api
+    // let provider = api
     this.setState(
       {
         account,
@@ -450,7 +450,8 @@ class ElementVaultActions extends React.Component {
       vaultDetails.symbol.toUpperCase()
     const transactionId = api.utils.sha3(new Date() + accountAddress)
     // Setting variables depending on account source
-    let provider = this.state.account.source === 'MetaMask' ? new Web3(window.ethereum) : api
+    // let provider = this.state.account.source === 'MetaMask' ? new Web3(window.ethereum) : api
+    let provider = this.state.account.source === 'MetaMask' ? new Web3(window.web3) : api
     let poolApi = null
     // Initializing transaction variables
     let transactionDetails = {
@@ -549,7 +550,8 @@ class ElementVaultActions extends React.Component {
       vaultDetails.symbol.toUpperCase()
     const transactionId = api.utils.sha3(new Date() + accountAddress)
     // Setting variables depending on account source
-    let provider = this.state.account.source === 'MetaMask' ? new Web3(window.ethereum) : api
+    // let provider = this.state.account.source === 'MetaMask' ? new Web3(window.ethereum) : api
+    let provider = this.state.account.source === 'MetaMask' ? new Web3(window.web3) : api
     let poolApi = null
     // Initializing transaction variables
     let transactionDetails = {

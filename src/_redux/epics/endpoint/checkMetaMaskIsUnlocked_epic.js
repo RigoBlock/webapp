@@ -33,6 +33,7 @@ const checkMetaMaskIsUnlocked$ = async (endpoint) => {
   let newAccounts = []
   //let accounts = []
   let metaMaskAccountAddress = ''
+  // watch out when injecting in new ways, as this gets called every 1 second
   const web3Metamask = new Web3(window.web3)
   const accounts = await web3Metamask.eth.getAccounts()
   const api = Web3Wrapper.getInstance(endpoint.networkInfo.id)

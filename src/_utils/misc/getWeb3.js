@@ -10,15 +10,15 @@ export const getWeb3 = (networkInfo, options = { wallet: '' }) => {
 
   switch (options.wallet) {
     case METAMASK: {
-      if (typeof window.ethereum !== 'undefined') {
+      /*if (typeof window.ethereum !== 'undefined') {
         web3 = window.ethereum //new Web3(window.ethereum)
-        /*try {
+        try {
           await window.ethereum.enable()
         } catch (error) {
           console.warn('User denied account access')
-        }*/
-      } else if (typeof window.web3 !== 'undefined') {
-        web3 = window.web3.currentProvider
+        }
+      } else*/ if (typeof window.web3 !== 'undefined') {
+        web3 = new Web3(window.web3)
       } else {
         web3 = 'Test env'
       }

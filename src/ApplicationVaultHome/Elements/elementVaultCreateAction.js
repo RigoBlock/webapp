@@ -124,7 +124,8 @@ class ElementVaultCreateAction extends React.Component {
       symbol: vaultSymbol
     }
     // Setting variables depending on account source
-    let provider = this.state.account.source === 'MetaMask' ? new Web3(window.ethereum) : api
+    // let provider = this.state.account.source === 'MetaMask' ? new Web3(window.ethereum) : api
+    let provider = this.props.account.source === 'MetaMask' ? new Web3(window.web3) : api
     let poolApi = null
     // Initializing transaction variables
     const authMsg = 'You deployed the vault ' + vaultSymbol + ' | ' + vaultName

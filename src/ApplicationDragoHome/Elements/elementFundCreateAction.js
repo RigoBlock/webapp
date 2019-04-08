@@ -128,7 +128,8 @@ class ElementFundCreateAction extends React.Component {
       symbol: dragoSymbol
     }
     // Setting variables depending on account source
-    let provider = this.state.account.source === 'MetaMask' ? new Web3(window.ethereum) : api
+    // let provider = this.state.account.source === 'MetaMask' ? new Web3(window.ethereum) : api
+    let provider = account.source === 'MetaMask' ? new Web3(window.web3) : api
     let poolApi = null
     // Initializing transaction variables
     const authMsg = 'You deployed the fund ' + dragoSymbol + ' | ' + dragoName

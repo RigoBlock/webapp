@@ -2,7 +2,7 @@
 // This file is part of RigoBlock.
 
 import * as abis from '../PoolsApi/src/contracts/abi'
-import { KOVAN, PROD, WS } from './const'
+import { INFURA, KOVAN, PROD, WS } from './const'
 import {
     //assetDataUtils,
     BigNumber,
@@ -11,10 +11,11 @@ import {
     //Order,
     orderHashUtils,
     signatureUtils,
+    Web3ProviderEngine
     //SignerType
 } from '0x.js'
 import { Web3Wrapper } from '@0x/web3-wrapper'
-import { MetamaskSubprovider } from '@0x/subproviders'
+import { MetamaskSubprovider, SignerSubprovider } from '@0x/subproviders'
 //import { ECSignature, SignatureType, SignedOrder, ValidatorSignature } from '@0x/types';
 import { SignatureType } from '@0x/types';
 //import ExchangeConnectorWrapper from './exchangeConnector'
@@ -32,8 +33,7 @@ export const setAllowaceOnExchangeThroughDrago = (
   selectedExchange,
   amount
 ) => {
-  //const web3 = account.source === 'MetaMask' ? new Web3(window.ethereum) : api
-  const poolApi = new PoolApi(new Web3(window.ethereum))
+  const poolApi = new PoolApi(window.web3)
   poolApi.contract.drago.init(selectedFund.details.address)
 
   console.log(
@@ -333,12 +333,13 @@ export const signOrder = async (order, selectedExchange, walletAddress) => {
   const web3 = new Web3(window.web3)
   const providerEngine = web3.currentProvider.isMetaMask
                     ? new MetamaskSubprovider(web3.currentProvider)
-                    : web3.currentProvider
+                    : new SignerSubprovider(web3.currentProvider)
 
   //const contractWrappers = new ContractWrappers(providerEngine, { networkId: selectedExchange.networkId })
   // Initialize the Web3Wrapper, this provides helper functions around fetching
   // account information, balances, general contract logs
   const web3Wrapper = new Web3Wrapper(providerEngine)
+  // const networkId = await web3Wrapper.getNetworkIdAsync()
 
   const fee_rate = 0.0025 // in case of ethfinex // TODO: pass this and settle spread in dedicated subfunction
 
@@ -766,7 +767,7 @@ export const cancelOrderOnExchangeViaProxy = async (
   )
 
   let poolApi = null
-  poolApi = new PoolApi(new Web3(window.ethereum))
+  poolApi = new PoolApi(new Web3(window.web3))
   poolApi.contract.drago.init(selectedFund.details.address)
   return poolApi.contract.drago.cancelOrderOnZeroExExchange(
     selectedFund.managerAccount,

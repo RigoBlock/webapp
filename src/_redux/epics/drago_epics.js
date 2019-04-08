@@ -3,7 +3,7 @@
 import * as TYPE_ from '../actions/const'
 import { Actions } from '../actions/'
 import { BigNumber } from 'bignumber.js'
-import { /*ERCdEX,*/ Ethfinex } from '../../_utils/const'
+import { ERCdEX, Ethfinex } from '../../_utils/const'
 import { Observable, from, timer } from 'rxjs'
 import {
   catchError,
