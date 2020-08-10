@@ -106,7 +106,7 @@ if (process.env.NODE_ENV !== 'development') {
   console.warn = noop
   console.error = noop
   Sentry.init({
-    dsn: 'https://b8304e9d588a477db619fbb026f31549@sentry.io/1329485',
+    dsn: 'https://8f6eb496a745453aaffe29e7e78273fc@o432218.ingest.sentry.io/5384582',
     environment: process.env.NODE_ENV,
     release: 'webapp-v1@' + GIT_HASH
   })
@@ -114,7 +114,7 @@ if (process.env.NODE_ENV !== 'development') {
 
 if (process.env.NODE_ENV === `development`) {
   // Sentry.init({
-  //   dsn: 'https://b8304e9d588a477db619fbb026f31549@sentry.io/1329485',
+  //   dsn: 'https://8f6eb496a745453aaffe29e7e78273fc@o432218.ingest.sentry.io/5384582',
   //   environment: process.env.NODE_ENV
   // })
   store = Reactotron.createStore(persistedReducer, enhancer)
