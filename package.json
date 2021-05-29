@@ -109,7 +109,7 @@
     "reactotron-react-js": "^2.1.1",
     "reactotron-redux": "^2.1.0",
     "redux-immutable-state-invariant": "^2.1.0",
-    "ws": "^6.1.0"
+    "ws": "^7.4.6"
   },
   "browserslist": [
     ">0.2%",
