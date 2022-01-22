@@ -26,7 +26,7 @@
     "material-ui-pagination": "^1.1.6",
     "memoize-one": "^4.0.3",
     "moment": "^2.22.2",
-    "node-fetch": "^2.2.0",
+    "node-fetch": "^3.1.1",
     "prop-types": "^15.6.0",
     "react": "^16.6.3",
     "react-chartist": "^0.13.1",
